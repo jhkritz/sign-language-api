@@ -1,4 +1,4 @@
-.ssh_cmd.sh
+ssh_cmd.sh
 __pycache__/
 venv/
 instance/
