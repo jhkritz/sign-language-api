@@ -60,4 +60,5 @@
 	or your ~/.zshrc (if you're using zsh)
 
 - To interact with the remote database with psql
+
 		heroku pg:psql -a guarded-hamlet-40611
