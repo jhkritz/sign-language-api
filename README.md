@@ -1,5 +1,9 @@
 # Development README.md
 
+## Dataset
+
+You can download an ASL dataset [here](https://www.kaggle.com/datasets/grassknoted/asl-alphabet?resource=download)
+
 ## Setting up Flask
 
 - Get into the correct directory:
