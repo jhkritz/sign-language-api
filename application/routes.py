@@ -1,7 +1,8 @@
-from flask import current_app as app, Response, request
+from flask import current_app as app, Response, request, send_from_directory
 from .models import user, SignLanguageLibrary, Sign
 from zipfile import ZipFile
 import csv
+from . import db
 
 
 @app.route("/")
@@ -43,4 +44,9 @@ def get_signs():
     return {'signs': signs}
 
 
+@app.route('/library/image', methods=['GET'])
 def get_sign_image():
+    lib_name = request.args['library_name']
+    img_name = request.args['image_name']
+    path = app.config['IMAGE_PATH'] + '/' + lib_name
+    return send_from_directory(path, img_name)
