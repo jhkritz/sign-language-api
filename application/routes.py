@@ -20,9 +20,7 @@ def upload_library():
         for line in reader:
             image_file_name = line[0]
             sign_meaning = line[1]
-            zpfl.extract(image_file_name, )
-        pass
-        if request.files['zipped_images']:
-            pass
+            zpfl.extract(image_file_name, path=img_path)
+
     except KeyError:
         print('missing some files')
