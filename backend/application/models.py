@@ -1,4 +1,5 @@
 from . import db
+import json
 
 
 class user(db.Model):
@@ -22,3 +23,11 @@ class Sign(db.Model):
     meaning = db.Column(db.String(256), nullable=False)
     image_url = db.Column(db.String(256), nullable=False)
     library_id = db.Column(db.Integer, db.ForeignKey('sign_language_library.id'), nullable=False)
+
+    def to_dict(self, url_base):
+        lib_name = self.sign_language_library.title
+        url = '{}?image_name={}+library_name={}'.format(url_base, self.image_url, lib_name)
+        return {
+            'meaning': self.meaning,
+            'image_url': url
+        }
