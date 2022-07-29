@@ -1,4 +1,5 @@
 ssh_cmd.sh
+backend/local_debug_functions.py
 meeting_notes.html
 __pycache__/
 venv/
