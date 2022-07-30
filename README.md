@@ -62,7 +62,21 @@ You can download an ASL dataset [here](https://www.kaggle.com/datasets/grassknot
 
 	If you get tired of doing that, add that last command to your ~/.bashrc (if you're using bash) 
 	or your ~/.zshrc (if you're using zsh)
+	
 
 - To interact with the remote database with psql
 
 		heroku pg:psql -a guarded-hamlet-40611
+		
+# frontend
+
+## Project setup
+```
+npm install
+```
+
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+	
