@@ -6,17 +6,11 @@ import VueRouter from 'vue-router'
 import axios from 'axios'
 import VueAuth from 'vue-auth'
 
-import HomeView from './views/HomeView'
 import Libraries from './views/Libraries'
 
 Vue.config.productionTip = false
 
 const routes = [
-  {
-    path: '/',
-    name: 'Home View',
-    component: HomeView
-  },
   {
     path: '/libraries',
     name: 'Libraries',
