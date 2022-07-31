@@ -22,7 +22,7 @@ def upload_library():
         lib_name = request.form.to_dict()['library_name']
         # Path this library's images will be saved to
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name
-        lib = SignLanguageLibrary(title=lib_name)
+        lib = SignLanguageLibrary(name=lib_name)
         db.session.add(lib)
         db.session.commit()
         reader = csv.reader(sign_meanings, delimiter=',')
@@ -31,7 +31,7 @@ def upload_library():
             image_file_name = line[0]
             sign_meaning = line[1]
             zpfl.extract(image_file_name, path=img_path)
-            sign = Sign(meaning=sign_meaning, image_url=image_file_name, library_id=lib.id)
+            sign = Sign(meaning=sign_meaning, image_filename=image_file_name, library_id=lib.id)
             db.session.add(sign)
         db.session.commit()
     except KeyError:
@@ -43,7 +43,7 @@ def upload_library():
 def get_signs():
     library_name = request.args['library_name']
     img_url_base = '/library/image'
-    lib = SignLanguageLibrary.query.filter_by(title=library_name).first_or_404()
+    lib = SignLanguageLibrary.query.filter_by(name=library_name).first_or_404()
     signs = [sign.to_dict(img_url_base) for sign in lib.signs]
     return {'signs': signs}
 
@@ -52,14 +52,14 @@ def get_signs():
 def get_sign_image():
     lib_name = request.args['library_name']
     img_name = request.args['image_name']
-    path = app.config['IMAGE_PATH'] + '/' + lib_name
+    path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     return send_from_directory(path, img_name)
 
 
 @app.route('/libraries/names', methods=['GET'])
 def get_library_names():
     libs = SignLanguageLibrary.query.all()
-    return {'library_names': [name for name in map(SignLanguageLibrary.get_title, libs)]}
+    return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
 @app.route('/library/classify/image', methods=['PUT'])
@@ -75,12 +75,12 @@ def classify_image():
     to_classify = cv.cvtColor(cv.imread(img_name), cv.COLOR_BGR2GRAY)
     desired_shape = to_classify.shape
     to_classify = np.array([to_classify.flatten()], dtype=np.float32)
-    lib = SignLanguageLibrary.query.filter_by(title=lib_name).first_or_404()
+    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
     # Construct the data and label arrays
     labels = []
     data = []
     for sign in lib.signs:
-        img = cv.imread(lib_path + sign.image_url)
+        img = cv.imread(lib_path + sign.image_filename)
         data += [preprocess_image(img, desired_shape)]
         labels += [sign.id]
     data = np.array(data, dtype=np.float32)
