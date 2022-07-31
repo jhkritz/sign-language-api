@@ -1,5 +1,11 @@
 # Development README.md
 
+## API Documentation
+
+*Swagger.io* recommends using Flask-RESTplus [here](https://swagger.io/blog/api-development/swagger-annotation-libraries/). 
+However, this library is outdated and has been replaced by Flask-RESTX. This is the 
+[link](https://flask-restx.readthedocs.io/en/latest/quickstart.html#) to it's the documentation.
+
 ## Dataset
 
 You can download an ASL dataset [here](https://www.kaggle.com/datasets/grassknoted/asl-alphabet?resource=download)
