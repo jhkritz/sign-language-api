@@ -1,5 +1,13 @@
 # Development README.md
 
+## Route testing
+
+Theres a small shell script that runs a few curl commands. They should all succeed if you edit the
+path for the image in one of the requests (as noted in a comment in test\_requests.sh). You should
+also export the **DATABASE\_URL** environment variable so the database contains the expected data.
+
+		sh backend/application/test_requests.sh
+
 ## API Documentation
 
 *Swagger.io* recommends using Flask-RESTplus [here](https://swagger.io/blog/api-development/swagger-annotation-libraries/). 
