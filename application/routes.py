@@ -1,8 +1,11 @@
 from flask import current_app as app, Response, request, send_from_directory
 from .models import user, SignLanguageLibrary, Sign
 from zipfile import ZipFile
-import csv
+import numpy as np
 from . import db
+import cv2 as cv
+import csv
+import os
 
 
 @app.route("/")
@@ -57,3 +60,47 @@ def get_sign_image():
 def get_library_names():
     libs = SignLanguageLibrary.query.all()
     return {'library_names': [name for name in map(SignLanguageLibrary.get_title, libs)]}
+
+
+@app.route('/library/classify/image', methods=['PUT'])
+def classify_image():
+    lib_name = request.form.to_dict()['library_name']
+    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+    img = request.files['image']
+    img_path = lib_path + 'to_classify/'
+    img_name = img_path + img.filename
+    os.makedirs(img_path, exist_ok=True)
+    img.save(img_name)
+    # All the images used need to be the same size
+    to_classify = cv.cvtColor(cv.imread(img_name), cv.COLOR_BGR2GRAY)
+    desired_shape = to_classify.shape
+    to_classify = np.array([to_classify.flatten()], dtype=np.float32)
+    lib = SignLanguageLibrary.query.filter_by(title=lib_name).first_or_404()
+    # Construct the data and label arrays
+    labels = []
+    data = []
+    for sign in lib.signs:
+        img = cv.imread(lib_path + sign.image_url)
+        data += [preprocess_image(img, desired_shape)]
+        labels += [sign.id]
+    data = np.array(data, dtype=np.float32)
+    labels = np.array(labels, dtype=np.float32)
+    # Setup the classifier
+    knn = cv.ml.KNearest_create()
+    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    # knn.findNearest() expects an array of images for classification.
+    retval, results, responses, dists = knn.findNearest(to_classify, k=12)
+    classification = results[0][0]
+    quality_of_match = 0
+    for resp in responses[0]:
+        if resp == classification:
+            quality_of_match += 1
+    quality_of_match = 100 * quality_of_match / len(responses[0])
+    return {'classification': str(classification), 'quality_of_match': str(quality_of_match)}
+
+
+def preprocess_image(image, desired_shape):
+    image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    if image.shape != desired_shape:
+        image = cv.resize(image, desired_shape)
+    return image.flatten()
