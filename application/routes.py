@@ -51,3 +51,9 @@ def get_sign_image():
     img_name = request.args['image_name']
     path = app.config['IMAGE_PATH'] + '/' + lib_name
     return send_from_directory(path, img_name)
+
+
+@app.route('/libraries/names', methods=['GET'])
+def get_library_names():
+    libs = SignLanguageLibrary.query.all()
+    return {'library_names': [name for name in map(SignLanguageLibrary.get_title, libs)]}
