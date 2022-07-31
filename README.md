@@ -13,7 +13,7 @@ They should all succeed if:
 
 To run the script, run:
 
-		sh backend/application/test_requests.sh
+	sh backend/application/test_requests.sh
 
 ## API Documentation
 
