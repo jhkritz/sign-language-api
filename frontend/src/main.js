@@ -22,6 +22,7 @@ const routes = [
     name: 'uploadImages',
     component: uploadImages
   },
+  
 ]
 
 Vue.use(VueRouter)
