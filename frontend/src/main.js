@@ -7,6 +7,7 @@ import axios from 'axios'
 import VueAuth from 'vue-auth'
 
 import Libraries from './views/Libraries'
+import uploadImages from './views/uploadImages'
 
 Vue.config.productionTip = false
 
@@ -15,6 +16,11 @@ const routes = [
     path: '/libraries',
     name: 'Libraries',
     component: Libraries
+  },
+  {
+    path: '/upload',
+    name: 'uploadImages',
+    component: uploadImages
   },
 ]
 
