@@ -8,26 +8,43 @@
       <form enctype="multipart/form-data">
         <h1>Add sign</h1>
         <div class="dropbox">
-          <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length"
+          <input type="file" single :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length"
             accept="image/*" class="input-file">
             <p v-if="isInitial">
-              Drag your file(s) here to begin<br> or click to browse
+              Drag your file here to begin<br> or click to browse
             </p>
             <p v-if="isSaving">
               Uploading {{ fileCount }} files...
             </p>
         </div>
+      </form>
+      <!--SIGN NAME-->
+      <v-form
+        ref="form"
+        v-model="valid"
+        lazy-validation
+        >
       <v-col
           cols="12"
           sm="6"
           md="3"
         >
-          <v-text-field
-            label="Sign name"
-            outlined
-          ></v-text-field>
-        </v-col>
-      </form>
+        <v-text-field
+          label="Sign name"
+          outlined
+          required
+        ></v-text-field>
+      </v-col>
+      <!--SUBMIT-->
+      <v-btn 
+         :disabled="!valid"
+          depressed 
+          color="black"
+          class="white--text"
+            > 
+          Submit 
+      </v-btn>
+      </v-form>
   </div>
 </template>
 
