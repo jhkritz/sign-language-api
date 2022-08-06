@@ -7,7 +7,7 @@ import axios from 'axios'
 import VueAuth from 'vue-auth'
 
 import Libraries from './views/Libraries'
-import uploadImages from './views/uploadImages'
+import addsign from './views/addsign'
 
 Vue.config.productionTip = false
 
@@ -18,11 +18,10 @@ const routes = [
     component: Libraries
   },
   {
-    path: '/upload',
-    name: 'uploadImages',
-    component: uploadImages
+    path: '/addsign',
+    name: 'addsign',
+    component: addsign
   },
-  
 ]
 
 Vue.use(VueRouter)

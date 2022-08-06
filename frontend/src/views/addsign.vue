@@ -6,7 +6,7 @@
     <div class="container">
       <!--UPLOAD-->
       <form enctype="multipart/form-data">
-        <h1>Upload images</h1>
+        <h1>Add sign</h1>
         <div class="dropbox">
           <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length"
             accept="image/*" class="input-file">
@@ -17,6 +17,16 @@
               Uploading {{ fileCount }} files...
             </p>
         </div>
+      <v-col
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <v-text-field
+            label="Sign name"
+            outlined
+          ></v-text-field>
+        </v-col>
       </form>
   </div>
 </template>
