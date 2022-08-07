@@ -1,6 +1,7 @@
 <!-- References:https://www.digitalocean.com/community/tutorials/how-to-handle-file-uploads-in-vue-2 -->
 <template>
     <v-form v-model="valid">
+      <v-container>
       <!-- UPLOAD SIGN -->
       <h1>Add sign</h1>
        <div class="dropbox">
@@ -10,7 +11,6 @@
          >
        </div>  
       <!-- SIGN NAME -->
-      <v-container>
       <v-col
           cols="12"
           sm="6"
