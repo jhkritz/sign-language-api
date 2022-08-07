@@ -1,12 +1,22 @@
 <template>
     <v-container>
     <!--LIBRARY-->
-    <h1>SASL</h1>
+    <h1>{{ $route.params.id }}</h1>
      <v-btn               
                 depressed    
-                @click="postInfo"
+                @click="goto_addsign"
         >
         Add sign 
         </v-btn>
     </v-container>    
 </template>
+
+<script>
+ export default {
+    methods:{
+     goto_addsign(){
+      this.$router.push('/:library/addsign');
+    }, 
+  },
+ }
+</script>

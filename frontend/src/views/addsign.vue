@@ -35,7 +35,6 @@
 </template>
 
 <script>
-import axios from 'axios';
 export default ({
   data: () => ({
     valid: false,
@@ -46,14 +45,7 @@ export default ({
   }
   )
 })
-  methods: {
-    async postInfo (){
-      this.$axios.post('/library/addsign',{
-        signname: this.signname,
-        })
-      },
-    },
-  }
+  
 </script>
 
 <!-- SASS styling -->
