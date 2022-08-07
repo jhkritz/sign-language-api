@@ -6,17 +6,12 @@ import VueRouter from 'vue-router'
 import axios from 'axios'
 import VueAuth from 'vue-auth'
 
-import Libraries from './views/Libraries'
 import addsign from './views/addsign'
 
 Vue.config.productionTip = false
 
 const routes = [
-  {
-    path: '/libraries',
-    name: 'Libraries',
-    component: Libraries
-  },
+  
   {
     path: '/addsign',
     name: 'addsign',
