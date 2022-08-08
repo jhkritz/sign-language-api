@@ -6,11 +6,33 @@ from . import db
 import cv2 as cv
 import csv
 import os
+import cv2 as cv
+from cvzone.HandTrackingModule import HandDetector
 
 
 @app.route("/")
 def home():
     return "Hello World!"
+
+
+def preprocess_and_save_image(zpfl, lib_name, img_path, image_file_name):
+    desired_shape = (200, 200)
+    zpfl.extract(lib_name + '/' + image_file_name, path=img_path)
+    img = cv.imread(img_path + '/' + lib_name + '/' + image_file_name)
+    img = cv.resize(img, desired_shape)
+    hand_detector = HandDetector(maxHands=1)
+    offset = 30
+    hands, hands_img = hand_detector.findHands(img)
+    if hands:
+        x, y, w, h = hands[0]['bbox']
+        try:
+            cropped = hands_img[y-offset:y+offset+h, x-offset:x+offset+w]
+            cropped = cv.resize(cropped, desired_shape)
+            cv.imwrite(img_path + '/' + image_file_name, cropped)
+        except Exception as e:
+            print(e)
+    else:
+        cv.imwrite(img_path + '/' + image_file_name, img)
 
 
 @app.route('/library/upload', methods=['POST'])
@@ -20,12 +42,12 @@ def upload_library():
         sign_meanings = request.files['sign_meanings']
         zipped_images = request.files['zipped_images']
         lib_name = request.form.to_dict()['library_name']
-        # Path this library's images will be saved to
+        # The path that this library's images will be saved to
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name
         lib = SignLanguageLibrary(name=lib_name)
         db.session.add(lib)
         db.session.commit()
-        # XXX: will not work as intended if the \r or \r\n is used instead of \n
+        # XXX: will not work as intended if the \r or \r\n are used instead of \n
         lines = sign_meanings.read().decode().split('\n')
         # TODO: Refer to source for the file extraction
         zpfl = ZipFile(zipped_images.stream._file)
@@ -35,10 +57,9 @@ def upload_library():
                 continue
             image_file_name = fields[0]
             sign_meaning = fields[1]
-            image_file_name = lib_name + '/' + image_file_name
             try:
-                zpfl.extract(image_file_name, path=img_path)
-            except KeyError as e:
+                preprocess_and_save_image(zpfl, lib_name, img_path, image_file_name)
+            except Exception as e:
                 print(e)
             sign = Sign(meaning=sign_meaning, image_filename=image_file_name, library_id=lib.id)
             db.session.add(sign)
@@ -106,6 +127,66 @@ def classify_image():
             quality_of_match += 1
     quality_of_match = 100 * quality_of_match / len(responses[0])
     return {'classification': str(classification), 'quality_of_match': str(quality_of_match)}
+
+
+@app.route('/test/local/stream/classification', methods=['GET'])
+def test_classify_image_with_local_video_stream():
+    """
+    This code assumes that the library images have been preprocessed by having the hands in the
+    image detected and being cropped and resized to 'desired_shape'
+    """
+    lib_name = 'test_local_stream'
+    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+    capture = cv.VideoCapture(0)
+    hand_detector = HandDetector(maxHands=1)
+    offset = 30
+    desired_shape = (200, 200)
+    # Read library images and get labels
+    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first()
+    labels = []
+    data = []
+    for sign in lib.signs:
+        img = cv.imread(lib_path + sign.image_filename)
+        data += [img.flatten()]
+        labels += [sign.id]
+    data = np.array(data, dtype=np.float32)
+    labels = np.array(labels, dtype=np.float32)
+    # Setup the classifier
+    knn = cv.ml.KNearest_create()
+    print(data.shape)
+    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    # Classify images from stream
+    i = 0
+    while True:
+        s, input_img = capture.read()
+        i += 1 % 200
+        if i % 30 != 0:
+            continue
+        input_img = cv.resize(input_img, desired_shape)
+        hands, hands_img = hand_detector.findHands(input_img)
+        if hands:
+            x, y, w, h = hands[0]['bbox']
+            try:
+                cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
+                # All the images used need to be the same size
+                cropped = cv.resize(cropped, desired_shape)
+                cv.imshow('cropped', cropped)
+                flattened = cropped.flatten()
+                # knn.findNearest() expects an array of images for classification.
+                flattened = np.array(flattened[np.newaxis, :], dtype=np.float32)
+                retval, results, responses, dists = knn.findNearest(flattened, k=1)
+                classification = results[0][0]
+                meaning = lib.get_sign_meaning(int(classification))
+                quality_of_match = 0
+                for resp in responses[0]:
+                    if resp == classification:
+                        quality_of_match += 1
+                quality_of_match = 100 * quality_of_match / len(responses[0])
+                print({'classification': meaning, 'quality_of_match': str(quality_of_match)})
+            except Exception as e:
+                print(e)
+            cv.waitKey(1)
+    return Response(status=200)
 
 
 def preprocess_image(image, desired_shape):
