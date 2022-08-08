@@ -20,14 +20,14 @@ const routes = [
     component: home
   },
   {
-    path: '/library/:id/addsign',
-    name: 'addsign',
-    component: addsign
-  },
-  {
     path: '/library/:id',
     name: 'library',
-    component: library
+    component: library,
+  },
+  {
+    path: '/addsign',
+    name: 'addsign',
+    component: addsign,
   },
 ]
 

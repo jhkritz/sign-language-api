@@ -26,7 +26,7 @@
       </v-col>
       <v-btn
         depressed
-        @click="postInfo"
+        
         >
       Submit
       </v-btn> 

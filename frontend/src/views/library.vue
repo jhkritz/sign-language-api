@@ -15,7 +15,7 @@
  export default {
     methods:{
      goto_addsign(){
-      this.$router.push('/:library/addsign');
+      this.$router.push('/addsign');
     }, 
   },
  }
