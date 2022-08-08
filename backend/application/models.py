@@ -16,9 +16,6 @@ class SignLanguageLibrary(db.Model):
     # One to many relationship between SignLanguageLibrary and Sign
     signs = db.relationship('Sign', backref='sign_language_library')
 
-    def get_sign_meaning(self, id):
-        return Sign.query.filter_by(id=id).first().meaning
-
 
 class Sign(db.Model):
     __tablename__ = 'sign'
@@ -26,6 +23,9 @@ class Sign(db.Model):
     meaning = db.Column(db.String(256), nullable=False)
     image_filename = db.Column(db.String(256), nullable=False)
     library_id = db.Column(db.Integer, db.ForeignKey('sign_language_library.id'), nullable=False)
+
+    def get_sign_meaning(id):
+        return Sign.query.filter_by(id=id).first().meaning
 
     def to_dict(self, url_base):
         lib_name = self.sign_language_library.name
