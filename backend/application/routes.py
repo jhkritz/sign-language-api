@@ -25,12 +25,21 @@ def upload_library():
         lib = SignLanguageLibrary(name=lib_name)
         db.session.add(lib)
         db.session.commit()
-        reader = csv.reader(sign_meanings, delimiter=',')
+        # XXX: will not work as intended if the \r or \r\n is used instead of \n
+        lines = sign_meanings.read().decode().split('\n')
+        # TODO: Refer to source for the file extraction
         zpfl = ZipFile(zipped_images.stream._file)
-        for line in reader:
-            image_file_name = line[0]
-            sign_meaning = line[1]
-            zpfl.extract(image_file_name, path=img_path)
+        for line in lines:
+            fields = line.split(',')
+            if len(fields) < 2:
+                continue
+            image_file_name = fields[0]
+            sign_meaning = fields[1]
+            image_file_name = lib_name + '/' + image_file_name
+            try:
+                zpfl.extract(image_file_name, path=img_path)
+            except KeyError as e:
+                print(e)
             sign = Sign(meaning=sign_meaning, image_filename=image_file_name, library_id=lib.id)
             db.session.add(sign)
         db.session.commit()
