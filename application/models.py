@@ -16,6 +16,9 @@ class SignLanguageLibrary(db.Model):
     # One to many relationship between SignLanguageLibrary and Sign
     signs = db.relationship('Sign', backref='sign_language_library')
 
+    def get_sign_meaning(self, id):
+        return Sign.query.filter_by(id=id).first().meaning
+
 
 class Sign(db.Model):
     __tablename__ = 'sign'
