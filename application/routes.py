@@ -92,6 +92,92 @@ def get_library_names():
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
+@app.route('/test/local/stream/classification', methods=['GET'])
+def test_classify_image_with_local_video_stream():
+    """
+    This code assumes that the library images have been resized to desired_shape
+    """
+    lib_name = 'test_local_stream'
+    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+    capture = cv.VideoCapture(0)
+    hand_detector = HandDetector(maxHands=1)
+    desired_shape = (200, 200)
+    data, labels = get_data_and_labels(lib_name, lib_path)
+    # Setup the classifier
+    knn = cv.ml.KNearest_create()
+    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    # Classify images from stream
+    while True:
+        input_img_array = process_input(capture, hand_detector, desired_shape)
+        try:
+            print(classify(input_img_array, knn))
+            cv.waitKey(1)
+        except Exception as e:
+            print(e)
+    return Response(status=200)
+
+# Functions used to classify images.
+####################################################################################################
+
+
+def classify(to_classify, knn):
+    retval, results, responses, dists = knn.findNearest(to_classify, k=1)
+    classification = results[0][0]
+    meaning = Sign.get_sign_meaning(int(classification))
+    quality_of_match = 0
+    for resp in responses[0]:
+        if resp == classification:
+            quality_of_match += 1
+    quality_of_match = 100 * quality_of_match / len(responses[0])
+    return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
+
+
+def get_data_and_labels(lib_name, lib_path):
+    # Read library images and get labels
+    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first()
+    labels = []
+    data = []
+    for sign in lib.signs:
+        img = cv.imread(lib_path + sign.image_filename)
+        data += [img.flatten()]
+        labels += [sign.id]
+    data = np.array(data, dtype=np.float32)
+    labels = np.array(labels, dtype=np.float32)
+    return data, labels
+
+
+def process_input(capture, hand_detector, desired_shape):
+    # TODO: reference tutorial video
+    offset = 30
+    s, input_img = capture.read()
+    input_img = cv.resize(input_img, desired_shape)
+    hands, hands_img = hand_detector.findHands(input_img)
+    if hands:
+        x, y, w, h = hands[0]['bbox']
+        try:
+            # All the images used need to be the same size
+            cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
+            cropped = cv.resize(cropped, desired_shape)
+            cv.imshow('Processed input', cropped)
+            # Prepare for classification
+            flattened = cropped.flatten()
+            # knn.findNearest() expects an array of images for classification.
+            return np.array(flattened[np.newaxis, :], dtype=np.float32)
+        except Exception as e:
+            print(e)
+    return None
+
+
+####################################################################################################
+# XXX: The code below is outdated.
+####################################################################################################
+def preprocess_image(image, desired_shape):
+    image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    if image.shape != desired_shape:
+        image = cv.resize(image, desired_shape)
+    return image.flatten()
+
+
 @app.route('/library/classify/image', methods=['PUT'])
 def classify_image():
     lib_name = request.form.to_dict()['library_name']
@@ -127,70 +213,4 @@ def classify_image():
             quality_of_match += 1
     quality_of_match = 100 * quality_of_match / len(responses[0])
     return {'classification': str(classification), 'quality_of_match': str(quality_of_match)}
-
-
-@app.route('/test/local/stream/classification', methods=['GET'])
-def test_classify_image_with_local_video_stream():
-    """
-    This code assumes that the library images have been preprocessed by having the hands in the
-    image detected and being cropped and resized to 'desired_shape'
-    """
-    lib_name = 'test_local_stream'
-    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    capture = cv.VideoCapture(0)
-    hand_detector = HandDetector(maxHands=1)
-    offset = 30
-    desired_shape = (200, 200)
-    # Read library images and get labels
-    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first()
-    labels = []
-    data = []
-    for sign in lib.signs:
-        img = cv.imread(lib_path + sign.image_filename)
-        data += [img.flatten()]
-        labels += [sign.id]
-    data = np.array(data, dtype=np.float32)
-    labels = np.array(labels, dtype=np.float32)
-    # Setup the classifier
-    knn = cv.ml.KNearest_create()
-    print(data.shape)
-    knn.train(data, cv.ml.ROW_SAMPLE, labels)
-    # Classify images from stream
-    i = 0
-    while True:
-        s, input_img = capture.read()
-        i += 1 % 200
-        if i % 30 != 0:
-            continue
-        input_img = cv.resize(input_img, desired_shape)
-        hands, hands_img = hand_detector.findHands(input_img)
-        if hands:
-            x, y, w, h = hands[0]['bbox']
-            try:
-                cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
-                # All the images used need to be the same size
-                cropped = cv.resize(cropped, desired_shape)
-                cv.imshow('cropped', cropped)
-                flattened = cropped.flatten()
-                # knn.findNearest() expects an array of images for classification.
-                flattened = np.array(flattened[np.newaxis, :], dtype=np.float32)
-                retval, results, responses, dists = knn.findNearest(flattened, k=1)
-                classification = results[0][0]
-                meaning = lib.get_sign_meaning(int(classification))
-                quality_of_match = 0
-                for resp in responses[0]:
-                    if resp == classification:
-                        quality_of_match += 1
-                quality_of_match = 100 * quality_of_match / len(responses[0])
-                print({'classification': meaning, 'quality_of_match': str(quality_of_match)})
-            except Exception as e:
-                print(e)
-            cv.waitKey(1)
-    return Response(status=200)
-
-
-def preprocess_image(image, desired_shape):
-    image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    if image.shape != desired_shape:
-        image = cv.resize(image, desired_shape)
-    return image.flatten()
+####################################################################################################
