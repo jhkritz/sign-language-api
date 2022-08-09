@@ -18,16 +18,18 @@
   </v-form>
 </template>
 
+
 <script>
 export default {
+
   data: () => ({
     valid: false,
     signname: '',
     signrules: [
       v => !!v || 'Sign name is required'
     ]
-  }
-  ),
+  }),
+
 
   methods: {
     async postSign() {
@@ -55,6 +57,9 @@ export default {
   },
 
 }
+
+  
+
 </script>
 
 <!-- SASS styling -->
