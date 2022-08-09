@@ -3,7 +3,7 @@ from .models import user, SignLanguageLibrary, Sign
 from zipfile import ZipFile
 import csv
 from . import db
-
+import os
 
 @app.route("/")
 def home():
@@ -51,3 +51,32 @@ def get_sign_image():
     img_name = request.args['image_name']
     path = app.config['IMAGE_PATH'] + '/' + lib_name
     return send_from_directory(path, img_name)
+
+
+#Endpoint to upload a single sign with a name
+@app.route('/library/uploadsign', methods=['POST'])
+def uploadsign():
+    try:
+        libid = request.form.get('lib_id')
+        sign_name = request.form.get('sign_name')
+        image = request.files['image_file']
+        lib_name = SignLanguageLibrary.query.filter_by(id=libid).first().title
+
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
+        image.save(img_path)
+
+        sign = Sign(meaning=sign_name, image_url = img_path,  library_id=libid)
+        db.session.add(sign)
+        db.session.commit()
+    except KeyError:
+        return Response(status=400)
+    return Response(status=200)
+
+@app.route('/library/createlibrary', methods=['POST'])
+def createlibrary():
+    libname = request.form.get('library_name')
+    library = SignLanguageLibrary(title = libname)
+    os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
+    db.session.add(library)
+    db.session.commit()
+    return Response(status=200)
