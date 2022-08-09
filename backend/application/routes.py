@@ -3,8 +3,6 @@ from .models import user, SignLanguageLibrary, Sign
 from zipfile import ZipFile
 import numpy as np
 from . import db
-import cv2 as cv
-import csv
 import os
 import cv2 as cv
 from cvzone.HandTrackingModule import HandDetector
@@ -68,6 +66,35 @@ def upload_library():
         return Response(status=400)
     return Response(status=200)
 
+#Endpoint to upload a single sign with a name
+@app.route('/library/uploadsign', methods=['POST'])
+def uploadsign():
+    try:
+        libid = request.form.get('lib_id')
+        sign_name = request.form.get('sign_name')
+        image = request.files['image_file']
+        lib_name = SignLanguageLibrary.query.filter_by(id=libid).first().name
+
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
+        image.save(img_path)
+
+        sign = Sign(meaning=sign_name, image_filename = img_path,  library_id=libid)
+        db.session.add(sign)
+        db.session.commit()
+    except KeyError:
+        return Response(status=400)
+    return Response(status=200)
+
+@app.route('/library/createlibrary', methods=['POST'])
+def createlibrary():
+    libname = request.form.get('library_name')
+    library = SignLanguageLibrary(name = libname)
+    os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
+    db.session.add(library)
+    db.session.commit()
+    return Response(status=200)
+
+
 
 @app.route('/library/signs', methods=['GET'])
 def get_signs():
@@ -84,6 +111,7 @@ def get_sign_image():
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     return send_from_directory(path, img_name)
+
 
 
 @app.route('/libraries/names', methods=['GET'])
