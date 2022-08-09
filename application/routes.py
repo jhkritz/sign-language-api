@@ -88,6 +88,9 @@ def uploadsign():
 @app.route('/library/createlibrary', methods=['POST'])
 def createlibrary():
     libname = request.form.get('library_name')
+    existinglib = SignLanguageLibrary.query.filter_by(name=libname)
+    if existinglib:
+        return Response({'Library exists'})
     library = SignLanguageLibrary(name = libname)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
