@@ -8,6 +8,8 @@
         >
         Add sign 
         </v-btn>
+        <v-row>
+        </v-row>
     </v-container>    
 </template>
 
@@ -15,7 +17,11 @@
  export default {
     methods:{
      goto_addsign(){
+<<<<<<< HEAD
       this.$router.push(`/addsign?library_id=${route.params.id}`);
+=======
+      this.$router.push('/addsign?library_id=${router.params.id}');
+>>>>>>> 3a4622f... Added a library id to /addsign route from the code River pushed to main
     }, 
   },
  }

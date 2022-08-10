@@ -23,12 +23,16 @@ const routes = [
     path: '/library/:id',
     name: 'library',
     component: library,
+    
   },
+
   {
     path: '/addsign',
     name: 'addsign',
     component: addsign,
+    
   },
+
 ]
 
 Vue.use(VueRouter)
