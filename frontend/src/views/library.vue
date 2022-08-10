@@ -16,7 +16,8 @@
       cols="4"
     >
       <v-img
-        :src="`http://images.agoramedia.com/wte3.0/gcms/baby-sign-launage-722x406.jpg?width=414=${n * 5 + 10}`"
+        :src="`https://images.agoramedia.com/wte3.0/gcms/baby-sign-launage-722x406.jpg?width=574`"
+        
         aspect-ratio="1"
         class="grey lighten-2"
       >
@@ -42,11 +43,7 @@
  export default {
     methods:{
      goto_addsign(){
-<<<<<<< HEAD
-      this.$router.push(`/addsign?library_id=${route.params.id}`);
-=======
       this.$router.push('/addsign?library_id=${router.params.id}');
->>>>>>> 3a4622f... Added a library id to /addsign route from the code River pushed to main
     }, 
   },
  }
