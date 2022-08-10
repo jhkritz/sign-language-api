@@ -15,7 +15,7 @@
  export default {
     methods:{
      goto_addsign(){
-      this.$router.push('/addsign');
+      this.$router.push(`/addsign?library_id=${route.params.id}`);
     }, 
   },
  }

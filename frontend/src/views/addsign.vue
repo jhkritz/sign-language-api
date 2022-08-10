@@ -33,6 +33,11 @@ export default {
 
   methods: {
     async postSign() {
+			// Accessing search parameters
+			// ----------------------------
+			const library_id = new URLSearchParams(window.location.search).get('library_id');
+			console.log(library_id);
+			// ----------------------------
       var axios = require('axios');
       var FormData = require('form-data');
 
