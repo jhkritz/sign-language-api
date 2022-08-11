@@ -12,15 +12,11 @@ from app import socketio
 import base64
 
 import cv2
-from aiohttp import web
-from av import VideoFrame
+#from aiohttp import web
+#from av import VideoFrame
 
-from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
-from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
-
-
-
-
+#from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
+#from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
 
 
 @app.route("/")
@@ -81,7 +77,9 @@ def upload_library():
         return Response(status=400)
     return Response(status=200)
 
-#Endpoint to upload a single sign with a name
+# Endpoint to upload a single sign with a name
+
+
 @app.route('/library/uploadsign', methods=['POST'])
 def uploadsign():
     try:
@@ -93,12 +91,13 @@ def uploadsign():
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
         image.save(img_path)
 
-        sign = Sign(meaning=sign_name, image_filename = img_path,  library_id=libid)
+        sign = Sign(meaning=sign_name, image_filename=img_path,  library_id=libid)
         db.session.add(sign)
         db.session.commit()
     except KeyError:
         return Response(status=400)
     return Response(status=200)
+
 
 @app.route('/library/createlibrary', methods=['POST'])
 def createlibrary():
@@ -106,12 +105,11 @@ def createlibrary():
     existinglib = SignLanguageLibrary.query.filter_by(name=libname)
     if existinglib:
         return Response({'Library exists'})
-    library = SignLanguageLibrary(name = libname)
+    library = SignLanguageLibrary(name=libname)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
     return Response(status=200)
-
 
 
 @app.route('/library/signs', methods=['GET'])
@@ -129,7 +127,6 @@ def get_sign_image():
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     return send_from_directory(path, img_name)
-
 
 
 @app.route('/libraries/names', methods=['GET'])
@@ -267,16 +264,21 @@ def classify_image():
 ####################################################################################################
 @socketio.on('connect')
 def test_connect():
-     emit('after_connect', "connected")
+    emit('after_connect', "connected")
 
 
-#socket function to process image and then return result
+@socketio.on('log')
+def test_log():
+    print('logging works')
+
+
+# socket function to process image and then return result
 @socketio.on('image')
 def return_image(data_image):
     image = base64.b64decode(data_image)
     #hand_detector = HandDetector(maxHands=1)
-    #process image
+    # process image
     processed_image = process_input()
 
-    image_out = 'data:image/jpg;base64,' +  base64.b64encode(processed_image)
+    image_out = 'data:image/jpg;base64,' + base64.b64encode(processed_image)
     emit('image_response', image_out)
