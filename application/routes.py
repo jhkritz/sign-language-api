@@ -262,24 +262,21 @@ def classify_image():
 ####################################################################################################
 # Code for receiving webcam streams
 ####################################################################################################
+"""
 @socketio.on('connect')
 def test_connect():
     print('emitting')
     emit('after_connect', "connected", callback=lambda: print('after_connect received'))
-
-
-@socketio.on('log')
-def test_log():
-    print('logging works')
+"""
 
 
 # socket function to process image and then return result
-@socketio.on('image')
+@socketio.on('image_request')
 def return_image(data_image):
+    # TODO: data_image is a Blob file, I think it might need to be parsed differently
     image = base64.b64decode(data_image)
     #hand_detector = HandDetector(maxHands=1)
     # process image
     processed_image = process_input()
-
     image_out = 'data:image/jpg;base64,' + base64.b64encode(processed_image)
     emit('image_response', image_out)
