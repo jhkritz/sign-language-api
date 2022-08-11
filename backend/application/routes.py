@@ -224,7 +224,6 @@ def process_input_single_frame(frame, hand_detector, desired_shape):
             # All the images used need to be the same size
             cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
             cropped = cv.resize(cropped, desired_shape)
-
             return cropped
             # Prepare for classification
             flattened = cropped.flatten()
@@ -335,11 +334,14 @@ def return_image(data_image):
     # Open image with opencv
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-
     hand_detector = HandDetector(maxHands=1)
     desired_shape = (200, 200)
-    # process image
     processed_image = process_input_single_frame(image, hand_detector, desired_shape)
     # classification = classify_image_frame(image, lib)
-    image_out = 'data:image/jpg;base64,' + base64.b64encode(processed_image)
+
+    # This conversion is based on the code provided in the following StackOverflow post
+    # https://stackoverflow.com/questions/58931854/
+    # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
+    processed_image = cv2.imencode('.png', processed_image)[1]
+    image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
     emit('image_response', image_out)
