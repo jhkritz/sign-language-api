@@ -13,11 +13,11 @@ from PIL import Image
 import base64
 
 import cv2
-#from aiohttp import web
-#from av import VideoFrame
+# from aiohttp import web
+# from av import VideoFrame
 
-#from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
-#from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
+# from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
+# from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
 
 
 @app.route("/")
@@ -330,16 +330,16 @@ def classify_image():
 # socket function to process image and then return result
 @socketio.on('image_request')
 def return_image(data_image):
-    # TODO: data_image is a Blob file, I think it might need to be parsed differently
-    image = base64.b64decode(data_image)
+    # Note: This code is based on the code given on the webpage linked below:
+    # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
+    # Open image with opencv
+    b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
+    image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
+
     hand_detector = HandDetector(maxHands=1)
     desired_shape = (200, 200)
-    # open image with opencv
-    image = io.BytesIO(base64.b64decode(data_image))
-    image = Image.open(image)
-    image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
     # process image
     processed_image = process_input_single_frame(image, hand_detector, desired_shape)
-    #classification = classify_image_frame(image, lib)
+    # classification = classify_image_frame(image, lib)
     image_out = 'data:image/jpg;base64,' + base64.b64encode(processed_image)
     emit('image_response', image_out)
