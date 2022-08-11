@@ -20,7 +20,7 @@ def init_app():
 
     # Initialize Plugins
     db.init_app(app)
-    socketio.init_app(app)
+    socketio.init_app(app, cors_allowed_origins="*")
     with app.app_context():
         # Include our Routes
         from application import routes
