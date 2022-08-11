@@ -8,7 +8,8 @@ import cv2 as cv
 from cvzone.HandTrackingModule import HandDetector
 from flask_socketio import SocketIO, emit
 from . import socketio
-
+import io
+from PIL import Image
 import base64
 
 import cv2
@@ -210,6 +211,66 @@ def process_input(capture, hand_detector, desired_shape):
             print(e)
     return None
 
+#mostly copied from above
+def process_input_single_frame(frame, hand_detector, desired_shape):
+    offset = 30
+    input_img = cv.resize(frame, desired_shape)
+    hands, hands_img = hand_detector.findHands(input_img)
+    if hands:
+        x, y, w, h = hands[0]['bbox']
+        try:
+            # All the images used need to be the same size
+            cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
+            cropped = cv.resize(cropped, desired_shape)
+
+            return cropped
+            # Prepare for classification
+            flattened = cropped.flatten()
+            # knn.findNearest() expects an array of images for classification.
+            return np.array(flattened[np.newaxis, :], dtype=np.float32)
+        except Exception as e:
+            print(e)
+    #return unchanged image if no hands found
+    return frame
+
+
+def classify_image_frame(img_frame, library):
+    #mostly copies from classify_image()
+    lib_name = library
+    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+
+    
+    # img_path = lib_path + 'to_classify/'
+    # img_name = img_path + img.filename
+    # os.makedirs(img_path, exist_ok=True)
+    # img.save(img_name)
+    # All the images used need to be the same size
+    
+    to_classify = cv.cvtColor(cv.imread(img_name), cv.COLOR_BGR2GRAY)
+    desired_shape = to_classify.shape
+    to_classify = np.array([to_classify.flatten()], dtype=np.float32)
+    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
+    # Construct the data and label arrays
+    labels = []
+    data = []
+    for sign in lib.signs:
+        img = cv.imread(lib_path + sign.image_filename)
+        data += [preprocess_image(img, desired_shape)]
+        labels += [sign.id]
+    data = np.array(data, dtype=np.float32)
+    labels = np.array(labels, dtype=np.float32)
+    # Setup the classifier
+    knn = cv.ml.KNearest_create()
+    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    # knn.findNearest() expects an array of images for classification.
+    retval, results, responses, dists = knn.findNearest(to_classify, k=12)
+    classification = results[0][0]
+    quality_of_match = 0
+    for resp in responses[0]:
+        if resp == classification:
+            quality_of_match += 1
+    quality_of_match = 100 * quality_of_match / len(responses[0])
+    return {'classification': str(classification), 'quality_of_match': str(quality_of_match)}
 
 ####################################################################################################
 # XXX: The code below is outdated.
@@ -276,10 +337,21 @@ def test_log():
 # socket function to process image and then return result
 @socketio.on('image')
 def return_image(data_image):
-    image = base64.b64decode(data_image)
-    #hand_detector = HandDetector(maxHands=1)
-    # process image
-    processed_image = process_input()
+    
+    #lib =
+
+    hand_detector = HandDetector(maxHands=1)
+    desired_shape = (200, 200)
+    
+    #open image with opencv
+    image = io.BytesIO(base64.b64decode(data_image))
+    image = Image.open(image)
+    image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
+    #process image
+    processed_image = process_input_single_frame(image,hand_detector,desired_shape)
+
+    #classification = classify_image_frame(image, lib)
+
 
     image_out = 'data:image/jpg;base64,' + base64.b64encode(processed_image)
     emit('image_response', image_out)
