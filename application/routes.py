@@ -6,6 +6,21 @@ from . import db
 import os
 import cv2 as cv
 from cvzone.HandTrackingModule import HandDetector
+from flask_socketio import SocketIO, emit
+from app import socketio
+
+import base64
+
+import cv2
+from aiohttp import web
+from av import VideoFrame
+
+from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
+from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
+
+
+
+
 
 
 @app.route("/")
@@ -245,3 +260,23 @@ def classify_image():
     quality_of_match = 100 * quality_of_match / len(responses[0])
     return {'classification': str(classification), 'quality_of_match': str(quality_of_match)}
 ####################################################################################################
+
+
+####################################################################################################
+# Code for receiving webcam streams
+####################################################################################################
+@socketio.on('connect')
+def test_connect():
+     emit('after_connect', "connected")
+
+
+#socket function to process image and then return result
+@socketio.on('image')
+def return_image(data_image):
+    image = base64.b64decode(data_image)
+    #hand_detector = HandDetector(maxHands=1)
+    #process image
+    processed_image = process_input()
+
+    image_out = 'data:image/jpg;base64,' +  base64.b64encode(processed_image)
+    emit('image_response', image_out)
