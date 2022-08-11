@@ -262,13 +262,6 @@ def classify_image():
 ####################################################################################################
 # Code for receiving webcam streams
 ####################################################################################################
-"""
-@socketio.on('connect')
-def test_connect():
-    print('emitting')
-    emit('after_connect', "connected", callback=lambda: print('after_connect received'))
-"""
-
 
 # socket function to process image and then return result
 @socketio.on('image_request')
