@@ -1,6 +1,6 @@
 <template>
   <v-app>
-		<Toolbar /> 
+		<toolbar /> 
     <v-main>
       <router-view />
     </v-main>
@@ -8,13 +8,13 @@
 </template>
 
 <script>
-import Toolbar from './components/Toolbar';
+import toolbar from './components/toolbar';
 export default {
   name: "App",
   data: () => ({
   }),
 	components: { 
-		Toolbar
+		toolbar
 	},
 };
 </script>
