@@ -8,21 +8,19 @@ import VueAuth from 'vue-auth'
 import home from './views/home'
 import addsign from './views/addsign'
 import library from './views/library'
-import PageNotFound from './views/PageNotFound';
-import UploadLibrary from './views/UploadLibrary';
+import page_not_found from './views/page-not-found';
+import upload_library from './views/upload-library';
 
 Vue.config.productionTip = false
 
-const routes = [
-
-	{
+const routes = [{
 		path: '/',
 		name: 'home',
 		component: home
 	},
 	{
 		path: '/library/upload',
-		component: UploadLibrary
+		component: upload_library
 	},
 	{
 		path: '/library/:id',
@@ -36,7 +34,7 @@ const routes = [
 	},
 	{
 		path: '/:pathMatch(.*)*',
-		component: PageNotFound
+		component: page_not_found
 	},
 ]
 
