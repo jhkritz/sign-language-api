@@ -264,6 +264,7 @@ def classify_image():
 ####################################################################################################
 @socketio.on('connect')
 def test_connect():
+    print('emitting')
     emit('after_connect', "connected")
 
 
