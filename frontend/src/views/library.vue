@@ -8,14 +8,14 @@
         >
         Add sign 
         </v-btn>
-    </v-container>    
+		</v-container>
 </template>
 
 <script>
  export default {
     methods:{
      goto_addsign(){
-      this.$router.push(`/addsign?library_id=${route.params.id}`);
+      this.$router.push(`/addsign?library_id=${this.$route.params.id}`);
     }, 
   },
  }
