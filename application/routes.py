@@ -7,7 +7,7 @@ import os
 import cv2 as cv
 from cvzone.HandTrackingModule import HandDetector
 from flask_socketio import SocketIO, emit
-from app import socketio
+from . import socketio
 
 import base64
 
@@ -265,7 +265,7 @@ def classify_image():
 @socketio.on('connect')
 def test_connect():
     print('emitting')
-    emit('after_connect', "connected")
+    emit('after_connect', "connected", callback=lambda: print('after_connect received'))
 
 
 @socketio.on('log')
