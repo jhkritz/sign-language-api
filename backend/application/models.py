@@ -13,9 +13,10 @@ class SignLanguageLibrary(db.Model):
     __tablename__ = 'sign_language_library'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(256), nullable=False)
+    description = db.Column(db.String(256), nullable=False)
     # One to many relationship between SignLanguageLibrary and Sign
     signs = db.relationship('Sign', backref='sign_language_library')
-
+    
 
 class Sign(db.Model):
     __tablename__ = 'sign'
