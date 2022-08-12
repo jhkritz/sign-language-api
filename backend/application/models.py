@@ -16,7 +16,7 @@ class SignLanguageLibrary(db.Model):
     description = db.Column(db.String(256), nullable=False)
     # One to many relationship between SignLanguageLibrary and Sign
     signs = db.relationship('Sign', backref='sign_language_library')
-    
+
 
 class Sign(db.Model):
     __tablename__ = 'sign'
@@ -32,6 +32,7 @@ class Sign(db.Model):
         lib_name = self.sign_language_library.name
         url = '{}?image_name={}+library_name={}'.format(url_base, self.image_filename, lib_name)
         return {
+            'id': self.id,
             'meaning': self.meaning,
             'image_url': url
         }
