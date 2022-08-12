@@ -12,7 +12,7 @@
             <v-btn text color="deep-purple accent-4" @click.stop='navigateToLibraryPage'>
                 Explore
             </v-btn>
-            <v-btn text color="deep-purple accent-4">
+            <v-btn text color="deep-purple accent-4" @click.stop='navigateToAPI'>
                 Use API
             </v-btn>
         </v-card-actions>
@@ -34,6 +34,9 @@
         methods: {
             navigateToLibraryPage() {
                 this.$router.push(`/library?library_id=${this.libraryname}`);
+            },
+            navigateToAPI() {
+                this.$router.push(`/library/api?library_id=${this.libraryname}`);
             }
         }
     };
