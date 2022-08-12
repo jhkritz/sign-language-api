@@ -66,6 +66,88 @@
     </div>
 </template>
 
+<script>
+    import libraryCardVue from '../components/library-card.vue';
+    import Vue from 'vue';
+    const axios = require('axios');
+    export default {
+        data: () => ({
+            dialog: false,
+            myName: '',
+            myDesc: '',
+        }),
+        components: {
+            libraryCardVue
+        },
+        methods: {
+            addNewLibrary() {
+                var compClass = Vue.extend(libraryCardVue);
+                var instance = new compClass({
+                    propsData: {
+                        libraryname: this.myName,
+                        librarydesc: this.myDesc,
+                    }
+                });
+                instance.$mount()
+                var lib = document.getElementsByClassName("libraries")[0]
+                lib.appendChild(instance.$el)
+                //add library to database
+                var FormData = require('form-data');
+                var data = new FormData();
+                data.append('library_name', this.myName);
+                data.append('description', this.myDesc);
+                var config = {
+                    method: 'post',
+                    url: 'http://localhost:5000/library/createlibrary',
+                    data: data
+                };
+                axios(config)
+                    .then(function(response) {
+                        console.log(JSON.stringify(response.data));
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+                //get library id
+                //link buttons to lib id
+                this.myName = '';
+                this.myDesc = '';
+                this.dialog = false;
+            },
+            async addAllLibraries() {
+                try {
+                    const config = {
+                        method: 'get',
+                        url: 'http://localhost:5000/libraries/getall',
+                    };
+                    // Get list of libraries
+                    const res = await axios(config);
+                    const libraries = res.data.libraries;
+                    const libs = document.getElementsByClassName('libraries')[0];
+                    // Create and mount new instances
+                    const createAndMountLibraryCard = (library) => {
+                        const compClass = Vue.extend(libraryCardVue);
+                        const instance = new compClass({
+                            propsData: {
+                                libraryname: library.name,
+                                librarydesc: library.description
+                            }
+                        });
+                        instance.$mount();
+                        libs.appendChild(instance.$el);
+                    };
+                    libraries.map(createAndMountLibraryCard);
+                } catch (err) {
+                    console.error(err);
+                }
+            },
+            searchLibraries() {}
+        },
+        beforeMount() {
+            this.addAllLibraries()
+        }
+    }
+</script>
 <style>
     .header {
         background-repeat: repeat-x;
@@ -109,7 +191,6 @@
         gap: 2vw;
     }
 
-
     .libraries>v-card {
         max-height: 10vw;
         max-width: 20vw;
@@ -120,103 +201,3 @@
 
     }
 </style>
-<script>
-    import libraryCardVue from '../components/library-card.vue';
-    import Vue from 'vue';
-    export default {
-        data: () => ({
-            dialog: false,
-            myName: '',
-            myDesc: '',
-        }),
-        components: {
-            libraryCardVue
-        },
-        methods: {
-
-            addNewLibrary() {
-
-                var compClass = Vue.extend(libraryCardVue);
-                var instance = new compClass({
-                    propsData: {
-                        libraryname: this.myName,
-                        librarydesc: this.myDesc,
-                    }
-                });
-                instance.$mount()
-                var lib = document.getElementsByClassName("libraries")[0]
-                lib.appendChild(instance.$el)
-
-
-                //add library to database
-                var axios = require('axios');
-                var FormData = require('form-data');
-
-                var data = new FormData();
-                data.append('library_name', this.myName);
-                data.append('description', this.myDesc);
-                console.log(this.myName)
-
-                var config = {
-                    method: 'post',
-                    url: 'http://localhost:5000/library/createlibrary',
-                    data: data
-                };
-
-                axios(config)
-                    .then(function(response) {
-                        console.log(JSON.stringify(response.data));
-                    })
-                    .catch(function(error) {
-                        console.log(error);
-                    });
-
-                //get library id
-
-
-                //link buttons to lib id
-
-
-                this.myName = '';
-                this.myDesc = '';
-                this.dialog = false;
-            },
-
-            addAllLibraries() {
-
-                // var axios = require('axios');
-                // var config = {
-                //     method: 'get',
-                //     url: 'http://localhost:5000/libraries/names',
-
-                // };
-
-                // axios(config)
-                //     .then(function (response) {
-                //         console.log(JSON.stringify(response.data));
-                //     })
-                //     .catch(function (error) {
-                //         console.log(error);
-                //     });
-
-
-
-                //get amount of libraries
-
-                //loop through them
-
-                //mount new instance with their props
-            },
-
-            searchLibraries() {
-
-            }
-
-        },
-
-        beforeMount() {
-            this.addAllLibraries()
-        }
-
-    }
-</script>
