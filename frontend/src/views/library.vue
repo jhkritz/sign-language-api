@@ -1,7 +1,15 @@
 <template>
-    <v-container>
+	<div>
+	
+		<v-app-bar
+      color="teal accent-4"
+      dense
+      dark
+    >
+	<v-toolbar-title>{{ $route.params.id }}</v-toolbar-title>
+		</v-app-bar>	
     <!--LIBRARY-->
-    <h1>{{ $route.params.id }}</h1>
+	<v-container>
 		<v-btn               
 							depressed    
 							@click="goto_addsign"
@@ -36,7 +44,8 @@
 				</v-img>
 			</v-col>
 		</v-row>
-    </v-container>    
+	</v-container>
+	</div>
 </template>
 
 <script>
