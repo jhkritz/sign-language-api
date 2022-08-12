@@ -14,14 +14,11 @@
             </div>
         </div>
 
-        <div class="libraries">
-
-            <libraryCardVue v-for="number in 0" :key="number" />
-
+        <div class='libraries'>
+            <libraryCardVue v-for="library in libraries" :key="library.name" :libraryname="library.name" :librarydesc="library.description" />
         </div>
 
         <div class="addLibraryButton">
-
             <v-row justify="center">
                 <v-dialog v-model="dialog" persistent max-width="600px">
                     <template v-slot:activator="{ on, attrs }">
@@ -68,29 +65,38 @@
 
 <script>
     import libraryCardVue from '../components/library-card.vue';
-    import Vue from 'vue';
+    //import Vue from 'vue';
     const axios = require('axios');
     export default {
         data: () => ({
             dialog: false,
             myName: '',
             myDesc: '',
+            libraries: []
         }),
         components: {
             libraryCardVue
         },
         methods: {
+            async addAllLibraries() {
+                try {
+                    const config = {
+                        method: 'get',
+                        url: 'http://localhost:5000/libraries/getall',
+                    };
+                    // Get list of libraries
+                    const res = await axios(config);
+                    console.log(res.data.libraries);
+                    this.libraries = res.data.libraries;
+                } catch (err) {
+                    console.error(err);
+                }
+            },
             addNewLibrary() {
-                var compClass = Vue.extend(libraryCardVue);
-                var instance = new compClass({
-                    propsData: {
-                        libraryname: this.myName,
-                        librarydesc: this.myDesc,
-                    }
+                this.libraries.push({
+                    name: this.myName,
+                    description: this.myDesc
                 });
-                instance.$mount()
-                var lib = document.getElementsByClassName("libraries")[0]
-                lib.appendChild(instance.$el)
                 //add library to database
                 var FormData = require('form-data');
                 var data = new FormData();
@@ -113,33 +119,6 @@
                 this.myName = '';
                 this.myDesc = '';
                 this.dialog = false;
-            },
-            async addAllLibraries() {
-                try {
-                    const config = {
-                        method: 'get',
-                        url: 'http://localhost:5000/libraries/getall',
-                    };
-                    // Get list of libraries
-                    const res = await axios(config);
-                    const libraries = res.data.libraries;
-                    const libs = document.getElementsByClassName('libraries')[0];
-                    // Create and mount new instances
-                    const createAndMountLibraryCard = (library) => {
-                        const compClass = Vue.extend(libraryCardVue);
-                        const instance = new compClass({
-                            propsData: {
-                                libraryname: library.name,
-                                librarydesc: library.description
-                            }
-                        });
-                        instance.$mount();
-                        libs.appendChild(instance.$el);
-                    };
-                    libraries.map(createAndMountLibraryCard);
-                } catch (err) {
-                    console.error(err);
-                }
             },
             searchLibraries() {}
         },

@@ -70,9 +70,8 @@ const router = new VueRouter({
 Vue.prototype.$axios = instance
 
 Vue.use(VueAuth)
-
 new Vue({
 	router,
 	vuetify,
 	render: h => h(App)
-}).$mount('#app')
+}).$mount('#app');
