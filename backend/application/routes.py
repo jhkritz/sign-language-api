@@ -83,14 +83,14 @@ def get_library_names():
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
-@app.route('/libraries/getall')
+@app.route('/libraries/getall', methods=['GET'])
 def get_libraries():
     libs = SignLanguageLibrary.query.all()
     all_libs = []
     for lib in libs:
         thislib = {'name': lib.name, 'description': lib.description}
         all_libs.append(thislib)
-    return {'libaries': all_libs}
+    return {'libraries': all_libs}
 
 
 def classify_image_frame(input_image, lib_name):
