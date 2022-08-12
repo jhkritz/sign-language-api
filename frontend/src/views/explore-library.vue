@@ -15,9 +15,24 @@
         </v-app-bar>
         <v-main class="grey lighten-3">
             <v-container>
-                <v-row class="justify-center align-center">
-                    <v-col cols="12" sm="8">
-                        <v-sheet min-height="70vh" rounded="lg" class="pa-8">
+                <v-sheet id='sheet' min-height="70vh" rounded="lg">
+                    <v-row>
+                        <v-col cols='2' />
+                        <v-col id='col' cols="3">
+                            <h3>Signs</h3>
+                        </v-col>
+                        <v-col cols='1' />
+                        <v-col id='col' cols="3">
+                            <v-autocomplete label='Search' />
+                        </v-col>
+                        <v-col cols='1'>
+                            <v-btn icon @click.stop='() => navigate("library/addsign")'>
+                                <v-icon>mdi-plus</v-icon>
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                    <v-row id='row'>
+                        <v-col cols="12" sm="8">
                             <v-simple-table>
                                 <thead>
                                     <th id='checkbox' />
@@ -47,14 +62,46 @@
                                     </tr>
                                 </tbody>
                             </v-simple-table>
-                        </v-sheet>
-                    </v-col>
-                </v-row>
+                        </v-col>
+                    </v-row>
+                </v-sheet>
             </v-container>
         </v-main>
     </v-app>
 </template>
 <style>
+    #col {
+        justify-content: center;
+        align-content: center;
+    }
+
+    #searchBar {
+        justify-content: center;
+        align-content: center;
+        padding: 8;
+        box-sizing: border-box;
+    }
+
+    #sheet {
+        width: 100%;
+    }
+
+    #toolRow {
+        padding: 8;
+        box-sizing: border-box;
+    }
+
+    #headingCol {
+        align-content: center;
+        justify-content: center;
+    }
+
+    #row {
+        width: 100%;
+        align-content: center;
+        justify-content: center;
+    }
+
     #homeButton {
         margin: 1%;
         margin-left: 1px;
