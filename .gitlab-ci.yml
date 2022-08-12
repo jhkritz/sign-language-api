@@ -21,8 +21,8 @@ init:
 deploy_staging:
   stage: deploy
   script:
-    - git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/flask-api-staging.git
-    - git push heroku master
+    - gem install dpl
+    - dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY
     - echo "Deployed to Staging Server https://flask-api-staging.herokuapp.com"
   environment:
     name: staging
