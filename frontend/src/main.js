@@ -26,14 +26,18 @@ const routes = [{
 		}
 	},
 	{
-		path: '/library/:id',
-		name: 'library',
+		path: '/library',
 		component: library,
+		props: route => ({
+			library_id: route.query.library_id
+		})
 	},
 	{
 		path: '/addsign',
-		name: 'addsign',
 		component: addsign,
+		props: route => ({
+			library_id: route.query.library_id
+		})
 	},
 	{
 		path: '/:pathMatch(.*)*',

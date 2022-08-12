@@ -33,7 +33,7 @@
         },
         methods: {
             navigateToLibraryPage() {
-                this.$router.push(`/library?id=${this.libraryname}`);
+                this.$router.push(`/library?library_id=${this.libraryname}`);
             }
         }
     };
