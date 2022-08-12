@@ -154,6 +154,7 @@
 
                 var data = new FormData();
                 data.append('library_name', this.myName);
+                data.append('description', this.myDesc);
                 console.log(this.myName)
 
                 var config = {
