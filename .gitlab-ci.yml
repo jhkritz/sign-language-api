@@ -8,7 +8,7 @@ stages:
 ver:
   stage: ver
   script:
-    - python --version
+    - python3 --version
     - whoami
 
 init:
