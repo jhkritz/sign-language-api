@@ -41,7 +41,7 @@ const routes = [{
 		})
 	},*/
 	{
-		path: '/addsign',
+		path: '/library/addsign',
 		component: addsign,
 		props: route => ({
 			library_id: route.query.library_id
