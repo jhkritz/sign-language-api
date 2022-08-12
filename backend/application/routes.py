@@ -34,7 +34,6 @@ def uploadsign():
         lib_name = request.form.get('lib_name')
         sign_name = request.form.get('sign_name')
         image = request.files['image_file']
-        #lib_name = SignLanguageLibrary.query.filter_by(id=libid).first().name
         libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
         image.save(img_path)
