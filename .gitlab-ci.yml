@@ -14,7 +14,7 @@ ver:
 init:
   stage: init
   script:
-    - sudo apt-get install postgresql
+    - apt-get install postgresql
     - pip install psycopg2-binary
     - pip install -r requirements.txt
 
