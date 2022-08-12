@@ -144,29 +144,28 @@
                     console.error(err);
                 }
             },
-            addNewLibrary() {
-                this.libraries.push({
-                    name: this.myName,
-                    description: this.myDesc
-                });
-                //add library to database
-                var FormData = require('form-data');
-                var data = new FormData();
-                data.append('library_name', this.myName);
-                data.append('description', this.myDesc);
-                var config = {
-                    method: 'post',
-                    url: 'http://localhost:5000/library/createlibrary',
-                    data: data
-                };
-                axios(config)
-                    .then(function(response) {
-                        console.log(JSON.stringify(response.data));
-                    })
-                    .catch(function(error) {
-                        console.log(error);
-                    });
-                //get library id
+            async addNewLibrary() {
+                try {
+                    //add library to database
+                    const FormData = require('form-data');
+                    const data = new FormData();
+                    data.append('library_name', this.myName);
+                    data.append('description', this.myDesc);
+                    const config = {
+                        method: 'post',
+                        url: 'http://localhost:5000/library/createlibrary',
+                        data: data
+                    };
+                    const res = await axios(config);
+                    if (res.data.message !== 'Library exists') {
+                        this.libraries.push({
+                            name: this.myName,
+                            description: this.myDesc
+                        });
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
                 //link buttons to lib id
                 this.myName = '';
                 this.myDesc = '';
