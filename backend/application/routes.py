@@ -29,20 +29,22 @@ def home():
 @app.route('/library/uploadsign', methods=['POST'])
 def uploadsign():
     # Endpoint to upload a single sign with a name
+    print(request.form)
     try:
-        libid = request.form.get('lib_id')
+        lib_name = request.form.get('lib_name')
         sign_name = request.form.get('sign_name')
         image = request.files['image_file']
-        lib_name = SignLanguageLibrary.query.filter_by(id=libid).first().name
-
+        #lib_name = SignLanguageLibrary.query.filter_by(id=libid).first().name
+        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
         image.save(img_path)
-
         sign = Sign(meaning=sign_name, image_filename=img_path,  library_id=libid)
         db.session.add(sign)
         db.session.commit()
-    except KeyError:
+    except Exception as e:
+        print(e)
         return Response(status=400)
+
     return Response(status=200)
 
 
