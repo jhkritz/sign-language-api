@@ -9,7 +9,6 @@ import home from './views/home'
 import addsign from './views/addsign'
 import library from './views/library'
 import page_not_found from './views/page-not-found';
-import upload_library from './views/upload-library';
 
 Vue.config.productionTip = false
 
@@ -17,10 +16,6 @@ const routes = [{
 		path: '/',
 		name: 'home',
 		component: home
-	},
-	{
-		path: '/library/upload',
-		component: upload_library
 	},
 	{
 		path: '/library/:id',
