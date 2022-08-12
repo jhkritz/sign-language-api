@@ -25,64 +25,9 @@ def home():
     return "Hello World!"
 
 
-def preprocess_and_save_image(zpfl, lib_name, img_path, image_file_name):
-    desired_shape = (200, 200)
-    zpfl.extract(lib_name + '/' + image_file_name, path=img_path)
-    img = cv.imread(img_path + '/' + lib_name + '/' + image_file_name)
-    img = cv.resize(img, desired_shape)
-    hand_detector = HandDetector(maxHands=1)
-    offset = 30
-    hands, hands_img = hand_detector.findHands(img)
-    if hands:
-        x, y, w, h = hands[0]['bbox']
-        try:
-            cropped = hands_img[y-offset:y+offset+h, x-offset:x+offset+w]
-            cropped = cv.resize(cropped, desired_shape)
-            cv.imwrite(img_path + '/' + image_file_name, cropped)
-        except Exception as e:
-            print(e)
-    else:
-        cv.imwrite(img_path + '/' + image_file_name, img)
-
-
-@app.route('/library/upload', methods=['POST'])
-def upload_library():
-    try:
-        # Request arguments and files
-        sign_meanings = request.files['sign_meanings']
-        zipped_images = request.files['zipped_images']
-        lib_name = request.form.to_dict()['library_name']
-        # The path that this library's images will be saved to
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name
-        lib = SignLanguageLibrary(name=lib_name)
-        db.session.add(lib)
-        db.session.commit()
-        # XXX: will not work as intended if the \r or \r\n are used instead of \n
-        lines = sign_meanings.read().decode().split('\n')
-        # TODO: Refer to source for the file extraction
-        zpfl = ZipFile(zipped_images.stream._file)
-        for line in lines:
-            fields = line.split(',')
-            if len(fields) < 2:
-                continue
-            image_file_name = fields[0]
-            sign_meaning = fields[1]
-            try:
-                preprocess_and_save_image(zpfl, lib_name, img_path, image_file_name)
-            except Exception as e:
-                print(e)
-            sign = Sign(meaning=sign_meaning, image_filename=image_file_name, library_id=lib.id)
-            db.session.add(sign)
-        db.session.commit()
-    except KeyError:
-        return Response(status=400)
-    return Response(status=200)
-
-# Endpoint to upload a single sign with a name
-
-
 @app.route('/library/uploadsign', methods=['POST'])
 def uploadsign():
+    # Endpoint to upload a single sign with a name
     try:
         libid = request.form.get('lib_id')
         sign_name = request.form.get('sign_name')
@@ -234,8 +179,8 @@ def process_input_single_frame(frame, hand_detector, desired_shape):
             return cropped
         except Exception as e:
             print(e)
-    # return unchanged image if no hands found
-    return frame
+    # Return None so that classification is aborted if hands aren't found.
+    return None
 
 
 @socketio.on('image_request')

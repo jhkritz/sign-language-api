@@ -16,76 +16,52 @@
 
         <div class="libraries">
 
-           
-
-            <v-card class="mx-auto" elevation=6>
-                <v-card-text>
-                    <p class="text-h4 text--primary">
-                        Test library name 1
-                    </p>
-                    <div class="text--primary">
-                        Test description of the library.
-                    </div>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn text color="deep-purple accent-4">
-                        Explore
-                    </v-btn>
-                    <v-btn text color="deep-purple accent-4">
-                        Use API
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-
-            <v-card class="mx-auto" elevation="6">
-                <v-card-text>
-                    <p class="text-h4 text--primary">
-                        Test library name 2
-                    </p>
-                    <div class="text--primary">
-                        Test description of the library.
-                    </div>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn text color="deep-purple accent-4">
-                        Explore
-                    </v-btn>
-                    <v-btn text color="deep-purple accent-4">
-                        Use API
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-
-            <v-card class="mx-auto" elevation="6">
-                <v-card-text>
-                    <p class="text-h4 text--primary">
-                        Test library name 3
-                    </p>
-                    <div class="text--primary">
-                        Test description of the library.
-                    </div>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn text color="deep-purple accent-4">
-                        Explore
-                    </v-btn>
-                    <v-btn text color="deep-purple accent-4">
-                        Use API
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
+            <libraryCardVue v-for="number in 0" :key="number" />
 
         </div>
 
         <div class="addLibraryButton">
-                   
-                        <v-btn class="mx-2" fab dark color="indigo" v-bind="attrs" v-on="on">
-                        <v-icon dark>
-                            mdi-plus
-                        </v-icon>
-                    </v-btn> 
 
-                </div>
+            <v-row justify="center">
+                <v-dialog v-model="dialog" persistent max-width="600px">
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn class="mx-2" fab dark color="indigo" v-bind="attrs" v-on="on">
+                            <v-icon dark>
+                                mdi-plus
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                    <v-card>
+                        <v-card-title>
+                            <span class="text-h5">Add a new library:</span>
+                        </v-card-title>
+                        <v-card-text>
+                            <v-container>
+                                <v-row>
+                                    <v-col cols="12">
+                                        <v-text-field v-model="myName" label="Library Name *" required></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <v-text-field v-model="myDesc" label="Description *" required></v-text-field>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                            <small>*indicates required field</small>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="indigo" text @click="dialog = false">
+                                Close
+                            </v-btn>
+                            <v-btn color="indigo" text @click="addNewLibrary">
+                                Save
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+            </v-row>
+
+        </div>
 
     </div>
 </template>
@@ -117,7 +93,7 @@
     backdrop-filter: blur(20px) opacity(0.8);
 }
 
-.addLibraryButton{
+.addLibraryButton {
     padding: 2%;
     display: inline-flex;
     position: relative;
@@ -145,4 +121,104 @@
 }
 </style>
 <script>
+
+import libraryCardVue from '../components/library-card.vue';
+import Vue from 'vue';
+export default {
+    data: () => ({
+        dialog: false,
+        myName: '',
+        myDesc: '',
+    }),
+    components: {
+        libraryCardVue
+    },
+    methods: {
+
+        addNewLibrary() {
+
+            var compClass = Vue.extend(libraryCardVue);
+            var instance = new compClass({
+                propsData: {
+                    libraryname: this.myName,
+                    librarydesc: this.myDesc,
+                }
+            });
+            instance.$mount()
+            var lib = document.getElementsByClassName("libraries")[0]
+            lib.appendChild(instance.$el)
+
+
+            //add library to database
+            var axios = require('axios');
+            var FormData = require('form-data');
+
+            var data = new FormData();
+            data.append('library_name', this.myName);
+            console.log(this.myName)
+
+            var config = {
+                method: 'post',
+                url: 'http://localhost:5000/library/createlibrary',
+                data: data
+            };
+
+            axios(config)
+                .then(function (response) {
+                    console.log(JSON.stringify(response.data));
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+
+            //get library id
+
+
+            //link buttons to lib id
+
+
+            this.myName = '';
+            this.myDesc = '';
+            this.dialog = false;
+        },
+
+        addAllLibraries() {
+
+            // var axios = require('axios');
+            // var config = {
+            //     method: 'get',
+            //     url: 'http://localhost:5000/libraries/names',
+
+            // };
+
+            // axios(config)
+            //     .then(function (response) {
+            //         console.log(JSON.stringify(response.data));
+            //     })
+            //     .catch(function (error) {
+            //         console.log(error);
+            //     });
+
+
+
+            //get amount of libraries
+
+            //loop through them
+
+            //mount new instance with their props
+        },
+
+        searchLibraries() {
+
+        }
+
+    },
+
+    beforeMount() {
+        this.addAllLibraries()
+    }
+
+}
+
+
 </script>
