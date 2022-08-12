@@ -70,6 +70,15 @@ def get_library_names():
     libs = SignLanguageLibrary.query.all()
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
+@app.route('/libraries/getall')
+def get_libraries():
+    libs = SignLanguageLibrary.query.all()
+    all_libs = []
+    for lib in libs:
+        thislib = {'name':lib.name, 'description':lib.description}
+        all_libs.append(thislib)
+    return {'libaries':all_libs}
+
 
 @app.route('/test/local/stream/classification', methods=['GET'])
 def test_classify_image_with_local_video_stream():
