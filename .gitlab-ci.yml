@@ -14,8 +14,8 @@ ver:
 init:
   stage: init
   script:
-#    - apt-get install postgresql
     - apt-get update
+    - apt-get install postgresql
     - apt-get -y install python3-pip
     - pip install psycopg2-binary
     - pip install -r backend/requirements.txt
@@ -30,8 +30,7 @@ deploy_staging:
   environment:
     name: staging
     url: https://flask-api-staging.herokuapp.com/
-  only:
-    - master
+
 
 deploy_production:
   stage: deploy
@@ -43,5 +42,3 @@ deploy_production:
     name: production
     url: https://flask-api-prod.herokuapp.com/
   when: manual
-  only:
-    - master
