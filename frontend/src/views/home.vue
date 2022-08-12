@@ -67,158 +67,156 @@
 </template>
 
 <style>
-.header {
-    background-repeat: repeat-x;
-    min-height: 25vw;
-    max-height: 30vw;
-    background-image: url('../assets/Tile.svg');
-    background-color: cadetblue;
-    background-size: contain;
+    .header {
+        background-repeat: repeat-x;
+        min-height: 25vw;
+        max-height: 30vw;
+        background-image: url('../assets/Tile.svg');
+        background-color: cadetblue;
+        background-size: contain;
 
-}
-
-.center {
-    text-align: center;
-    margin: auto;
-    padding: 8%;
-}
-
-.maintitle {
-
-    padding-bottom: 1%;
-    font-size: 4vw;
-    color: white;
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: lighter;
-    backdrop-filter: blur(20px) opacity(0.8);
-}
-
-.addLibraryButton {
-    padding: 2%;
-    display: inline-flex;
-    position: relative;
-    float: right;
-}
-
-.libraries {
-    padding: 2%;
-    display: inline-flex;
-    align-content: left;
-    flex-wrap: wrap;
-    flex-direction: row;
-    gap: 2vw;
-}
-
-
-.libraries>v-card {
-    max-height: 10vw;
-    max-width: 20vw;
-    display: flex;
-    justify-content: left;
-    justify-items: left;
-    align-items: left;
-
-}
-</style>
-<script>
-
-import libraryCardVue from '../components/library-card.vue';
-import Vue from 'vue';
-export default {
-    data: () => ({
-        dialog: false,
-        myName: '',
-        myDesc: '',
-    }),
-    components: {
-        libraryCardVue
-    },
-    methods: {
-
-        addNewLibrary() {
-
-            var compClass = Vue.extend(libraryCardVue);
-            var instance = new compClass({
-                propsData: {
-                    libraryname: this.myName,
-                    librarydesc: this.myDesc,
-                }
-            });
-            instance.$mount()
-            var lib = document.getElementsByClassName("libraries")[0]
-            lib.appendChild(instance.$el)
-
-
-            //add library to database
-            var axios = require('axios');
-            var FormData = require('form-data');
-
-            var data = new FormData();
-            data.append('library_name', this.myName);
-            console.log(this.myName)
-
-            var config = {
-                method: 'post',
-                url: 'http://localhost:5000/library/createlibrary',
-                data: data
-            };
-
-            axios(config)
-                .then(function (response) {
-                    console.log(JSON.stringify(response.data));
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
-
-            //get library id
-
-
-            //link buttons to lib id
-
-
-            this.myName = '';
-            this.myDesc = '';
-            this.dialog = false;
-        },
-
-        addAllLibraries() {
-
-            // var axios = require('axios');
-            // var config = {
-            //     method: 'get',
-            //     url: 'http://localhost:5000/libraries/names',
-
-            // };
-
-            // axios(config)
-            //     .then(function (response) {
-            //         console.log(JSON.stringify(response.data));
-            //     })
-            //     .catch(function (error) {
-            //         console.log(error);
-            //     });
-
-
-
-            //get amount of libraries
-
-            //loop through them
-
-            //mount new instance with their props
-        },
-
-        searchLibraries() {
-
-        }
-
-    },
-
-    beforeMount() {
-        this.addAllLibraries()
     }
 
-}
+    .center {
+        text-align: center;
+        margin: auto;
+        padding: 8%;
+    }
+
+    .maintitle {
+
+        padding-bottom: 1%;
+        font-size: 4vw;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: lighter;
+        backdrop-filter: blur(20px) opacity(0.8);
+    }
+
+    .addLibraryButton {
+        padding: 2%;
+        display: inline-flex;
+        position: relative;
+        float: right;
+    }
+
+    .libraries {
+        padding: 2%;
+        display: inline-flex;
+        align-content: left;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 2vw;
+    }
 
 
+    .libraries>v-card {
+        max-height: 10vw;
+        max-width: 20vw;
+        display: flex;
+        justify-content: left;
+        justify-items: left;
+        align-items: left;
+
+    }
+</style>
+<script>
+    import libraryCardVue from '../components/library-card.vue';
+    import Vue from 'vue';
+    export default {
+        data: () => ({
+            dialog: false,
+            myName: '',
+            myDesc: '',
+        }),
+        components: {
+            libraryCardVue
+        },
+        methods: {
+
+            addNewLibrary() {
+
+                var compClass = Vue.extend(libraryCardVue);
+                var instance = new compClass({
+                    propsData: {
+                        libraryname: this.myName,
+                        librarydesc: this.myDesc,
+                    }
+                });
+                instance.$mount()
+                var lib = document.getElementsByClassName("libraries")[0]
+                lib.appendChild(instance.$el)
+
+
+                //add library to database
+                var axios = require('axios');
+                var FormData = require('form-data');
+
+                var data = new FormData();
+                data.append('library_name', this.myName);
+                data.append('description', this.myDesc);
+                console.log(this.myName)
+
+                var config = {
+                    method: 'post',
+                    url: 'http://localhost:5000/library/createlibrary',
+                    data: data
+                };
+
+                axios(config)
+                    .then(function(response) {
+                        console.log(JSON.stringify(response.data));
+                    })
+                    .catch(function(error) {
+                        console.log(error);
+                    });
+
+                //get library id
+
+
+                //link buttons to lib id
+
+
+                this.myName = '';
+                this.myDesc = '';
+                this.dialog = false;
+            },
+
+            addAllLibraries() {
+
+                // var axios = require('axios');
+                // var config = {
+                //     method: 'get',
+                //     url: 'http://localhost:5000/libraries/names',
+
+                // };
+
+                // axios(config)
+                //     .then(function (response) {
+                //         console.log(JSON.stringify(response.data));
+                //     })
+                //     .catch(function (error) {
+                //         console.log(error);
+                //     });
+
+
+
+                //get amount of libraries
+
+                //loop through them
+
+                //mount new instance with their props
+            },
+
+            searchLibraries() {
+
+            }
+
+        },
+
+        beforeMount() {
+            this.addAllLibraries()
+        }
+
+    }
 </script>

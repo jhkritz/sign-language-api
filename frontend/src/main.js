@@ -9,6 +9,7 @@ import home from './views/home'
 import addsign from './views/addsign'
 import library from './views/library'
 import page_not_found from './views/page-not-found';
+import test_library from './views/test-library';
 
 Vue.config.productionTip = false
 
@@ -16,6 +17,13 @@ const routes = [{
 		path: '/',
 		name: 'home',
 		component: home
+	},
+	{
+		path: '/library/test',
+		component: test_library,
+		props: {
+			lib_name: 'test_library'
+		}
 	},
 	{
 		path: '/library/:id',
