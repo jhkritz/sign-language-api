@@ -9,7 +9,7 @@
             </div>
         </v-card-text>
         <v-card-actions>
-            <v-btn text color="deep-purple accent-4">
+            <v-btn text color="deep-purple accent-4" @click.stop='navigateToLibraryPage'>
                 Explore
             </v-btn>
             <v-btn text color="deep-purple accent-4">
@@ -20,11 +20,21 @@
 </template>
 
 <script>
-export default {
-  props: {
-    libraryname: { required: true, type: String },
-    librarydesc: { required: true, type: String }
-  }
-};
-
+    export default {
+        props: {
+            libraryname: {
+                required: true,
+                type: String
+            },
+            librarydesc: {
+                required: true,
+                type: String
+            }
+        },
+        methods: {
+            navigateToLibraryPage() {
+                this.$router.push(`/library?id=${this.libraryname}`);
+            }
+        }
+    };
 </script>
