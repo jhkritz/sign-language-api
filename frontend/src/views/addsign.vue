@@ -4,6 +4,9 @@
         <v-container>
             <!-- UPLOAD SIGN -->
             <h1>Add sign</h1>
+            <v-container id='container'>
+                <v-file-input label='Upload a hand sign' v-model='image' />
+            </v-container>
             <div class="dropbox">
                 <input type="file" single required>
             </div>
@@ -18,22 +21,19 @@
     </v-form>
 </template>
 
-
 <script>
     export default {
         props: {
             library_id: null
         },
-
         data: () => ({
             valid: false,
             signname: '',
             signrules: [
                 v => !!v || 'Sign name is required'
-            ]
+            ],
+            image: null
         }),
-
-
         methods: {
             async postSign() {
                 // Accessing search parameters
@@ -45,7 +45,8 @@
 
                 var data = new FormData();
                 data.append('sign_name', this.signname);
-                //data.append('image_file', this.image);
+                data.append('lib_name', this.library_id);
+                data.append('image_file', this.image);
 
                 var config = {
                     method: 'post',
@@ -99,5 +100,9 @@
         font-size: 1.2em;
         text-align: center;
         padding: 50px 0;
+    }
+
+    #container {
+        width: 50%
     }
 </style>
