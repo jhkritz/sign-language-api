@@ -1,3 +1,4 @@
+from pydoc import describe
 from flask import current_app as app, Response, request, send_from_directory
 from .models import user, SignLanguageLibrary, Sign
 from zipfile import ZipFile
@@ -48,10 +49,11 @@ def uploadsign():
 @app.route('/library/createlibrary', methods=['POST'])
 def createlibrary():
     libname = request.form.get('library_name')
+    lib_description = request.form.get('description')
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return Response({'Library exists'})
-    library = SignLanguageLibrary(name=libname)
+    library = SignLanguageLibrary(name=libname, description=lib_description)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
@@ -79,6 +81,16 @@ def get_sign_image():
 def get_library_names():
     libs = SignLanguageLibrary.query.all()
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
+
+
+@app.route('/libraries/getall')
+def get_libraries():
+    libs = SignLanguageLibrary.query.all()
+    all_libs = []
+    for lib in libs:
+        thislib = {'name': lib.name, 'description': lib.description}
+        all_libs.append(thislib)
+    return {'libaries': all_libs}
 
 
 def classify_image_frame(input_image, lib_name):
