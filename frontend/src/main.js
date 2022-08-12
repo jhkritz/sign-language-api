@@ -7,9 +7,9 @@ import VueAuth from 'vue-auth'
 
 import home from './views/home'
 import addsign from './views/addsign'
-import library from './views/library'
 import page_not_found from './views/page-not-found';
 import test_library from './views/test-library';
+import explore_library from './views/explore-library';
 
 Vue.config.productionTip = false
 
@@ -19,19 +19,27 @@ const routes = [{
 		component: home
 	},
 	{
+		path: '/library',
+		component: explore_library,
+		props: route => ({
+			library_id: route.query.library_id
+		})
+	},
+	{
 		path: '/library/test',
 		component: test_library,
 		props: {
 			lib_name: 'test_library'
 		}
 	},
+	/*
 	{
 		path: '/library',
 		component: library,
 		props: route => ({
 			library_id: route.query.library_id
 		})
-	},
+	},*/
 	{
 		path: '/addsign',
 		component: addsign,
