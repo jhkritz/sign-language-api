@@ -136,12 +136,10 @@ def get_library_names():
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
-@app.route('/test/local/stream/classification', methods=['GET'])
-def test_classify_image_with_local_video_stream():
+def classify_image_frame(input_image, lib_name):
     """
     This code assumes that the library images have been resized to desired_shape
     """
-    lib_name = 'test_local_stream'
     lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     capture = cv.VideoCapture(0)
     hand_detector = HandDetector(maxHands=1)
@@ -190,31 +188,40 @@ def get_data_and_labels(lib_name, lib_path):
     return data, labels
 
 
-def process_input(capture, hand_detector, desired_shape):
-    # TODO: reference tutorial video
-    offset = 30
-    s, input_img = capture.read()
-    input_img = cv.resize(input_img, desired_shape)
-    hands, hands_img = hand_detector.findHands(input_img)
-    if hands:
-        x, y, w, h = hands[0]['bbox']
+####################################################################################################
+# Code for receiving webcam streams
+####################################################################################################
+
+# socket function to process image and then return result
+
+
+@app.route('/test/local/stream/classification', methods=['GET'])
+def test_classify_image_with_local_video_stream():
+    """
+    This code assumes that the library images have been resized to desired_shape
+    """
+    lib_name = 'test_local_stream'
+    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+    capture = cv.VideoCapture(0)
+    hand_detector = HandDetector(maxHands=1)
+    desired_shape = (200, 200)
+    data, labels = get_data_and_labels(lib_name, lib_path)
+    # Setup the classifier
+    knn = cv.ml.KNearest_create()
+    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    # Classify images from stream
+    while True:
+        input_img_array = process_input(capture, hand_detector, desired_shape)
         try:
-            # All the images used need to be the same size
-            cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
-            cropped = cv.resize(cropped, desired_shape)
-            cv.imshow('Processed input', cropped)
-            # Prepare for classification
-            flattened = cropped.flatten()
-            # knn.findNearest() expects an array of images for classification.
-            return np.array(flattened[np.newaxis, :], dtype=np.float32)
+            print(classify(input_img_array, knn))
+            cv.waitKey(1)
         except Exception as e:
             print(e)
-    return None
-
-# mostly copied from above
+    return Response(status=200)
 
 
 def process_input_single_frame(frame, hand_detector, desired_shape):
+    # TODO: reference tutorial video
     offset = 30
     input_img = cv.resize(frame, desired_shape)
     hands, hands_img = hand_detector.findHands(input_img)
@@ -225,123 +232,41 @@ def process_input_single_frame(frame, hand_detector, desired_shape):
             cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
             cropped = cv.resize(cropped, desired_shape)
             return cropped
-            # Prepare for classification
-            flattened = cropped.flatten()
-            # knn.findNearest() expects an array of images for classification.
-            return np.array(flattened[np.newaxis, :], dtype=np.float32)
         except Exception as e:
             print(e)
     # return unchanged image if no hands found
     return frame
 
 
-def classify_image_frame(img_frame, library):
-    # mostly copies from classify_image()
-    lib_name = library
-    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-
-    # img_path = lib_path + 'to_classify/'
-    # img_name = img_path + img.filename
-    # os.makedirs(img_path, exist_ok=True)
-    # img.save(img_name)
-    # All the images used need to be the same size
-
-    to_classify = cv.cvtColor(cv.imread(img_name), cv.COLOR_BGR2GRAY)
-    desired_shape = to_classify.shape
-    to_classify = np.array([to_classify.flatten()], dtype=np.float32)
-    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
-    # Construct the data and label arrays
-    labels = []
-    data = []
-    for sign in lib.signs:
-        img = cv.imread(lib_path + sign.image_filename)
-        data += [preprocess_image(img, desired_shape)]
-        labels += [sign.id]
-    data = np.array(data, dtype=np.float32)
-    labels = np.array(labels, dtype=np.float32)
-    # Setup the classifier
-    knn = cv.ml.KNearest_create()
-    knn.train(data, cv.ml.ROW_SAMPLE, labels)
-    # knn.findNearest() expects an array of images for classification.
-    retval, results, responses, dists = knn.findNearest(to_classify, k=12)
-    classification = results[0][0]
-    quality_of_match = 0
-    for resp in responses[0]:
-        if resp == classification:
-            quality_of_match += 1
-    quality_of_match = 100 * quality_of_match / len(responses[0])
-    return {'classification': str(classification), 'quality_of_match': str(quality_of_match)}
-
-####################################################################################################
-# XXX: The code below is outdated.
-####################################################################################################
-
-
-def preprocess_image(image, desired_shape):
-    image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    if image.shape != desired_shape:
-        image = cv.resize(image, desired_shape)
-    return image.flatten()
-
-
-@app.route('/library/classify/image', methods=['PUT'])
-def classify_image():
-    lib_name = request.form.to_dict()['library_name']
-    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    img = request.files['image']
-    img_path = lib_path + 'to_classify/'
-    img_name = img_path + img.filename
-    os.makedirs(img_path, exist_ok=True)
-    img.save(img_name)
-    # All the images used need to be the same size
-    to_classify = cv.cvtColor(cv.imread(img_name), cv.COLOR_BGR2GRAY)
-    desired_shape = to_classify.shape
-    to_classify = np.array([to_classify.flatten()], dtype=np.float32)
-    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
-    # Construct the data and label arrays
-    labels = []
-    data = []
-    for sign in lib.signs:
-        img = cv.imread(lib_path + sign.image_filename)
-        data += [preprocess_image(img, desired_shape)]
-        labels += [sign.id]
-    data = np.array(data, dtype=np.float32)
-    labels = np.array(labels, dtype=np.float32)
-    # Setup the classifier
-    knn = cv.ml.KNearest_create()
-    knn.train(data, cv.ml.ROW_SAMPLE, labels)
-    # knn.findNearest() expects an array of images for classification.
-    retval, results, responses, dists = knn.findNearest(to_classify, k=12)
-    classification = results[0][0]
-    quality_of_match = 0
-    for resp in responses[0]:
-        if resp == classification:
-            quality_of_match += 1
-    quality_of_match = 100 * quality_of_match / len(responses[0])
-    return {'classification': str(classification), 'quality_of_match': str(quality_of_match)}
-####################################################################################################
-
-
-####################################################################################################
-# Code for receiving webcam streams
-####################################################################################################
-
-# socket function to process image and then return result
 @socketio.on('image_request')
-def return_image(data_image):
+def return_image(data_image, lib_name):
     # Note: This code is based on the code given on the webpage linked below:
     # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
     # Open image with opencv
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
     hand_detector = HandDetector(maxHands=1)
+    # Setup the model
     desired_shape = (200, 200)
+    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+    data, labels = get_data_and_labels(lib_name, lib_path)
+    print(data.shape)
+    knn = cv.ml.KNearest_create()
+    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    # Process the image
     processed_image = process_input_single_frame(image, hand_detector, desired_shape)
-    # classification = classify_image_frame(image, lib)
-
+    # Prepare for classification
+    flattened = processed_image.flatten()
+    # knn.findNearest() expects an array of images for classification.
+    to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
+    print(to_classify.shape)
+    # Classify the processed image
+    result = None
+    if type(processed_image):
+        result = classify(to_classify, knn)
     # This conversion is based on the code provided in the following StackOverflow post
     # https://stackoverflow.com/questions/58931854/
     # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
     processed_image = cv2.imencode('.png', processed_image)[1]
     image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-    emit('image_response', image_out)
+    emit('image_response', image_out, result)

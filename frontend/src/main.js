@@ -21,7 +21,10 @@ const routes = [{
 	},
 	{
 		path: '/library/test',
-		component: test_library
+		component: test_library,
+		props: {
+			lib_name: 'test_local_stream'
+		}
 	},
 	{
 		path: '/library/upload',

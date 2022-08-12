@@ -13,6 +13,7 @@
         io
     } = require("socket.io-client");
     export default {
+        props: ['lib_name'],
         data: () => ({
             imgCapture: null,
             socket: null,
@@ -23,11 +24,12 @@
         methods: {
             async sendFrame() {
                 const img = await this.imgCapture.takePhoto();
-                this.socket.emit('image_request', img);
+                this.socket.emit('image_request', img, this.lib_name);
             },
-            async receiveFrame(frame) {
+            async receiveFrame(frame, result) {
                 const img = document.querySelector('img#processedImage');
                 img.src = frame;
+                console.log(result);
             },
             async toggleStream() {
                 if (this.isStreaming) {
