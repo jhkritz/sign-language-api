@@ -15,7 +15,7 @@ init:
   script:
     - apt-get update
     - apt-get -y install python3-pip
-    - pip install -r backend/requirements.txt
+    - pip install -r requirements.txt
 
 
 deploy_staging:
