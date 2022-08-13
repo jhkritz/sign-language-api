@@ -10,6 +10,7 @@ import addsign from './views/addsign'
 import page_not_found from './views/page-not-found';
 import test_library from './views/test-library';
 import explore_library from './views/explore-library';
+import library from './views/library';
 
 Vue.config.productionTip = false
 
@@ -17,6 +18,11 @@ const routes = [{
 		path: '/',
 		name: 'home',
 		component: home
+	},
+	{
+		path: '/library_2/:id',
+		name: 'library',
+		component: library
 	},
 	{
 		path: '/library',
