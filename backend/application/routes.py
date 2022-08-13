@@ -1,6 +1,6 @@
 from pydoc import describe
 from flask import current_app as app, Response, request, send_from_directory
-from .models import user, SignLanguageLibrary, Sign
+from .models import SignLanguageLibrary, Sign
 from zipfile import ZipFile
 import numpy as np
 from . import db
@@ -13,6 +13,7 @@ import io
 from PIL import Image
 import base64
 import cv2
+import shutil
 # from aiohttp import web
 # from av import VideoFrame
 
@@ -28,7 +29,6 @@ def home():
 @app.route('/library/uploadsign', methods=['POST'])
 def uploadsign():
     # Endpoint to upload a single sign with a name
-    print(request.form)
     try:
         lib_name = request.form.get('lib_name')
         sign_name = request.form.get('sign_name')
@@ -92,6 +92,32 @@ def get_libraries():
         all_libs.append(thislib)
     return {'libraries': all_libs}
 
+
+@app.route('/library/deletesign', methods=['DELETE'])
+def delete_sign():
+    libname = request.json.get('library_name')
+    signname = request.json.get('sign_name')
+    try:
+        lib = SignLanguageLibrary.query.filter_by(name=libname).first()
+        Sign.query.filter_by(meaning=signname, library_id = lib.id).delete()
+        db.session.commit()
+        return Response(status=200)
+    except:
+        return Response(status=400)
+
+
+@app.route('/library/deletelibrary', methods=['DELETE'])
+def delete_library():
+    libname = request.json.get('library_name')
+    try:
+        libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
+        Sign.query.filter_by(library_id=libid).delete()
+        SignLanguageLibrary.query.filter_by(name=libname).delete()
+        shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
+        db.session.commit()
+        return Response(status=200)
+    except:
+        return Response(status=400)
 
 # Functions used to classify images.
 ####################################################################################################
