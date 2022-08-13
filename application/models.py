@@ -1,21 +1,13 @@
 from . import db
 import json
 
-
-class user(db.Model):
-    __tablename__ = 'user_account'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_name = db.Column(db.String(128), nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-
-
 class SignLanguageLibrary(db.Model):
     __tablename__ = 'sign_language_library'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(256), nullable=False)
     description = db.Column(db.String(256), nullable=False)
     # One to many relationship between SignLanguageLibrary and Sign
-    signs = db.relationship('Sign', backref='sign_language_library')
+    signs = db.relationship('Sign', backref='sign_language_library', cascade="all,delete")
 
 
 class Sign(db.Model):
