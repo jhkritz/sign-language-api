@@ -145,15 +145,7 @@
                     route: ''
                 }
             ],
-            signs: [{
-                id: 0,
-                meaning: 'A',
-                status: 'Trained'
-            }, {
-                id: 1,
-                meaning: 'B',
-                status: 'Trained'
-            }],
+            signs: [],
             signsToDelete: [],
         }),
         beforeMount() {

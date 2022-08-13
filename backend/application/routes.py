@@ -12,7 +12,6 @@ from . import socketio
 import io
 from PIL import Image
 import base64
-
 import cv2
 # from aiohttp import web
 # from av import VideoFrame
@@ -37,7 +36,7 @@ def uploadsign():
         libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
         image.save(img_path)
-        sign = Sign(meaning=sign_name, image_filename=img_path,  library_id=libid)
+        sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg',  library_id=libid)
         db.session.add(sign)
         db.session.commit()
     except Exception as e:
@@ -94,34 +93,12 @@ def get_libraries():
     return {'libraries': all_libs}
 
 
-def classify_image_frame(input_image, lib_name):
-    """
-    This code assumes that the library images have been resized to desired_shape
-    """
-    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    capture = cv.VideoCapture(0)
-    hand_detector = HandDetector(maxHands=1)
-    desired_shape = (200, 200)
-    data, labels = get_data_and_labels(lib_name, lib_path)
-    # Setup the classifier
-    knn = cv.ml.KNearest_create()
-    knn.train(data, cv.ml.ROW_SAMPLE, labels)
-    # Classify images from stream
-    while True:
-        input_img_array = process_input(capture, hand_detector, desired_shape)
-        try:
-            print(classify(input_img_array, knn))
-            cv.waitKey(1)
-        except Exception as e:
-            print(e)
-    return Response(status=200)
-
 # Functions used to classify images.
 ####################################################################################################
 
 
-def classify(to_classify, knn):
-    retval, results, responses, dists = knn.findNearest(to_classify, k=1)
+def classify(to_classify, knn, k):
+    retval, results, responses, dists = knn.findNearest(to_classify, k=k)
     classification = results[0][0]
     meaning = Sign.get_sign_meaning(int(classification))
     quality_of_match = 0
@@ -146,38 +123,6 @@ def get_data_and_labels(lib_name, lib_path):
     return data, labels
 
 
-####################################################################################################
-# Code for receiving webcam streams
-####################################################################################################
-
-# socket function to process image and then return result
-
-
-@app.route('/test/local/stream/classification', methods=['GET'])
-def test_classify_image_with_local_video_stream():
-    """
-    This code assumes that the library images have been resized to desired_shape
-    """
-    lib_name = 'test_local_stream'
-    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    capture = cv.VideoCapture(0)
-    hand_detector = HandDetector(maxHands=1)
-    desired_shape = (200, 200)
-    data, labels = get_data_and_labels(lib_name, lib_path)
-    # Setup the classifier
-    knn = cv.ml.KNearest_create()
-    knn.train(data, cv.ml.ROW_SAMPLE, labels)
-    # Classify images from stream
-    while True:
-        input_img_array = process_input(capture, hand_detector, desired_shape)
-        try:
-            print(classify(input_img_array, knn))
-            cv.waitKey(1)
-        except Exception as e:
-            print(e)
-    return Response(status=200)
-
-
 def process_input_single_frame(frame, hand_detector, desired_shape):
     # TODO: reference tutorial video
     offset = 30
@@ -198,33 +143,39 @@ def process_input_single_frame(frame, hand_detector, desired_shape):
 
 @socketio.on('image_request')
 def return_image(data_image, lib_name):
-    # Note: This code is based on the code given on the webpage linked below:
-    # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
-    # Open image with opencv
-    b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
-    image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-    hand_detector = HandDetector(maxHands=1)
-    # Setup the model
-    desired_shape = (200, 200)
-    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    data, labels = get_data_and_labels(lib_name, lib_path)
-    print(data.shape)
-    knn = cv.ml.KNearest_create()
-    knn.train(data, cv.ml.ROW_SAMPLE, labels)
-    # Process the image
-    processed_image = process_input_single_frame(image, hand_detector, desired_shape)
-    # Prepare for classification
-    flattened = processed_image.flatten()
-    # knn.findNearest() expects an array of images for classification.
-    to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
-    print(to_classify.shape)
-    # Classify the processed image
-    result = None
-    if type(processed_image):
-        result = classify(to_classify, knn)
-    # This conversion is based on the code provided in the following StackOverflow post
-    # https://stackoverflow.com/questions/58931854/
-    # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
-    processed_image = cv2.imencode('.png', processed_image)[1]
-    image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-    emit('image_response', image_out, result)
+    # socket function to process image and then return result
+    try:
+        # Note: This code is based on the code given on the webpage linked below:
+        # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
+        # Open image with opencv
+        b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
+        image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
+        hand_detector = HandDetector(maxHands=1)
+        # Setup the model
+        desired_shape = (200, 200)
+        lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+        data, labels = get_data_and_labels(lib_name, lib_path)
+        # XXX: this code will crash if the library contains < 3 images
+        k = min(data.shape[0], 3)
+        knn = cv.ml.KNearest_create()
+        knn.train(data, cv.ml.ROW_SAMPLE, labels)
+        # Process the image
+        processed_image = process_input_single_frame(image, hand_detector, desired_shape)
+        # Prepare for classification
+        flattened = processed_image.flatten()
+        # knn.findNearest() expects an array of images for classification.
+        to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
+        # Classify the processed image
+        result = None
+        if type(processed_image):
+            result = classify(to_classify, knn, k)
+        # This conversion is based on the code provided in the following StackOverflow post
+        # https://stackoverflow.com/questions/58931854/
+        # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
+        processed_image = cv2.imencode('.png', processed_image)[1]
+        image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
+        response = {'frame': image_out, 'result': result}
+        print(response['result'])
+        emit('image_response', response)
+    except Exception as e:
+        print(e)
