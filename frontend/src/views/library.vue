@@ -1,4 +1,8 @@
 <template>
+<div>
+ <v-app-bar color="teal accent-4" dense dark>
+	<v-toolbar-title>{{ $route.params.id }}</v-toolbar-title>
+ </v-app-bar>
   <v-data-table :headers="headers" :items="desserts" class="elevation-1">
     <template v-slot:top>
       <v-toolbar flat>
@@ -17,7 +21,7 @@
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="text-h5"
-              >Are you sure you want to delete this item?</v-card-title
+              >Are you sure you want to delete this sign?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -41,6 +45,7 @@
       <v-btn color="primary" @click="initialize"> Reset </v-btn>
     </template>
   </v-data-table>
+</div>
 </template>
 
 <script>
@@ -62,17 +67,11 @@ export default {
     editedIndex: -1,
     editedItem: {
       name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      status: "",
     },
     defaultItem: {
       name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      status: "",
     },
   }),
 
@@ -100,7 +99,7 @@ export default {
       this.$router.push(`/addsign?library_id=${this.$route.params.id}`);
     },
     initialize() {
-      this.desserts = [{name: "A",status: "Trained",},{name: "B",status: "Trained",},{name: "A",status: "Not trained",},];
+      this.desserts = [{name: "A",status: "Trained",},{name: "B",status: "Trained",},{name: "C",status: "Not trained",},];
     },
 
     editItem(item) {
