@@ -1,20 +1,33 @@
 <template id="test_library">
     <div id='mainContainer'>
-        <navBar :library_id='library_id' selectedPage='Interpret my hand signs' />
         <v-main class='grey lighten-3' id='mainContainer'>
-            <v-container>
+            <v-container id='sheet'>
                 <v-sheet min-height='70vh' rounded='lg' id='sheet'>
-                    <v-btn @click.stop='toggleStream'>
-                        Click here to toggle streaming
-                    </v-btn>
-                    <video id='webcamVideo' width='300' height='200' autoplay />
-                    <img id='processedImage' width='300' height='200' />
+                    <v-row>
+                        <v-col>
+                            <video id='webcamVideo' width='400' height='300' autoplay />
+                        </v-col>
+                        <v-col>
+                            <img id='processedImage' width='400' height='300' />
+                        </v-col>
+                    </v-row>
+                    <v-container>
+                        <v-btn @click.stop='toggleStream'>
+                            Toggle streaming
+                        </v-btn>
+                    </v-container>
                 </v-sheet>
             </v-container>
         </v-main>
     </div>
 </template>
 <style>
+    #sheet {
+        width: 100%;
+        padding: 2.5%;
+        box-sizing: border-box;
+    }
+
     #mainContainer {
         height: 100%;
         box-sizing: border-box;
@@ -25,12 +38,8 @@
     const {
         io
     } = require("socket.io-client");
-    import navBar from '../components/navigation-bar';
     export default {
-        components: {
-            navBar
-        },
-        props: ['lib_name', 'library_id'],
+        props: ['library_id'],
         data: () => ({
             imgCapture: null,
             socket: null,
@@ -41,7 +50,7 @@
         methods: {
             async sendFrame() {
                 const img = await this.imgCapture.takePhoto();
-                this.socket.emit('image_request', img, this.lib_name);
+                this.socket.emit('image_request', img, this.library_id);
             },
             async receiveFrame(response) {
                 const img = document.querySelector('img#processedImage');
