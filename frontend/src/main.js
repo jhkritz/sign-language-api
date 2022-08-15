@@ -9,8 +9,10 @@ import home from './views/home'
 import addsign from './views/addsign'
 import page_not_found from './views/page-not-found';
 import test_library from './views/test-library';
-import explore_library from './views/explore-library';
 import library from './views/library';
+import {
+	sharedState
+} from './SharedState';
 
 Vue.config.productionTip = false
 
@@ -20,20 +22,21 @@ const routes = [{
 		component: home
 	},
 	{
-		path: '/library',
+		path: '/library/explore',
 		name: 'library',
 		component: library,
 		props: route => ({
 			library_id: route.query.library_id
 		})
 	},
+	/*
 	{
 		path: '/library',
 		component: explore_library,
 		props: route => ({
 			library_id: route.query.library_id
 		})
-	},
+	},*/
 	{
 		path: '/library/test',
 		component: test_library,
@@ -86,5 +89,8 @@ Vue.use(VueAuth)
 new Vue({
 	router,
 	vuetify,
-	render: h => h(App)
+	render: h => h(App),
+	data: {
+		sharedState: sharedState
+	},
 }).$mount('#app');

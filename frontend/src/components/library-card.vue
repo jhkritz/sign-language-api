@@ -20,6 +20,9 @@
 </template>
 
 <script>
+    import {
+        sharedState
+    } from '../SharedState';
     export default {
         props: {
             libraryname: {
@@ -33,9 +36,11 @@
         },
         methods: {
             navigateToLibraryPage() {
-                this.$router.push(`/library?library_id=${this.libraryname}`);
+                sharedState.setLibraryID(this.libraryname);
+                this.$router.push(`/library/explore?library_id=${this.libraryname}`);
             },
             navigateToAPI() {
+                sharedState.setLibraryID(this.libraryname);
                 this.$router.push(`/library/api?library_id=${this.libraryname}`);
             }
         }
