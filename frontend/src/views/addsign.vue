@@ -1,25 +1,37 @@
 <!-- References:https://www.digitalocean.com/community/tutorials/how-to-handle-file-uploads-in-vue-2 -->
 <template>
-    <v-form v-model="valid">
-        <v-container>
-            <!-- UPLOAD SIGN -->
-            <h1>Add sign</h1>
-            <v-container id='container'>
-                <v-file-input label='Upload a hand sign' v-model='image' />
+    <div>
+        <v-form v-model="valid">
+            <v-container>
+                <!-- UPLOAD SIGN -->
+                <v-row id='row'>
+                    <v-col>
+                        <v-container id='container'>
+                            <v-file-input label='Upload a hand sign' v-model='image' />
+                            <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
+                            <v-btn depressed @click="postSign">
+                                Submit
+                            </v-btn>
+                        </v-container>
+                    </v-col>
+                </v-row>
+                <!--
+                <div class="dropbox">
+                    <input type="file" single required>
+                </div>
+								-->
+                <!-- SIGN NAME -->
             </v-container>
-            <div class="dropbox">
-                <input type="file" single required>
-            </div>
-            <!-- SIGN NAME -->
-            <v-col cols="12" sm="6" md="3">
-                <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
-            </v-col>
-            <v-btn depressed @click="postSign">
-                Submit
-            </v-btn>
-        </v-container>
-    </v-form>
+        </v-form>
+    </div>
 </template>
+
+<style>
+    #row {
+        align-content: start;
+        justify-content: start;
+    }
+</style>
 
 <script>
     export default {
