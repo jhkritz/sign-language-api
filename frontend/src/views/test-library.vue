@@ -1,19 +1,36 @@
 <template id="test_library">
-    <v-container>
-        <v-btn @click.stop='toggleStream'>
-            Click here to toggle streaming
-        </v-btn>
-        <video id='webcamVideo' width='300' height='200' autoplay />
-        <img id='processedImage' width='300' height='200' />
-    </v-container>
+    <div id='mainContainer'>
+        <navBar :library_id='library_id' selectedPage='Interpret my hand signs' />
+        <v-main class='grey lighten-3' id='mainContainer'>
+            <v-container>
+                <v-sheet min-height='70vh' rounded='lg' id='sheet'>
+                    <v-btn @click.stop='toggleStream'>
+                        Click here to toggle streaming
+                    </v-btn>
+                    <video id='webcamVideo' width='300' height='200' autoplay />
+                    <img id='processedImage' width='300' height='200' />
+                </v-sheet>
+            </v-container>
+        </v-main>
+    </div>
 </template>
+<style>
+    #mainContainer {
+        height: 100%;
+        box-sizing: border-box;
+    }
+</style>
 
 <script charset="utf-8">
     const {
         io
     } = require("socket.io-client");
+    import navBar from '../components/navigation-bar';
     export default {
-        props: ['lib_name'],
+        components: {
+            navBar
+        },
+        props: ['lib_name', 'library_id'],
         data: () => ({
             imgCapture: null,
             socket: null,
