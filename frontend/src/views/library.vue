@@ -2,23 +2,10 @@
     <!-- color="teal accent-4" dense dark-->
     <!--            <v-toolbar-title>{{ library_id }}</v-toolbar-title>-->
     <div id='mainContainer'>
-        <v-app-bar app>
-            <v-btn icon id='homeButton' @click.stop='()=> navigate("/")'>
-                <v-icon>mdi-home</v-icon>
-            </v-btn>
-            <v-tabs centered class="ml-n9" color="grey darken-1">
-                <v-tab v-for="link in links" :key="link.text" @click.stop='() => navigate(link.route)'>
-                    {{link.text}}
-                </v-tab>
-            </v-tabs>
-            <v-btn icon>
-                <v-icon>mdi-menu</v-icon>
-            </v-btn>
-        </v-app-bar>
         <v-main class="grey lighten-3" id='mainContainer'>
             <v-container id='sheet'>
                 <v-sheet id='sheet' min-height="70vh" rounded="lg">
-                    <v-data-table :headers="headers" :items="desserts" class="elevation-1">
+                    <v-data-table :headers="headers" :items="signs" class="elevation-1">
                         <template v-slot:top>
                             <v-toolbar flat>
                                 <v-toolbar-title>My Signs</v-toolbar-title>
@@ -67,7 +54,9 @@
 </style>
 
 <script>
+    const axios = require('axios');
     export default {
+        components: {},
         props: {
             library_id: null
         },
@@ -90,7 +79,7 @@
                     sortable: false
                 },
             ],
-            desserts: [],
+            signs: [],
             editedIndex: -1,
             editedItem: {
                 name: "",
@@ -100,20 +89,6 @@
                 name: "",
                 status: "",
             },
-            links: [{
-                    text: 'Explore library',
-                    route: ''
-                },
-                {
-                    text: 'Interpet my hand signs',
-                    route: 'library/test'
-                },
-                {
-                    text: 'Train',
-                    route: ''
-                }
-            ],
-            signs: [],
             signsToDelete: [],
         }),
 
@@ -133,15 +108,35 @@
         },
 
         created() {
-            this.initialize();
+            console.log(this.$router.currentRoute);
+            this.getSigns();
+            //this.initialize();
         },
 
         methods: {
+            async getSigns() {
+                try {
+                    const url = new URL('http://localhost:5000/library/signs');
+                    url.searchParams.append('library_name', this.library_id);
+                    const config = {
+                        method: 'get',
+                        url: url
+                    }
+                    const res = await axios(config);
+                    this.signs = res.data.signs.map(sign => ({
+                        name: sign.meaning,
+                        status: 'Trained'
+                    }));
+                    console.log(this.signs);
+                } catch (err) {
+                    console.error(err);
+                }
+            },
             goto_addsign() {
                 this.$router.push(`/library/addsign?library_id=${this.library_id}`);
             },
             initialize() {
-                this.desserts = [{
+                this.signs = [{
                     name: "A",
                     status: "Trained",
                 }, {
@@ -154,19 +149,19 @@
             },
 
             editItem(item) {
-                this.editedIndex = this.desserts.indexOf(item);
+                this.editedIndex = this.signs.indexOf(item);
                 this.editedItem = Object.assign({}, item);
                 this.dialog = true;
             },
 
             deleteItem(item) {
-                this.editedIndex = this.desserts.indexOf(item);
+                this.editedIndex = this.signs.indexOf(item);
                 this.editedItem = Object.assign({}, item);
                 this.dialogDelete = true;
             },
 
             deleteItemConfirm() {
-                this.desserts.splice(this.editedIndex, 1);
+                this.signs.splice(this.editedIndex, 1);
                 this.closeDelete();
             },
 
@@ -188,12 +183,13 @@
 
             save() {
                 if (this.editedIndex > -1) {
-                    Object.assign(this.desserts[this.editedIndex], this.editedItem);
+                    Object.assign(this.signs[this.editedIndex], this.editedItem);
                 } else {
-                    this.desserts.push(this.editedItem);
+                    this.signs.push(this.editedItem);
                 }
                 this.close();
             },
+
         },
     };
 </script>
