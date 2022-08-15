@@ -20,9 +20,12 @@ const routes = [{
 		component: home
 	},
 	{
-		path: '/library_2/:id',
+		path: '/library',
 		name: 'library',
-		component: library
+		component: library,
+		props: route => ({
+			library_id: route.query.library_id
+		})
 	},
 	{
 		path: '/library',
@@ -35,17 +38,9 @@ const routes = [{
 		path: '/library/test',
 		component: test_library,
 		props: route => ({
-			lib_name: route.query.library_id
-		})
-	},
-	/*
-	{
-		path: '/library',
-		component: library,
-		props: route => ({
 			library_id: route.query.library_id
 		})
-	},*/
+	},
 	{
 		path: '/library/addsign',
 		component: addsign,
