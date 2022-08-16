@@ -23,7 +23,8 @@
                 <v-list-item-group
                     @click="() => {}"
                     >
-                <v-list-item>
+                <v-list-item
+                >
                     <v-list-item-title>
                     Use API
                     </v-list-item-title>
