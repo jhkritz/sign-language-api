@@ -9,7 +9,7 @@
             </v-tab>
         </v-tabs>
         <v-btn icon>
-            <v-icon>mdi-menu</v-icon>
+            <v-icon>mdi-dots-vertical</v-icon>
         </v-btn>
     </v-app-bar>
 </template>
