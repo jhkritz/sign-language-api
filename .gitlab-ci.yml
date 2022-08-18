@@ -21,7 +21,7 @@ init:
 run_tests:
   stage : test
   script:
-    - sudo apt-get install postgresql
+    - apt-get install postgresql
     - pip install psycopg2-binary
     - sh backend/application/test_requests.sh
 
