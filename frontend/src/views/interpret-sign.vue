@@ -87,12 +87,11 @@
                 };
                 try {
                     const res = await axios(config);
-                    console.log(res);
                     if (res.status == 200) {
                         this.processedImageSrc = res.data.processedImage;
                         this.result = res.data.result;
                     } else {
-                        console.log('classification failed');
+                        console.error('classification failed');
                     }
                 } catch (err) {
                     console.error(err);

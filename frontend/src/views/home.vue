@@ -138,7 +138,6 @@
                     };
                     // Get list of libraries
                     const res = await axios(config);
-                    console.log(res.data.libraries);
                     this.libraries = res.data.libraries;
                 } catch (err) {
                     console.error(err);

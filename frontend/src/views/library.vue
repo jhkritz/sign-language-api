@@ -9,23 +9,23 @@
                                 <v-toolbar-title>
                                     MY SIGNS
                                 </v-toolbar-title>
-                                    <v-divider class="mx-4" inset vertical>
-                                    </v-divider>
-                                        <v-spacer></v-spacer>
-                                            <v-btn dark color="orange darken-4" class="mb-2" v-bind="attrs" v-on="on" @click="goto_addsign">
-                                                Add Sign
-                                            </v-btn>
-                                    <v-dialog v-model="dialogDelete" max-width="500px">
-                                        <v-card>
-                                            <v-card-title class="text-h5">Are you sure you want to delete this sign?</v-card-title>
-                                            <v-card-actions>
-                                                <v-spacer></v-spacer>
-                                                    <v-btn color="black" text @click="closeDelete">Cancel</v-btn>
-                                                        <v-btn color="black" text @click="deleteItemConfirm">OK</v-btn>
-                                                <v-spacer></v-spacer>
-                                            </v-card-actions>
-                                        </v-card>
-                                    </v-dialog>
+                                <v-divider class="mx-4" inset vertical>
+                                </v-divider>
+                                <v-spacer></v-spacer>
+                                <v-btn dark color="orange darken-4" class="mb-2" @click="goto_addsign">
+                                    Add Sign
+                                </v-btn>
+                                <v-dialog v-model="dialogDelete" max-width="500px">
+                                    <v-card>
+                                        <v-card-title class="text-h5">Are you sure you want to delete this sign?</v-card-title>
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color="black" text @click="closeDelete">Cancel</v-btn>
+                                            <v-btn color="black" text @click="deleteItemConfirm">OK</v-btn>
+                                            <v-spacer></v-spacer>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
                             </v-toolbar>
                         </template>
                         <template v-slot:item.actions="{ item }">
@@ -34,10 +34,9 @@
                         </template>
                         <template v-slot:no-data>
                             <v-btn icon @click="initialize">
-                            <v-icon
-                            >
-                                mdi-cached
-                            </v-icon>
+                                <v-icon>
+                                    mdi-cached
+                                </v-icon>
                             </v-btn>
                         </template>
                     </v-data-table>
@@ -114,9 +113,7 @@
         },
 
         created() {
-            console.log(this.$router.currentRoute);
             this.getSigns();
-            //this.initialize();
         },
 
         methods: {
@@ -133,7 +130,6 @@
                         name: sign.meaning,
                         status: 'Trained'
                     }));
-                    console.log(this.signs);
                 } catch (err) {
                     console.error(err);
                 }
@@ -142,7 +138,7 @@
                 this.$router.push(`/library/addsign?library_id=${this.library_id}`);
             },
             initialize() {
-                
+
             },
 
             editItem(item) {
