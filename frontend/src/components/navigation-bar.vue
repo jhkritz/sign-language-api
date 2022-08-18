@@ -76,7 +76,7 @@
             async deleteLibrary(){
                 var axios = require('axios');
                 var data = JSON.stringify({
-                "library_name": this.library_name
+                "library_name": sharedState.library_id
             });
 
             var config = {
