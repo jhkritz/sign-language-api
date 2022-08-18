@@ -30,11 +30,13 @@
                     Use API
                     </v-list-item-title>
                 </v-list-item>
-                <v-list-item>
+                
+                <v-list-item @click="deleteLibrary">
                     <v-list-item-title>
                     Delete Library 
                     </v-list-item-title>
                 </v-list-item>
+                
                 </v-list-item-group>
             </v-list>
         </v-menu>
@@ -71,6 +73,28 @@
             ],
         }),
         methods: {
+            async deleteLibrary(){
+                var axios = require('axios');
+                var data = JSON.stringify({
+                "library_name": this.library_name
+            });
+
+            var config = {
+            method: 'delete',
+            url: 'http://localhost:5000/library/deletelibrary',
+            headers: { 
+            'Content-Type': 'application/json'
+            },
+            data : data
+            };
+            axios(config)
+            .then(function (response) {
+            console.log(JSON.stringify(response.data));
+            })
+            .catch(function (error) {
+            console.log(error);
+            });
+            },
             /*
             navigate(link) {
                 // Only try to navigate if we are not navigating to the page we're on.
