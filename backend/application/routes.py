@@ -37,13 +37,13 @@ def uploadsign():
         image.save(img_path)
         image = cv2.imread(img_path)
 
-
         hand_detector = HandDetector(maxHands=1)
         desired_shape = (200, 200)
-        image = process_input_single_frame(image,hand_detector=hand_detector,desired_shape=desired_shape)
+        image = process_input_single_frame(
+            image, hand_detector=hand_detector, desired_shape=desired_shape)
         os.remove(img_path)
         if image is None:
-            return {"Error":"A hand could not be found in the image"}
+            return {"Error": "A hand could not be found in the image"}
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
         Image.fromarray(image).save(img_path)
         libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
@@ -110,7 +110,7 @@ def delete_sign():
     signname = request.json.get('sign_name')
     try:
         lib = SignLanguageLibrary.query.filter_by(name=libname).first()
-        Sign.query.filter_by(meaning=signname, library_id = lib.id).delete()
+        Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
         db.session.commit()
         return Response(status=200)
     except:
@@ -220,15 +220,15 @@ def return_image(data_image, lib_name):
 
 @app.route('/library/classifyimage', methods=['POST'])
 def classify_request():
-    #Majority of code copied from function above
-    data_image = request.json.get('image')
-    lib_name = request.json.get('library_name')
-    data_image = bytes(data_image, 'utf-8')
+    # Majority of code copied from function above
+    data_image = request.files['image'].read()
+    lib_name = request.form['library_name']
+    b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     try:
         # Note: This code is based on the code given on the webpage linked below:
         # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
         # Open image with opencv
-        b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
+        #b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
         hand_detector = HandDetector(maxHands=1)
         # Setup the model
@@ -241,25 +241,26 @@ def classify_request():
         knn.train(data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
         processed_image = process_input_single_frame(image, hand_detector, desired_shape)
-        # Prepare for classification
-        flattened = processed_image.flatten()
-        # knn.findNearest() expects an array of images for classification.
-        to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
-        # Classify the processed image
         result = None
-        if type(processed_image):
+        if processed_image is not None:
+            # Prepare for classification
+            flattened = processed_image.flatten()
+            # knn.findNearest() expects an array of images for classification.
+            to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
+            # Classify the processed image
             result = classify(to_classify, knn, k)
-        # This conversion is based on the code provided in the following StackOverflow post
-        # https://stackoverflow.com/questions/58931854/
-        # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
-        processed_image = cv2.imencode('.png', processed_image)[1]
-        image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-        response = {'frame': image_out, 'result': result}
-        print(response['result'])
-        return('image_response', response)
-
-
+            # This conversion is based on the code provided in the following StackOverflow post
+            # https://stackoverflow.com/questions/58931854/
+            # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
+            processed_image = cv2.imencode('.png', processed_image)[1]
+            image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
+            response = {'processedImage': image_out, 'result': result}
+            print(response['result'])
+            return response
+        else:
+            print('processed_image is none')
+            return Response(status=400)
     except Exception as e:
+        print('exception')
         print(e)
-        return({"status":"error"})
-
+        return Response(status=400)
