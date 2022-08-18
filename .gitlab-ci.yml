@@ -2,6 +2,7 @@
 stages:
   - ver
   - init
+  - test
   - deploy
 
 ver:
@@ -17,6 +18,12 @@ init:
     - apt-get -y install python3-pip
     - pip install -r requirements.txt
 
+run_tests:
+  stage : test
+  script:
+    - apk add postgresql-dev --no-cache
+    - pip install psycopg2-binary
+    - sh backend/application/test_requests.sh
 
 deploy_staging:
   stage: deploy
