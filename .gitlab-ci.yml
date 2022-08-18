@@ -21,8 +21,6 @@ init:
 run_tests:
   stage : test
   script:
-    - apt-get install postgresql
-    - pip install psycopg2-binary
     - sh backend/application/test_requests.sh
 
 deploy_staging:
