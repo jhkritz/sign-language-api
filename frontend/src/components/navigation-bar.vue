@@ -1,6 +1,5 @@
 <template>
     <v-app-bar app
-        color="cadetblue"
     >
         <v-btn icon id='homeButton' to='/'>
             <v-icon>mdi-home</v-icon>

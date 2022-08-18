@@ -9,7 +9,7 @@
                         <v-container id='container'>
                             <v-file-input label='Upload a hand sign' v-model='image' />
                             <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
-                            <v-btn depressed @click="postSign">
+                            <v-btn dark color="orange darken-4" depressed @click="postSign">
                                 Submit
                             </v-btn>
                         </v-container>

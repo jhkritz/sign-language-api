@@ -4,7 +4,7 @@
             <v-container id='sheet'>
                 <v-sheet min-height='70vh' rounded='lg' id='sheet'>
                     <v-layout align-center justify-center>
-                    <v-btn @click.stop='toggleStream'>
+                    <v-btn dark color="orange darken-4" @click.stop='toggleStream'>
                             Toggle streaming
                     </v-btn>
                     </v-layout>
