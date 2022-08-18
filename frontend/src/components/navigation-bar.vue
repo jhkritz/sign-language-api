@@ -17,7 +17,7 @@
 
             <v-list>
                 <v-list-item-group @click="() => {}">
-                    <v-list-item>
+                    <v-list-item @click='navigateToAPI'>
                         <v-list-item-title>
                             Use API
                         </v-list-item-title>
@@ -60,6 +60,9 @@
             ],
         }),
         methods: {
+            navigateToAPI() {
+                this.$router.push(`/library/api?library_id=${sharedState.library_id}`);
+            },
             async deleteLibrary() {
                 var axios = require('axios');
                 var data = JSON.stringify({
