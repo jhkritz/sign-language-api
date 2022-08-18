@@ -65,7 +65,10 @@
                     })
                     .catch(function(error) {
                         console.log(error);
-                    });
+                    },
+                (this.signname=""),
+                (this.image = ""),
+                alert('Added Succesfully!'));
             }
         },
 
