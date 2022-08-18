@@ -235,7 +235,7 @@ def classify_request():
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
         data, labels = get_data_and_labels(lib_name, lib_path)
         # XXX: this code will crash if the library contains < 3 images
-        k = min(data.shape[0], 3)
+        k = min(data.shape[0], 1)
         knn = cv.ml.KNearest_create()
         knn.train(data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
