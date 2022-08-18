@@ -3,24 +3,17 @@
     <div>
         <v-form v-model="valid">
             <v-container>
-                <!-- UPLOAD SIGN -->
                 <v-row id='row'>
                     <v-col>
                         <v-container id='container'>
                             <v-file-input label='Upload a hand sign' v-model='image' />
-                            <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
-                            <v-btn dark color="orange darken-4" depressed @click="postSign">
-                                Submit
-                            </v-btn>
+                                <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
+                                <v-btn dark color="orange darken-4" depressed @click="postSign">
+                                    Submit
+                                </v-btn>
                         </v-container>
                     </v-col>
                 </v-row>
-                <!--
-                <div class="dropbox">
-                    <input type="file" single required>
-                </div>
-								-->
-                <!-- SIGN NAME -->
             </v-container>
         </v-form>
     </div>
@@ -79,42 +72,4 @@
     }
 </script>
 
-<!-- SASS styling -->
-<style lang="scss">
-    .dropbox {
-        outline: 2px dashed grey;
-        /* the dash box */
-        outline-offset: -10px;
-        background: lightcyan;
-        color: dimgray;
-        padding: 10px 10px;
-        min-height: 200px;
-        /* minimum height */
-        position: relative;
-        cursor: pointer;
-    }
 
-    .input-file {
-        opacity: 0;
-        /* invisible but it's there! */
-        width: 100%;
-        height: 200px;
-        position: absolute;
-        cursor: pointer;
-    }
-
-    .dropbox:hover {
-        background: lightblue;
-        /* when mouse over to the drop zone, change color */
-    }
-
-    .dropbox p {
-        font-size: 1.2em;
-        text-align: center;
-        padding: 50px 0;
-    }
-
-    #container {
-        width: 50%
-    }
-</style>
