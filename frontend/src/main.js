@@ -91,6 +91,13 @@ const router = new VueRouter({
 	routes,
 })
 
+router.beforeEach((to, from, next) => {
+	if (from.path === '/library/test') {
+		sharedState.stopCamera();
+	}
+	next();
+});
+
 Vue.prototype.$axios = instance
 
 Vue.use(VueAuth)

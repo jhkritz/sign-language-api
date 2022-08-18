@@ -57,6 +57,9 @@
 
 <script charset="utf-8">
     const axios = require('axios');
+    import {
+        sharedState
+    } from '../SharedState';
     export default {
         props: ['library_id'],
         data: () => ({
@@ -103,6 +106,7 @@
                 const videoElement = document.querySelector('video#webcamVideo');
                 videoElement.srcObject = this.cameraStream;
                 this.imgCapture = new ImageCapture(this.cameraStream.getVideoTracks()[0]);
+                sharedState.setCameraStream(this.cameraStream);
             },
         }
     }
