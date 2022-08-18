@@ -142,16 +142,7 @@
                 this.$router.push(`/library/addsign?library_id=${this.library_id}`);
             },
             initialize() {
-                this.signs = [{
-                    name: "A",
-                    status: "Trained",
-                }, {
-                    name: "B",
-                    status: "Trained",
-                }, {
-                    name: "C",
-                    status: "Not trained",
-                }, ];
+                
             },
 
             editItem(item) {
