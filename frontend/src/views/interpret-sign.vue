@@ -22,7 +22,7 @@
                                 <v-card-title class='justify-center align-center'>
                                     Processed Image
                                 </v-card-title>
-                                <v-img width='100%' contain :aspect-ratio='16/9' src='http://localhost:5000/library/image?image_name=default.jpg&library_name=' />
+                                <v-img id='processedImage' :src='processedImageSrc' width='100%' contain :aspect-ratio='16/9' />
                                 <v-card-subtitle class='justify-center align-center'>
                                     Sign meaning: {{result.classification}}<br />
                                     Quality of match: {{result.quality_of_match}}
@@ -65,7 +65,8 @@
             result: {
                 classification: 'Unknown',
                 quality_of_match: '0%',
-            }
+            },
+            processedImageSrc: 'http://localhost:5000/library/image?image_name=default.jpg&library_name='
         }),
         created() {
             this.initCamera();
@@ -73,18 +74,20 @@
         methods: {
             async processSnapshot() {
                 const img = await this.imgCapture.takePhoto();
+                const data = new FormData();
+                data.append('library_name', this.library_id);
+                data.append('image', img);
                 const config = {
                     method: 'post',
                     url: 'http://localhost:5000/library/classifyimage',
-                    library_name: this.library_id,
-                    image: img
+                    data: data
                 };
                 try {
                     const res = await axios(config);
+                    console.log(res);
                     if (res.status == 200) {
-                        const processedImage = document.querySelector('img#processedImage');
-                        processedImage.src = res.processedImage;
-                        this.result = res.result;
+                        this.processedImageSrc = res.data.processedImage;
+                        this.result = res.data.result;
                     } else {
                         console.log('classification failed');
                     }
