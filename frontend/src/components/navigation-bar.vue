@@ -30,13 +30,13 @@
                     Use API
                     </v-list-item-title>
                 </v-list-item>
-                <v-btn @click="deleteLibrary">
-                <v-list-item>
+                
+                <v-list-item @click="deleteLibrary">
                     <v-list-item-title>
                     Delete Library 
                     </v-list-item-title>
                 </v-list-item>
-                </v-btn>
+                
                 </v-list-item-group>
             </v-list>
         </v-menu>
