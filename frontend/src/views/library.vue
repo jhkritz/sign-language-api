@@ -1,6 +1,4 @@
 <template>
-    <!-- color="teal accent-4" dense dark-->
-    <!--            <v-toolbar-title>{{ library_id }}</v-toolbar-title>-->
     <div id='mainContainer'>
         <v-main class="grey lighten-3" id='mainContainer'>
             <v-container id='sheet'>
@@ -8,10 +6,10 @@
                     <v-data-table :headers="headers" :items="signs" class="elevation-1">
                         <template v-slot:top>
                             <v-toolbar flat>
-                                <v-toolbar-title>My Signs</v-toolbar-title>
+                                <v-toolbar-title>MY SIGNS</v-toolbar-title>
                                 <v-divider class="mx-4" inset vertical></v-divider>
                                 <v-spacer></v-spacer>
-                                <v-btn color="teal accent -4" class="mb-2" v-bind="attrs" v-on="on" @click="goto_addsign">
+                                <v-btn dark color="orange darken-4" class="mb-2" v-bind="attrs" v-on="on" @click="goto_addsign">
                                     Add Sign
                                 </v-btn>
                                 <v-dialog v-model="dialogDelete" max-width="500px">
@@ -19,8 +17,8 @@
                                         <v-card-title class="text-h5">Are you sure you want to delete this sign?</v-card-title>
                                         <v-card-actions>
                                             <v-spacer></v-spacer>
-                                            <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-                                            <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                                            <v-btn color="black" text @click="closeDelete">Cancel</v-btn>
+                                            <v-btn color="black" text @click="deleteItemConfirm">OK</v-btn>
                                             <v-spacer></v-spacer>
                                         </v-card-actions>
                                     </v-card>
@@ -32,7 +30,7 @@
                             <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
                         </template>
                         <template v-slot:no-data>
-                            <v-btn color="primary" @click="initialize"> Reset </v-btn>
+                            <v-btn dark color="orange darken-4" @click="initialize"> Reset </v-btn>
                         </template>
                     </v-data-table>
                 </v-sheet>
