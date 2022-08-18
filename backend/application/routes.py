@@ -36,24 +36,23 @@ def uploadsign():
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '_temp.jpg'
         image.save(img_path)
         image = cv2.imread(img_path)
-
         hand_detector = HandDetector(maxHands=1)
         desired_shape = (200, 200)
         image = process_input_single_frame(
             image, hand_detector=hand_detector, desired_shape=desired_shape)
         os.remove(img_path)
         if image is None:
-            return {"Error": "A hand could not be found in the image"}
+            return {"Error": "A hand could not be found in the image"}, 400
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
         Image.fromarray(image).save(img_path)
         libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
         sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg',  library_id=libid)
         db.session.add(sign)
         db.session.commit()
+        print('success')
     except Exception as e:
         print(e)
-        return Response(status=400)
-
+        return {"Error": str(e)}, 400
     return Response(status=200)
 
 
@@ -163,7 +162,7 @@ def get_data_and_labels(lib_name, lib_path):
 def process_input_single_frame(frame, hand_detector, desired_shape):
     # TODO: reference tutorial video
     offset = 30
-    input_img = cv.resize(frame, desired_shape)
+    input_img = frame
     hands, hands_img = hand_detector.findHands(input_img)
     if hands:
         x, y, w, h = hands[0]['bbox']
