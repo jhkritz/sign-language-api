@@ -9,14 +9,12 @@
                     </v-btn>
                     </v-layout>
                     <v-layout align-center justify-center>
-                    <v-row>
-                        <v-col>
+                        <v-container>
                             <video id='webcamVideo' width='400' height='300' autoplay />
-                        </v-col>
-                        <v-col>
+                        </v-container>
+                        <v-container>
                             <img id='processedImage' width='400' height='300' />
-                        </v-col>
-                    </v-row>
+                        </v-container>
                     </v-layout>
                 </v-sheet>
             </v-container>
