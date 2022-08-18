@@ -33,9 +33,20 @@ def uploadsign():
         lib_name = request.form.get('lib_name')
         sign_name = request.form.get('sign_name')
         image = request.files['image_file']
-        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '_temp.jpg'
         image.save(img_path)
+        image = cv2.imread(img_path)
+
+
+        hand_detector = HandDetector(maxHands=1)
+        desired_shape = (200, 200)
+        image = process_input_single_frame(image,hand_detector=hand_detector,desired_shape=desired_shape)
+        os.remove(img_path)
+        if image is None:
+            return {"Error":"A hand could not be found in the image"}
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
+        Image.fromarray(image).save(img_path)
+        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
         sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg',  library_id=libid)
         db.session.add(sign)
         db.session.commit()
