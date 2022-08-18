@@ -3,6 +3,12 @@
         <v-main class='grey lighten-3' id='mainContainer'>
             <v-container id='sheet'>
                 <v-sheet min-height='70vh' rounded='lg' id='sheet'>
+                    <v-layout align-center justify-center>
+                    <v-btn @click.stop='toggleStream'>
+                            Toggle streaming
+                    </v-btn>
+                    </v-layout>
+                    <v-layout align-center justify-center>
                     <v-row>
                         <v-col>
                             <video id='webcamVideo' width='400' height='300' autoplay />
@@ -11,11 +17,7 @@
                             <img id='processedImage' width='400' height='300' />
                         </v-col>
                     </v-row>
-                    <v-container>
-                        <v-btn @click.stop='toggleStream'>
-                            Toggle streaming
-                        </v-btn>
-                    </v-container>
+                    </v-layout>
                 </v-sheet>
             </v-container>
         </v-main>
