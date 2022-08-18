@@ -1,17 +1,24 @@
 <template>
-    <v-container>
-        <h1>404: Page not found</h1>
-        <v-btn @click.stop='navigateHome'>
-            Click here to return to the home page.
-        </v-btn>
-    </v-container>
+    <div id='mainContainer'>
+        <v-main class='grey lighten-3' id='mainContainer'>
+            <v-container id='sheet' class='align-center justify-center'>
+                <v-sheet min-height='70vh' rounded='lg' id='sheet' class='align-center justify-center'>
+                    <h3>Page not found</h3>
+                </v-sheet>
+            </v-container>
+        </v-main>
+    </div>
 </template>
-<script>
-    export default {
-        methods: {
-            navigateHome() {
-                this.$router.push('/');
-            }
-        }
+<style>
+    #sheet {
+        width: 100%;
+        padding: 2.5%;
+        box-sizing: border-box;
+        justify-content: space-between;
     }
-</script>
+
+    #mainContainer {
+        height: 100%;
+        box-sizing: border-box;
+    }
+</style>
