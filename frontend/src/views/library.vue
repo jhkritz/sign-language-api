@@ -30,7 +30,12 @@
                             <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
                         </template>
                         <template v-slot:no-data>
-                            <v-btn dark color="orange darken-4" @click="initialize"> Reset </v-btn>
+                            <v-btn icon @click="initialize">
+                            <v-icon
+                            >
+                                mdi-cached
+                            </v-icon>
+                            </v-btn>
                         </template>
                     </v-data-table>
                 </v-sheet>
