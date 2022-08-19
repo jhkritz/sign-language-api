@@ -17,8 +17,6 @@ init:
     - apt-get update
     - apt-get -y install python3-pip
     - pip install -r requirements.txt
-    - npm install --progress=false
-    - npm run build
 
 run_tests:
   stage : test
