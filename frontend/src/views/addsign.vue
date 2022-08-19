@@ -43,6 +43,7 @@
             async postSign() {
                 // Accessing search parameters
                 // ----------------------------
+                var PostSuccess = 1;
                 console.log(this.library_id);
                 // ----------------------------
                 var axios = require('axios');
@@ -61,15 +62,22 @@
 
                 axios(config)
                     .then(function(response) {
-                        console.log(JSON.stringify(response.data));
+                        console.log(JSON.stringify(response.data))
+                        PostSuccess = 0;
                     })
                     .catch(function(error) {
+                        PostSuccess = 1;
                         console.log(error);
-                    },
-                (this.signname=""),
-                (this.image = ""),
-                alert('Added Succesfully!'));
-            }
+                        alert('Failed to upload image')
+                        this.signname=" " 
+                        this.image = " ";
+                    })
+                if (PostSuccess == 0) {
+                        alert('Picture Added Succesfully!')
+                        this.signname=" " 
+                        this.image = " ";
+                    }
+            }   
         },
 
     }
