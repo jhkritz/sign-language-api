@@ -3,6 +3,9 @@
         <v-btn icon id='homeButton' to='/'>
             <v-icon>mdi-home</v-icon>
         </v-btn>
+        <v-appbar-title id='toolbarTitle' class="text-no-wrap">
+            {{libraryname}}   
+        </v-appbar-title>
         <v-tabs centered class="ml-n9">
             <v-tab v-for="link in links" :key="link.text" :to='link.route'>
                 {{link.text}}
@@ -58,6 +61,7 @@
                     route: `/library/test?library_id=${sharedState.library_id}`
                 },
             ],
+            libraryname: sharedState.library_id
         }),
         methods: {
             navigateToAPI() {
