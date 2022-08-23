@@ -36,6 +36,7 @@ deploy_staging:
   tags:
     - shared-docker-runner
   script:
+    - apt-get install -y ruby ruby-dev rubygems-integration
     - gem install dpl
     - dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY
     - echo "Deployed to Staging Server https://flask-api-staging.herokuapp.com"
