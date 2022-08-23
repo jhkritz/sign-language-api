@@ -12,6 +12,16 @@
                                     Submit
                                 </v-btn>
                         </v-container>
+                        <v-container id='container'>
+                            <v-container-title>Take picture to upload</v-container-title>
+                                <video id='webcamVideo' width='100%' height='400' autoplay />
+                                    <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required>
+                                </v-text-field>
+                                    <v-btn dark color="orange darken-4">
+                                        Submit
+                                    </v-btn>
+                                    
+            </v-container>
                     </v-col>
                 </v-row>
             </v-container>
@@ -27,6 +37,9 @@
 </style>
 
 <script>
+    import {
+        sharedState
+    } from '../SharedState';
     export default {
         props: {
             library_id: null
@@ -39,7 +52,11 @@
             ],
             image: null
         }),
+        created() {
+            this.initCamera();
+        },
         methods: {
+            
             async postSign() {
                 // Accessing search parameters
                 // ----------------------------
@@ -69,7 +86,17 @@
                     })
                         this.signname=" " 
                         this.image = " ";
-            }   
+            },
+            async initCamera() {
+                this.cameraStream = await window.navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+                const videoElement = document.querySelector('video#webcamVideo');
+                videoElement.srcObject = this.cameraStream;
+                this.imgCapture = new ImageCapture(this.cameraStream.getVideoTracks()[0]);
+                sharedState.setCameraStream(this.cameraStream);
+            },   
         },
 
     }
