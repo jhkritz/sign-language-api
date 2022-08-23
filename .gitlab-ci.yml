@@ -10,6 +10,7 @@ ver:
   tags:
     - shared-docker-runner
   script:
+    - apt-get update
     - apt-get install python3
     - python3 --version
     - whoami
