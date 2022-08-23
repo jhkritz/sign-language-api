@@ -17,6 +17,8 @@ ver:
 
 init:
   stage: init
+  tags:
+    - shared-docker-runner
   script:
     - apt-get update
     - apt-get -y install python3-pip
@@ -24,11 +26,15 @@ init:
 
 run_tests:
   stage : test
+  tags:
+    - shared-docker-runner
   script:
     - sh backend/application/test_requests.sh
 
 deploy_staging:
   stage: deploy
+  tags:
+    - shared-docker-runner
   script:
     - gem install dpl
     - dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY
@@ -40,6 +46,8 @@ deploy_staging:
 
 deploy_production:
   stage: deploy
+  tags:
+    - shared-docker-runner
   script:
     - git remote add heroku https://heroku:$HEROKU_API_KEY@git.heroku.com/flask-api-prod.git
     - git push heroku master
