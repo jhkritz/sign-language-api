@@ -13,3 +13,16 @@ ENV/
 env.bak/
 venv.bak/
 asl_alphabet*
+
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.pdf
+*.snm
+*.synctex.gz
+*.toc
