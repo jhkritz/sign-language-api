@@ -1,21 +1,14 @@
-const http = require('http')
-const fs = require('fs')
-const httpPort = process.env.PORT;
+const express = require('express')
+const path = require('path')
+const PORT = process.env.PORT || 5000
 
-http
-	.createServer((req, res) => {
-		fs.readFile('index.html', 'utf-8', (err, content) => {
-			if (err) {
-				console.log('We cannot open "index.html" file.')
-			}
-
-			res.writeHead(200, {
-				'Content-Type': 'text/html; charset=utf-8',
-			})
-
-			res.end(content)
-		})
-	})
-	.listen(httpPort, () => {
-		console.log('Server listening on: http://localhost:%s', httpPort)
-	})
+const expressApp = express();
+expressApp.use(express.static(path.join(__dirname, 'dist')));
+expressApp.get('*', (req, res) => res.sendFile(__dirname, '/dist/index.html'));
+expressApp.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+/*
+	.set('views', path.join(__dirname, 'views'))
+	.set('view engine', 'ejs')
+	.get('/', (req, res) => res.render('pages/index'))
+	.listen(PORT, () => console.log(`Listening on ${ PORT }`))
+		 */
