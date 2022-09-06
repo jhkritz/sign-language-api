@@ -1,6 +1,6 @@
 const http = require('http')
 const fs = require('fs')
-const httpPort = 80
+const httpPort = process.env.PORT;
 
 http
 	.createServer((req, res) => {
