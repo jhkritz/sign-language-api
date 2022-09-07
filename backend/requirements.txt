@@ -31,4 +31,4 @@ six==1.16.0
 SQLAlchemy
 Werkzeug==2.2.1
 gunicorn
-opencv-contrib-python
+opencv-contrib-python==4.5.5.64
