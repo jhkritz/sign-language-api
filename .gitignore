@@ -14,6 +14,7 @@ env.bak/
 venv.bak/
 asl_alphabet*
 
+# Files related to the presentation.
 *.aux
 *.bbl
 *.blg
@@ -26,6 +27,7 @@ asl_alphabet*
 *.snm
 *.synctex.gz
 *.toc
+*.png
 
 .DS_Store
 node_modules
