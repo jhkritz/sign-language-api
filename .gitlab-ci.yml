@@ -7,9 +7,6 @@ cache:
   key: cache_key
   paths:
     ['$CI_PROJECT_DIR/python_cache']
-  key: venv_cache
-  paths:
-    ['$CI_PROJECT_DIR/venv']
 
 stages:
   - ver
@@ -27,23 +24,11 @@ ver:
     - python3 --version
     - ls -a $CI_PROJECT_DIR
 
-init:
-  stage: init
-  tags:
-    - shared-docker-runner
-  script:
-    #- apt-get update
-    #- apt-get -y install python3-pip
-    - python3 -m venv $CI_PROJECT_DIR/venv
-    - source $CI_PROJECT_DIR/venv/bin/activate
-    - pip install -r requirements.txt
-
 run_tests:
   stage : test
   tags:
     - shared-docker-runner
   script:
-    - source $CI_PROJECT_DIR venv/bin/activate
     - pip install -r requirements.txt
     - python3 backend/app.py & sleep 5; python3 backend/tests.py
 
