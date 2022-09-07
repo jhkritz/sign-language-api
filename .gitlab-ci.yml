@@ -1,9 +1,12 @@
 image: python:latest
 
+variables:
+  PIP_CACHE_DIR: "python_cache"
+
 cache:
   key: cache_key
   paths:
-    ['backend/__pycache__']
+    ['python_cache']
 
 stages:
   - ver
