@@ -26,6 +26,18 @@ def home():
     return "Hello World!"
 
 
+@app.route('/library/uploadsigns', methods=['POST'])
+def upload_signs():
+    try:
+        lib_name = request.form['lib_name']
+        sign_name = request.form['sign_name']
+        zpfl = request.files['zip_file']
+        return Response(status=200)
+    except Exception as e:
+        print(e)
+        return Response(status=400)
+
+
 @app.route('/library/uploadsign', methods=['POST'])
 def uploadsign():
     # Endpoint to upload a single sign with a name
