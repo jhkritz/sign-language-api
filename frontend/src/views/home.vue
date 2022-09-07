@@ -117,6 +117,9 @@
 </template>
 <script>
     import libraryCardVue from '../components/library-card.vue';
+    import {
+        baseUrl
+    } from '../BaseRequestUrl.js';
     //import Vue from 'vue';
     const axios = require('axios');
     export default {
@@ -134,7 +137,7 @@
                 try {
                     const config = {
                         method: 'get',
-                        url: 'http://localhost:5000/libraries/getall',
+                        url: baseUrl + '/libraries/getall',
                     };
                     // Get list of libraries
                     const res = await axios(config);
@@ -152,7 +155,7 @@
                     data.append('description', this.myDesc);
                     const config = {
                         method: 'post',
-                        url: 'http://localhost:5000/library/createlibrary',
+                        url: baseUrl + '/library/createlibrary',
                         data: data
                     };
                     const res = await axios(config);
