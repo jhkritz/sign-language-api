@@ -15,7 +15,7 @@ import {
 	sharedState
 } from './SharedState';
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 const routes = [{
 		path: '/',
@@ -30,14 +30,6 @@ const routes = [{
 			library_id: route.query.library_id
 		})
 	},
-	/*
-	{
-		path: '/library',
-		component: explore_library,
-		props: route => ({
-			library_id: route.query.library_id
-		})
-	},*/
 	{
 		path: '/library/test',
 		component: interpret_sign,
@@ -68,8 +60,8 @@ const routes = [{
 Vue.use(VueRouter)
 
 const instance = axios.create({
-	//baseURL: 'http://127.0.0.1:8000/',
-	baseURL: 'http://rocky-taiga-14209.herokuapp.com',
+	baseURL: process.env.NODE_ENV === 'production' ?
+		'http://rocky-taiga-14209.herokuapp.com' : 'http://127.0.0.1/8000/',
 })
 
 instance.interceptors.request.use(
