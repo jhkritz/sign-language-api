@@ -1,67 +1,42 @@
 # Development README.md
 
-## Route testing
+## Details specific to the frontend/backend application
 
-There is a small shell script that runs a few curl commands. 
+See the README.md in  **frontend** or **backend/**.
 
-They should all succeed if:
-- you edit the path for the image in one of the requests (as noted in a comment in test\_requests.sh).
-- You should export the **DATABASE\_URL** environment variable so the database contains the expected data.
-- You have a file saved as follows:
+## Testing the staged applications
 
-		library_images/asl_alphabet_train/A1234.jpg
+You can access the frontend application [here](https://rocky-taiga-14209.herokuapp.com/).
 
-To run the script, run:
+You can access the backend application [here](https://guarded-hamlet-40611.herokuapp.com/).
 
-	sh backend/application/test_requests.sh
+If something appears to be wrong, check the logs using the following command
 
-## API Documentation
+	heroku logs -a <application_name_here>
 
-*Swagger.io* recommends using Flask-RESTplus [here](https://swagger.io/blog/api-development/swagger-annotation-libraries/). 
-However, this library is outdated and has been replaced by Flask-RESTX. This is the 
-[link](https://flask-restx.readthedocs.io/en/latest/quickstart.html#) to it's the documentation.
+## Continuous deployment
 
-## Dataset
+Use the following commands to deploy an application to staging manually.
 
-You can download an ASL dataset [here](https://www.kaggle.com/datasets/grassknoted/asl-alphabet?resource=download)
+	git push heroku_backend `git subtree split --prefix backend <name_of_branch_to_push>`:main --force	
 
-## Setting up Flask
+	git push heroku_frontend `git subtree split --prefix frontend <name_of_branch_to_push>`:main --force
 
-- Get into the correct directory:
+You'll need to have the **heroku\_backend** and **heroku\_frontend** remotes configured. To do that,
+past the following into your **.git/config** file.
 
-		cd backend
+	[remote "heroku_backend"]
+		url = https://git.heroku.com/guarded-hamlet-40611.git
+		fetch = +refs/heads/*:refs/remotes/heroku/*
 
-- Create a virtual environment:
+	[remote "heroku_frontend"]
+		url = https://git.heroku.com/rocky-taiga-14209.git
+		fetch = +refs/heads/*:refs/remotes/heroku/*
 
-		python3 -m venv venv
+## Integration testing
 
-- Activate the virtual environment:
-
-		source venv/bin/activate
-
-- Install all requirements:
-
-		pip install -r requirements.txt
-
-- Run the Flask server:
-
-		flask run
-
-## Setting up your local PostgreSQL server
-
-- Install Postgres if you don't already have it
-
-		sudo apt-get install postgresql
-
-- Login to psql
-			
-		sudo -u postgres psql
-
-- Create the user with the appropriate password. Use the ones below:
-
-		CREATE DATABASE sign_language_api;
-		CREATE USER sign_language_api WITH ENCRYPTED PASSWORD 'flask123';
-		GRANT ALL PRIVILEGES ON DATABASE sign_language_api TO sign_language_api;
+There's a simple test case in **backend/tests.py**. All the test cases in this file are run
+everytime something is pushed to the main branch.
 
 ## Heroku CLI
 
@@ -73,31 +48,3 @@ You can download an ASL dataset [here](https://www.kaggle.com/datasets/grassknot
 	the email address you used on the group so I can grant you access to the app.
 
 		https://guarded-hamlet-40611.herokuapp.com/ | https://git.heroku.com/guarded-hamlet-40611.git
-
-## Heroku Postgres
-
-- To connect the application to the remote database (run this before **flask run**)
-
-		heroku config -a guarded-hamlet-40611 # To get the database url
-		export DATABASE_URL='url_from_previous_command' # To allow our app to access the url.
-
-	If you get tired of doing that, add that last command to your ~/.bashrc (if you're using bash) 
-	or your ~/.zshrc (if you're using zsh)
-	
-
-- To interact with the remote database with psql
-
-		heroku pg:psql -a guarded-hamlet-40611
-		
-# frontend
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-	
