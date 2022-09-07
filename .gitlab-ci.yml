@@ -29,14 +29,18 @@ init:
   script:
     #- apt-get update
     #- apt-get -y install python3-pip
+    - ls -a
     - pip install -r requirements.txt
+    - ls -a
 
 run_tests:
   stage : test
   tags:
     - shared-docker-runner
   script:
+    - ls -a
     - python3 backend/app.py & sleep 5; python3 backend/tests.py
+    - ls -a
 
 deploy_staging:
   stage: deploy
