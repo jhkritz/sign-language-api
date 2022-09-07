@@ -24,5 +24,9 @@ def init_app():
     with app.app_context():
         # Include our Routes
         from application import routes
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            print(e)
+            print('continuing...')
         return app
