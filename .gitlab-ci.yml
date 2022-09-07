@@ -1,4 +1,4 @@
-image: python:latest
+image: jjanzic/docker-python3-opencv
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/python_cache"
@@ -17,7 +17,6 @@ run_tests:
   tags:
     - shared-docker-runner
   script:
-    - apt-get install libgl1
     - python3 --version
     - ls -a $CI_PROJECT_DIR
     - pip install -r requirements.txt
