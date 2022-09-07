@@ -2,7 +2,7 @@
 
 ## Details specific to the frontend/backend application
 
-See the README.md in  **frontend** or **backend/**.
+See the README.md in  **frontend/** or **backend/**.
 
 ## Testing the staged applications
 
@@ -10,9 +10,9 @@ You can access the frontend application [here](https://rocky-taiga-14209.herokua
 
 You can access the backend application [here](https://guarded-hamlet-40611.herokuapp.com/).
 
-If something appears to be wrong, check the logs using the following command
+If something appears to be wrong, check the logs using the following command.
 
-	heroku logs -a <application_name_here>
+	heroku logs -a <application_name>
 
 ## Continuous deployment
 
