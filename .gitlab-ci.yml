@@ -19,7 +19,7 @@ run_tests:
   script:
     - python3 --version
     - ls -a $CI_PROJECT_DIR
-    - pip install -r requirements.txt
+    - pip install -r backend/requirements.txt
     - python3 backend/app.py & sleep 5; python3 backend/tests.py
 
 deploy_staging:
