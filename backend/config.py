@@ -15,6 +15,7 @@ IMAGE_PATH = './library_images'
 """Heroku database configuration."""
 try:
     HEROKU_DATABASE_URL = os.environ['DATABASE_URL'].replace('postgres://', 'postgresql://')
+    print(HEROKU_DATABASE_URL)
     if HEROKU_DATABASE_URL != '':
         SQLALCHEMY_DATABASE_URI = HEROKU_DATABASE_URL
 except KeyError:
