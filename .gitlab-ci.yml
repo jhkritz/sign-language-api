@@ -21,7 +21,7 @@ run_tests:
     - ls -a $CI_PROJECT_DIR
     - apt-get update && apt-get install libgl1 -y
     - pip install -r backend/requirements.txt
-    - gunicorn app:backend/app & sleep 5; python3 backend/tests.py
+    - cd backend; gunicorn app:app & cd ../; sleep 5; python3 backend/tests.py
 
 deploy_staging:
   stage: deploy
