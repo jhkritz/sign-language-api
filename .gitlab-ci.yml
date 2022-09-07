@@ -33,8 +33,8 @@ deploy_staging:
     #- gem install dpl
     #- dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY
     #- echo "Deployed to Staging Server https://flask-api-staging.herokuapp.com"
-    - git remote add heroku_backend https://heroku:$HEROKU_API_KEY@git.heroku.com/guarded-hamlet-40611.git
-    - git remote add heroku_frontend https://heroku:$HEROKU_API_KEY@git.heroku.com/rocky-taiga-14209.git
+    - git remote add heroku_backend https://heroku:$HEROKU_API_KEY@git.heroku.com/guarded-hamlet-40611.git || echo heroku_backend should exist.
+    - git remote add heroku_frontend https://heroku:$HEROKU_API_KEY@git.heroku.com/rocky-taiga-14209.git || echo heroku_frontend should exist.
     - git subtree push --prefix backend heroku_backend main
     - git subtree push --prefix frontend heroku_frontend main
   environment:
