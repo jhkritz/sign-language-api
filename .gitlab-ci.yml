@@ -17,6 +17,7 @@ run_tests:
   tags:
     - shared-docker-runner
   script:
+    - apt-get install libgl1
     - python3 --version
     - ls -a $CI_PROJECT_DIR
     - pip install -r requirements.txt
