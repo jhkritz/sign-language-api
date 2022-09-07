@@ -26,6 +26,8 @@ def home():
     return "Hello World!"
 
 
+
+
 @app.route('/library/uploadsign', methods=['POST'])
 def uploadsign():
     # Endpoint to upload a single sign with a name
