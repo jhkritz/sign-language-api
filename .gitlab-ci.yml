@@ -35,8 +35,8 @@ deploy_staging:
     #- echo "Deployed to Staging Server https://flask-api-staging.herokuapp.com"
     - git remote add heroku_backend https://heroku:$HEROKU_API_KEY@git.heroku.com/guarded-hamlet-40611.git || echo heroku_backend should exist.
     - git remote add heroku_frontend https://heroku:$HEROKU_API_KEY@git.heroku.com/rocky-taiga-14209.git || echo heroku_frontend should exist.
-    - git subtree push --prefix backend heroku_backend main
-    - git subtree push --prefix frontend heroku_frontend main
+    - git push heroku_backend `git subtree split --prefix backend main`:main --force                     
+    - git push heroku_frontend `git subtree split --prefix frontend main`:main --force 
   environment:
     name: staging
     url: https://flask-api-staging.herokuapp.com/
