@@ -1,12 +1,12 @@
 image: python:latest
 
 variables:
-  PIP_CACHE_DIR: "python_cache"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/python_cache"
 
 cache:
   key: cache_key
   paths:
-    ['python_cache']
+    ['$CI_PROJECT_DIR/python_cache']
 
 stages:
   - ver
