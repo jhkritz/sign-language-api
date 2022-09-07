@@ -29,7 +29,7 @@ run_tests:
   tags:
     - shared-docker-runner
   script:
-    - sh backend/application/test_requests.sh
+    - python3 backend/app.py & sleep 5; python3 backend/tests.py
 
 deploy_staging:
   stage: deploy
