@@ -68,7 +68,8 @@ const routes = [{
 Vue.use(VueRouter)
 
 const instance = axios.create({
-	baseURL: 'http://127.0.0.1:8000/',
+	//baseURL: 'http://127.0.0.1:8000/',
+	baseURL: 'http://rocky-taiga-14209.herokuapp.com',
 })
 
 instance.interceptors.request.use(
