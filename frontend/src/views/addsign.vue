@@ -77,30 +77,25 @@
 
             async postSign() {
                 const data = new FormData();
-
                 data.append('sign_name', this.signname);
                 data.append('lib_name', this.library_id);
                 data.append('image_file', this.image);
-
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/uploadsign',
                     data: data
                 };
-
-                axios(config)
-                    .then(function(response) {
-                        console.log(JSON.stringify(response.data));
-                        if (response.status == 200) {
-                            alert('Success');
-                            this.signname = " "
-                            this.image = " ";
-                        }
-                    })
-                    .catch(function(error) {
-                        console.log(error);
-                        alert('Failed to upload image')
-                    })
+                try {
+                    const res = await axios(config);
+                    if (res.status == 200) {
+                        alert('Success');
+                        this.signname = " ";
+                        this.image = null;
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to upload image.');
+                }
             },
             async postSigns() {
                 const data = new FormData();
@@ -115,7 +110,7 @@
                 try {
                     const res = await axios(config);
                     if (res.status == 200) {
-                        alert('Success');
+                        alert(res.data.message);
                         this.signname = " "
                         this.image = " ";
                     }
