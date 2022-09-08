@@ -62,6 +62,7 @@ def upload_signs():
                 )
                 db.session.add(sign)
                 db.session.commit()
+            print('Sucessfully uploaded image ' + str(total_num_images))
         message = 'Successfully uploaded {} of {} images.'.format(num_good_images, total_num_images)
         print(message)
         return {'status': 200, 'message': message}
@@ -180,14 +181,17 @@ def delete_library():
 ####################################################################################################
 
 
-def classify(to_classify, knn, k):
+def classify(to_classify, knn, k, label_meanings):
     retval, results, responses, dists = knn.findNearest(to_classify, k=k)
     classification = results[0][0]
-    meaning = Sign.get_sign_meaning(int(classification))
+    meaning = label_meanings[int(classification)]
+    #meaning = Sign.get_sign_meaning(int(classification))
     quality_of_match = 0
     for resp in responses[0]:
         if resp == classification:
             quality_of_match += 1
+    print(responses[0])
+    print('len(responses) = ' + str(len(responses[0])))
     quality_of_match = 100 * quality_of_match / len(responses[0])
     return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
 
@@ -197,15 +201,21 @@ def get_data_and_labels(lib_name, lib_path):
     lib = SignLanguageLibrary.query.filter_by(name=lib_name).first()
     labels = []
     data = []
+    next_label = 0
+    meaning_labels = {}
+    label_meanings = []
     for sign in lib.signs:
+        if sign.meaning not in meaning_labels.keys():
+            meaning_labels[sign.meaning] = next_label
+            label_meanings += [sign.meaning]
+            next_label += 1
         fullpath = lib_path + sign.meaning + '/' + sign.image_filename
-        print(fullpath)
         img = cv.imread(lib_path + sign.meaning + '/' + sign.image_filename)
         data += [img.flatten()]
-        labels += [sign.id]
+        labels += [meaning_labels[sign.meaning]]
     data = np.array(data, dtype=np.float32)
     labels = np.array(labels, dtype=np.float32)
-    return data, labels
+    return data, labels, label_meanings
 
 
 def process_input_single_frame(frame, hand_detector, desired_shape):
@@ -237,9 +247,9 @@ def return_image(data_image, lib_name):
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
         # Setup the model
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-        data, labels = get_data_and_labels(lib_name, lib_path)
+        data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
         # XXX: this code will crash if the library contains < 3 images
-        k = min(data.shape[0], 3)
+        k = min(data.shape[0], 50)
         knn = cv.ml.KNearest_create()
         knn.train(data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
@@ -251,7 +261,7 @@ def return_image(data_image, lib_name):
         # Classify the processed image
         result = None
         if type(processed_image):
-            result = classify(to_classify, knn, k)
+            result = classify(to_classify, knn, k, label_meanings)
         # This conversion is based on the code provided in the following StackOverflow post
         # https://stackoverflow.com/questions/58931854/
         # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
@@ -278,9 +288,11 @@ def classify_request():
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
         # Setup the model
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-        data, labels = get_data_and_labels(lib_name, lib_path)
+        data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
         # XXX: this code will crash if the library contains < 3 images
-        k = min(data.shape[0], 1)
+        #k = min(data.shape[0], 1)
+        k = min(data.shape[0], 50)
+        print('k = ' + str(k))
         knn = cv.ml.KNearest_create()
         knn.train(data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
@@ -292,7 +304,7 @@ def classify_request():
             # knn.findNearest() expects an array of images for classification.
             to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
             # Classify the processed image
-            result = classify(to_classify, knn, k)
+            result = classify(to_classify, knn, k, label_meanings)
             # This conversion is based on the code provided in the following StackOverflow post
             # https://stackoverflow.com/questions/58931854/
             # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
