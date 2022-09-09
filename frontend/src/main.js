@@ -12,6 +12,7 @@ import test_library from './views/test-library';
 import interpret_sign from './views/interpret-sign';
 import library from './views/library';
 import register from './views/register';
+import login from './views/login';
 import {
 	sharedState
 } from './SharedState';
@@ -23,6 +24,11 @@ const routes = [
 		path: '/register',
 		name: 'register',
 		component: register
+	},
+	{
+		path: '/login',
+		name: 'login',
+		component: login
 	},
 	{
 		path: '/',
