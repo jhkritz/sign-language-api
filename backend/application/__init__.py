@@ -23,7 +23,7 @@ def init_app():
     socketio.init_app(app, cors_allowed_origins="*")
     with app.app_context():
         # Include our Routes
-        from application import routes
+        from application import routes, login_routes
         try:
             db.create_all()
         except Exception as e:
