@@ -11,13 +11,20 @@ import page_not_found from './views/page-not-found';
 import test_library from './views/test-library';
 import interpret_sign from './views/interpret-sign';
 import library from './views/library';
+import register from './views/register';
 import {
 	sharedState
 } from './SharedState';
 
 Vue.config.productionTip = false;
 
-const routes = [{
+const routes = [
+	{
+		path: '/register',
+		name: 'register',
+		component: register
+	},
+	{
 		path: '/',
 		name: 'home',
 		component: home
