@@ -19,7 +19,7 @@ def test_get_libraries():
 
 
 def test_classification_accuracy():
-    lib_name = "testest"
+    lib_name = "Testing classification accuracy"
     signs = ['a', 'b', 'c']
     num_correct = 0
     total = 0
