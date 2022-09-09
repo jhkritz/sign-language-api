@@ -1,27 +1,29 @@
 <!-- References:https://www.digitalocean.com/community/tutorials/how-to-handle-file-uploads-in-vue-2 -->
 <template>
-    <div>
-        <v-form v-model="valid">
-            <v-container>
-                <v-row id='row'>
-                    <v-col>
-                        <v-container id='container'>
-                            <v-file-input label='Upload a hand sign' v-model='image' />
-                            <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
-                            <v-btn dark color="orange darken-4" depressed @click="postSign">
-                                Submit single image
-                            </v-btn>
-                        </v-container>
-                    </v-col>
-                    <v-col>
-                        <v-container id='container'>
-                            <v-file-input label='Upload a zip file with many photos of the same sign' v-model='zip_file' />
-                            <v-text-field v-model="zip_signname" label="Sign name" :rules="signrules" outlined required />
-                            <v-btn dark color="orange darken-4" depressed @click="postSigns">
-                                Submit zip file
-                            </v-btn>
-                        </v-container>
-                        <!--
+    <div id='mainContainer'>
+        <v-main class="grey lighten-3" id='mainContainer'>
+            <v-form v-model="valid">
+                <v-container id='sheet'>
+                    <v-sheet id='sheet' min-height="70vh" rounded="lg">
+                        <v-row id='row'>
+                            <v-col>
+                                <v-container id='container'>
+                                    <v-file-input label='Upload a hand sign' v-model='image' />
+                                    <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
+                                    <v-btn dark color="orange darken-4" depressed @click="postSign">
+                                        Submit single image
+                                    </v-btn>
+                                </v-container>
+                            </v-col>
+                            <v-col>
+                                <v-container id='container'>
+                                    <v-file-input label='Upload a zip file with many photos of the same sign' v-model='zip_file' />
+                                    <v-text-field v-model="zip_signname" label="Sign name" :rules="signrules" outlined required />
+                                    <v-btn dark color="orange darken-4" depressed @click="postSigns">
+                                        Submit zip file
+                                    </v-btn>
+                                </v-container>
+                                <!--
                         <v-container id='container'>
                             <v-container-title>Take picture to upload</v-container-title>
                                 <video id='webcamVideo' width='100%' height='400' autoplay />
@@ -33,10 +35,12 @@
                                     
             </v-container>
 						-->
-                    </v-col>
-                </v-row>
-            </v-container>
-        </v-form>
+                            </v-col>
+                        </v-row>
+                    </v-sheet>
+                </v-container>
+            </v-form>
+        </v-main>
     </div>
 </template>
 
@@ -44,6 +48,17 @@
     #row {
         align-content: start;
         justify-content: start;
+    }
+
+    #sheet {
+        width: 100%;
+        padding: 2.5%;
+        box-sizing: border-box;
+    }
+
+    #mainContainer {
+        height: 100%;
+        box-sizing: border-box;
     }
 </style>
 
@@ -71,7 +86,7 @@
             zip_file: null,
         }),
         created() {
-            this.initCamera();
+            //this.initCamera();
         },
         methods: {
 

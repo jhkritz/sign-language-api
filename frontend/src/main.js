@@ -62,7 +62,7 @@ Vue.use(VueRouter)
 const instance = axios.create({
 	baseURL: process.env.NODE_ENV === 'production' ?
 		'http://rocky-taiga-14209.herokuapp.com' : 'http://127.0.0.1/8000/',
-})
+});
 
 instance.interceptors.request.use(
 	config => {
