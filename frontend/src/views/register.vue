@@ -1,4 +1,5 @@
 <template>
+    <v-container>
     <v-form
       ref="form"
       v-model="valid"
@@ -22,14 +23,15 @@
   
       <v-btn
         :disabled="!valid"
-        color="success"
-        class="mr-4"
+        color="black"
+        class="mr-4 white--text"
         @click="validate"
       >
         Register
       </v-btn>
   
     </v-form>
+</v-container>
   </template>
 
 <script>
