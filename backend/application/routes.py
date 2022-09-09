@@ -190,8 +190,8 @@ def classify(to_classify, knn, k, label_meanings):
     for resp in responses[0]:
         if resp == classification:
             quality_of_match += 1
-    print(responses[0])
-    print('len(responses) = ' + str(len(responses[0])))
+    # print(responses[0])
+    #print('len(responses) = ' + str(len(responses[0])))
     quality_of_match = 100 * quality_of_match / len(responses[0])
     return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
 
@@ -249,7 +249,7 @@ def return_image(data_image, lib_name):
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
         data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
         # XXX: this code will crash if the library contains < 3 images
-        k = min(data.shape[0], 50)
+        k = min(data.shape[0], 10)
         knn = cv.ml.KNearest_create()
         knn.train(data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
@@ -268,7 +268,7 @@ def return_image(data_image, lib_name):
         processed_image = cv2.imencode('.png', processed_image)[1]
         image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
         response = {'frame': image_out, 'result': result}
-        print(response['result'])
+        # print(response['result'])
         emit('image_response', response)
     except Exception as e:
         print(e)
@@ -291,8 +291,8 @@ def classify_request():
         data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
         # XXX: this code will crash if the library contains < 3 images
         #k = min(data.shape[0], 1)
-        k = min(data.shape[0], 50)
-        print('k = ' + str(k))
+        k = min(data.shape[0], 10)
+        #print('k = ' + str(k))
         knn = cv.ml.KNearest_create()
         knn.train(data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
@@ -311,7 +311,7 @@ def classify_request():
             processed_image = cv2.imencode('.png', processed_image)[1]
             image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
             response = {'processedImage': image_out, 'result': result}
-            print(response['result'])
+            # print(response['result'])
             return response
         else:
             print('processed_image is none')
