@@ -53,7 +53,8 @@ def upload_signs():
                 continue
             else:
                 num_good_images += 1
-                Image.fromarray(img).save(img_path + filename)
+                cv.imwrite(img_path + filename, img)
+                #Image.fromarray(img).save(img_path + filename)
                 libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
                 sign = Sign(
                     meaning=sign_name,
