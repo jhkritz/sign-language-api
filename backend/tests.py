@@ -19,7 +19,7 @@ def test_get_libraries():
 
 
 def test_classification_accuracy():
-    lib_name = "Testing classification accuracy"
+    lib_name = "ClassificationAccuracy"
     signs = ['a', 'b', 'c']
     num_correct = 0
     total = 0
@@ -29,8 +29,9 @@ def test_classification_accuracy():
     for sign in signs:
         count = 0
         for img_name in os.listdir('./test_data/{}'.format(sign)):
+            print(img_name)
             if count >= signs_per_dir:
-                continue
+                break
             count += 1
             path_to_image = "./test_data/{}/{}".format(sign, img_name)
             # path_to_image = "/home/river/cs344/sign_language_recognition/backend/test_data/" + img_name
@@ -41,7 +42,7 @@ def test_classification_accuracy():
             try:
                 output = json.loads(completed.stdout.decode('utf-8'))
                 res = output['result']
-                if res['classification'] == sign:
+                if res['classification'] == 'small_' + sign:
                     num_correct += 1
                     positive_confidence += float(res['quality_of_match'])
                 else:
