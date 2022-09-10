@@ -13,6 +13,7 @@ import interpret_sign from './views/interpret-sign';
 import library from './views/library';
 import register from './views/register';
 import login from './views/login';
+import dashboard from './views/dashboard';
 import {
 	sharedState
 } from './SharedState';
@@ -20,6 +21,11 @@ import {
 Vue.config.productionTip = false;
 
 const routes = [
+	{
+		path: '/dashboard',
+		name: 'dashboard',
+		component: dashboard
+	},
 	{
 		path: '/register',
 		name: 'register',
