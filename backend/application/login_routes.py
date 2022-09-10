@@ -1,11 +1,18 @@
-from flask import current_app as app, Response, request
+from flask import current_app as app, Response, request, jsonify
 from . import db
 from .models import User, APIKeys
 import hashlib
 import random
 import uuid
+from flask_jwt_extended import (create_access_token, 
+create_refresh_token, 
+set_access_cookies,
+set_refresh_cookies )
+
 @app.route('/login', methods=['POST'])
 def login():
+
+    #return auth and token
     return 'success'
 
 
@@ -29,7 +36,15 @@ def register():
     db.session.add(apikey)
     db.session.commit()
 
-    return {'api_key':key}
+    access_token = create_access_token(identity=user.id)
+    refresh_token = create_refresh_token(identity=user.id)
+
+    response = jsonify({'api_key':key})
+
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+
+    return response
 
 
 @app.route('/logout', methods=['POST'])
