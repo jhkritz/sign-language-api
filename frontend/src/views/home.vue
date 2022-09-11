@@ -1,8 +1,8 @@
 <template>
 <v-app-bar
-  elevation="4"
-  
+  elevation="4" 
 >
+<v-toolbar-title class="black--text">Sign Language API</v-toolbar-title>
 <v-spacer></v-spacer>
       <v-btn
         color="black"
@@ -19,8 +19,7 @@
       >
         Login
       </v-btn>
-</v-app-bar>
-    
+</v-app-bar>  
 </template>
 
 <script>
