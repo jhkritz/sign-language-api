@@ -1,7 +1,7 @@
 <template>
     <v-app>
         <v-main>
-            <navBar app v-if="this.$router.currentRoute.path !== '/'" />
+            <navBar app v-if="shouldDisplayNavbar()" />
             <router-view />
         </v-main>
     </v-app>
@@ -14,6 +14,12 @@
         data: () => ({}),
         components: {
             navBar
+        },
+        methods: {
+            shouldDisplayNavbar() {
+                const path = this.$router.currentRoute.path;
+                return path !== '/' && path !== '/register' && path !== '/login' && path !== '/dashboard';
+            }
         },
     };
 </script>
