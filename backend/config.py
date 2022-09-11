@@ -5,7 +5,9 @@ import os
 TESTING = True
 DEBUG = True
 FLASK_ENV = 'development'
-SECRET_KEY = 'GDtfDCFYjD'
+SECRET_KEY = 'GDtfDCFdwafwafwafYjD'
+JWT_SECRET_KEY='GDtfDCFdwafwafwafYjD'
+JWT_TOKEN_LOCATION=['cookies']
 
 SQLALCHEMY_DATABASE_URI = 'postgresql://sign_language_api:flask123@localhost:5432/sign_language_api'
 SQLALCHEMY_ECHO = False

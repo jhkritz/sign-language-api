@@ -15,7 +15,7 @@ def init_app():
     app = Flask(__name__, instance_relative_config=False)
     jwt = JWTManager(app)
     app.config.from_object('config')
-    app.add_url_rule('/library/image', endpoint='get_sign_image', build_only=True)
+    #app.add_url_rule('/library/image', endpoint='get_sign_image', build_only=True)
     # Initialize CORS
     CORS(app)
 
