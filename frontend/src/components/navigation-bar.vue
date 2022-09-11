@@ -84,7 +84,7 @@
                     const response = await axios(config);
                     console.log(response.data);
                     // Navigate home after deleting library.
-                    this.$router.push('/');
+                    this.$router.push('/dashboard');
                 } catch (err) {
                     console.error(err);
                 }
