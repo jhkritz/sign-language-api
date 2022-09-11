@@ -4,7 +4,7 @@
         min-height: 25vw;
         max-height: 30vw;
         background-image: url('../assets/Tile.svg');
-        background-color: cadetblue;
+        background-color: #3AA5A9;
         background-size: contain;
 
     }
@@ -56,7 +56,7 @@
         <div class="header">
             <div class="center">
 
-                <h1 class="maintitle">Sign Language API</h1>
+                <p class="maintitle">Sign Language API</p>
 
                 <v-toolbar flat floating rounded>
                     <v-text-field hide-details label="Search for a library..." prepend-icon="mdi-magnify" single-line>
@@ -75,7 +75,7 @@
             <v-row justify="center">
                 <v-dialog v-model="dialog" persistent max-width="600px">
                     <template v-slot:activator="{ on, attrs }">
-                        <v-btn class="mx-2" fab dark color="orange darken-4" v-bind="attrs" v-on="on">
+                        <v-btn class="mx-2" fab dark color= #17252A v-bind="attrs" v-on="on">
                             <v-icon dark>
                                 mdi-plus
                             </v-icon>
