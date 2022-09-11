@@ -1,11 +1,12 @@
 <template>
 <v-app-bar
   elevation="4" 
+  color=#3AAFA9
 >
-<v-toolbar-title class="black--text">Sign Language API</v-toolbar-title>
+<v-toolbar-title class="white--text">Sign Language API</v-toolbar-title>
 <v-spacer></v-spacer>
       <v-btn
-        color="black"
+        color=#17252A
         class="mr-4 white--text"
         @click="goToRegister()"
       >
@@ -13,7 +14,7 @@
       </v-btn>
 
       <v-btn
-        color="black"
+        color=#17252A
         class="mr-4 white--text"
         @click="goToLogin()"
       >
