@@ -1,5 +1,6 @@
 <!-- References:https://www.digitalocean.com/community/tutorials/how-to-handle-file-uploads-in-vue-2 -->
 <template>
+<<<<<<< HEAD
     <div id='mainContainer'>
         <v-main class="grey lighten-3" id='mainContainer'>
             <v-form v-model="valid">
@@ -23,7 +24,8 @@
                                         Submit zip file
                                     </v-btn>
                                 </v-container>
-                                <!--
+                                
+                        <!--
                         <v-container id='container'>
                             <v-container-title>Take picture to upload</v-container-title>
                                 <video id='webcamVideo' width='100%' height='400' autoplay />
