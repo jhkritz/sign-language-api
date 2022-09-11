@@ -17,7 +17,7 @@
             label="Password"
             required
           ></v-text-field>
-          <v-btn :disabled="!valid" color="black" class="mr-4 white--text" @click="login()">
+          <v-btn :disabled="!valid" color=#17252A class="mr-4 white--text" @click="login()">
             Log In
           </v-btn>
         </v-form>

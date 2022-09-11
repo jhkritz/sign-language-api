@@ -1,26 +1,6 @@
 <template>
     <v-container>
-      <v-app-bar
-  elevation="4"
-  
->
-<v-spacer></v-spacer>
-      <v-btn
-        color="black"
-        class="mr-4 white--text"
-        @click="goToRegister()"
-      >
-        Register
-      </v-btn>
 
-      <v-btn
-        color="black"
-        class="mr-4 white--text"
-        @click="goToLogin()"
-      >
-        Login
-      </v-btn>
-</v-app-bar> 
     <v-form
       ref="form"
       v-model="valid"
@@ -44,7 +24,7 @@
   
       <v-btn
         :disabled="!valid"
-        color="black"
+        color=#17252A
         class="mr-4 white--text"
         @click="validate"
       >
