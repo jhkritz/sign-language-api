@@ -22,10 +22,54 @@ from .login_routes import verifykey
 # from aiortc import MediaStreamTrack, RTCPeerConnection, RTCSessionDescription
 # from aiortc.contrib.media import MediaBlackhole, MediaPlayer, MediaRecorder
 
+hand_detector = HandDetector(maxHands=1)
+desired_shape = (200, 200)
+
 
 @app.route("/")
 def home():
     return "Hello World!"
+
+
+@app.route('/library/uploadsigns', methods=['POST'])
+def upload_signs():
+    try:
+        lib_name = request.form['lib_name']
+        sign_name = request.form['sign_name']
+        zip_file = request.files['zip_file']
+        zpfl = ZipFile(zip_file.stream._file)
+        filenames = zpfl.namelist()
+        total_num_images = 0
+        num_good_images = 0
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
+        for filename in filenames[1:]:
+            total_num_images += 1
+            # XXX: what happens if the file already exists? Is it overwritten?
+            zpfl.extract(filename, path=img_path)
+            img = cv.imread(img_path + filename)
+            img = process_input_single_frame(
+                img, hand_detector=hand_detector, desired_shape=desired_shape
+            )
+            os.remove(img_path + filename)
+            if img is None:
+                continue
+            else:
+                num_good_images += 1
+                Image.fromarray(img).save(img_path + filename)
+                libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+                sign = Sign(
+                    meaning=sign_name,
+                    image_filename=filename,
+                    library_id=libid
+                )
+                db.session.add(sign)
+                db.session.commit()
+        message = 'Successfully uploaded {} of {} images.'.format(num_good_images, total_num_images)
+        print(message)
+        return {'status': 200, 'message': message}
+    except Exception as e:
+        print(e)
+        return Response(status=400)
 
 
 @app.route('/library/uploadsign', methods=['POST'])
@@ -36,23 +80,26 @@ def uploadsign():
         lib_name = request.form.get('lib_name')
         sign_name = request.form.get('sign_name')
         image = request.files['image_file']
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '_temp.jpg'
-        image.save(img_path)
-        image = cv2.imread(img_path)
-        hand_detector = HandDetector(maxHands=1)
-        desired_shape = (200, 200)
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
+        try:
+            os.makedirs(img_path[:-1])
+        except Exception as e:
+            pass
+        image.save(img_path + 'temp.jpg')
+        image = cv2.imread(img_path + 'temp.jpg')
         image = process_input_single_frame(
-            image, hand_detector=hand_detector, desired_shape=desired_shape)
-        os.remove(img_path)
+            image, hand_detector=hand_detector, desired_shape=desired_shape
+        )
+        os.remove(img_path + 'temp.jpg')
         if image is None:
-            return {"Error": "A hand could not be found in the image"}, 400
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
-        Image.fromarray(image).save(img_path)
+            msg = 'A hand could not be found in the image.'
+            print(msg)
+            return {"Error": msg}, 400
+        Image.fromarray(image).save(img_path + sign_name + '.jpg')
         libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
         sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg',  library_id=libid)
         db.session.add(sign)
         db.session.commit()
-        print('success')
     except Exception as e:
         print(e)
         return {"Error": str(e)}, 400
@@ -161,7 +208,9 @@ def get_data_and_labels(lib_name, lib_path):
     labels = []
     data = []
     for sign in lib.signs:
-        img = cv.imread(lib_path + sign.image_filename)
+        fullpath = lib_path + sign.meaning + '/' + sign.image_filename
+        print(fullpath)
+        img = cv.imread(lib_path + sign.meaning + '/' + sign.image_filename)
         data += [img.flatten()]
         labels += [sign.id]
     data = np.array(data, dtype=np.float32)
@@ -196,9 +245,7 @@ def return_image(data_image, lib_name):
         # Open image with opencv
         b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-        hand_detector = HandDetector(maxHands=1)
         # Setup the model
-        desired_shape = (200, 200)
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
         data, labels = get_data_and_labels(lib_name, lib_path)
         # XXX: this code will crash if the library contains < 3 images
@@ -239,9 +286,7 @@ def classify_request():
         # Open image with opencv
         #b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-        hand_detector = HandDetector(maxHands=1)
         # Setup the model
-        desired_shape = (200, 200)
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
         data, labels = get_data_and_labels(lib_name, lib_path)
         # XXX: this code will crash if the library contains < 3 images

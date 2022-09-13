@@ -1,5 +1,6 @@
 <template>
-    <v-app-bar app>
+    <v-app-bar app
+    >
         <v-btn icon id='homeButton' to='/'>
             <v-icon>mdi-home</v-icon>
         </v-btn>
@@ -84,7 +85,7 @@
                     const response = await axios(config);
                     console.log(response.data);
                     // Navigate home after deleting library.
-                    this.$router.push('/');
+                    this.$router.push('/dashboard');
                 } catch (err) {
                     console.error(err);
                 }

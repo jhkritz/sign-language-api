@@ -11,7 +11,7 @@
                                 </v-card-title>
                                 <video id='webcamVideo' width='100%' height='400' autoplay />
                                 <v-card-actions class='justify-center align-center'>
-                                    <v-btn dark color="orange darken-4" @click.stop='processSnapshot'>
+                                    <v-btn dark color=#17252A @click.stop='processSnapshot'>
                                         Process a snapshot
                                     </v-btn>
                                 </v-card-actions>
@@ -25,7 +25,7 @@
                                 <v-img id='processedImage' :src='processedImageSrc' width='100%' contain :aspect-ratio='16/9' />
                                 <v-card-subtitle class='justify-center align-center'>
                                     Sign meaning: {{result.classification}}<br />
-                                    Quality of match: {{result.quality_of_match}}
+                                    Confidence: {{result.quality_of_match}}
                                 </v-card-subtitle>
                             </v-card>
                         </v-col>

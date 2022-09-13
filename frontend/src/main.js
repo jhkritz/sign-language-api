@@ -5,22 +5,41 @@ import VueRouter from 'vue-router'
 import axios from 'axios'
 import VueAuth from 'vue-auth'
 
-import home from './views/home'
+import dashboard from './views/dashboard'
 import addsign from './views/addsign'
 import page_not_found from './views/page-not-found';
 import test_library from './views/test-library';
 import interpret_sign from './views/interpret-sign';
 import library from './views/library';
+import register from './views/register';
+import login from './views/login';
+import home from './views/home';
 import {
 	sharedState
 } from './SharedState';
 
 Vue.config.productionTip = false;
 
-const routes = [{
+const routes = [
+	{
 		path: '/',
 		name: 'home',
 		component: home
+	},
+	{
+		path: '/register',
+		name: 'register',
+		component: register
+	},
+	{
+		path: '/login',
+		name: 'login',
+		component: login
+	},
+	{
+		path: '/dashboard',
+		name: 'dashboard',
+		component: dashboard
 	},
 	{
 		path: '/library/explore',
@@ -62,7 +81,7 @@ Vue.use(VueRouter)
 const instance = axios.create({
 	baseURL: process.env.NODE_ENV === 'production' ?
 		'http://rocky-taiga-14209.herokuapp.com' : 'http://127.0.0.1/8000/',
-})
+});
 
 instance.interceptors.request.use(
 	config => {
