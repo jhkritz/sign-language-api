@@ -18,7 +18,7 @@
         methods: {
             shouldDisplayNavbar() {
                 const path = this.$router.currentRoute.path;
-                return path !== '/' && path !== '/register' && path !== '/login' && path !== '/dashboard';
+                return path !== '/' && path !== '/register' && path !== '/login' && path !== '/dashboard' && path !== '/API';
             }
         },
     };
