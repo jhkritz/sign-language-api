@@ -140,6 +140,8 @@ export default {
                 const config = {
                     method: 'get',
                     url: baseUrl + '/libraries/getall',
+                    withCredentials: true,
+                    'Access-Control-Allow-Credentials' : true
                 };
                 // Get list of libraries
                 const res = await axios(config);

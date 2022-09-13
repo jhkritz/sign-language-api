@@ -64,8 +64,6 @@
                         alert('Success');
                         this.password = " ";
                         this.email = " ";
-                        console.log(res.data);
-                        console.log(res.headers);
                     }
                     else {
                       alert(res.data)
