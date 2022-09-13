@@ -47,16 +47,20 @@
   </template>
 
 <script>
-    import {
+    /*import {
         sharedState
     } from '../SharedState';
+    */
     import {
         baseUrl
     } from '../BaseRequestUrl';
     const axios = require('axios');
     export default {
       props: {
-        API_key: null
+        APIkey:{
+          required: true, 
+          type: String
+        }
         },
       data: () => ({
         valid: true,
@@ -99,8 +103,10 @@
                         this.email = " ";
                         console.log(res.data);
                         console.log(res.headers);
-                        sharedState.setAPIkey(res.data['api_key']);
-                        console.log(res.data['api_key']); 
+                        console.log(res.data['api_key']);
+                        //sharedState.setAPIkey(res.data['api_key']);
+                        //this.$router.push(`/API?API_key=${this.APIkey}`);
+                        this.$router.push("/API");
                     }
                     else {
                       alert(res.data)

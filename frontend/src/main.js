@@ -14,6 +14,7 @@ import library from './views/library';
 import register from './views/register';
 import login from './views/login';
 import home from './views/home';
+import API from './views/API';
 import {
 	sharedState
 } from './SharedState';
@@ -35,6 +36,15 @@ const routes = [
 		path: '/login',
 		name: 'login',
 		component: login
+	},
+	{
+		path: '/API',
+		name: 'API',
+		component: API,
+		/*props: route => ({
+			API_key: route.query.API_key
+		})
+		*/
 	},
 	{
 		path: '/dashboard',
