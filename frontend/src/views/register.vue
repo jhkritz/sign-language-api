@@ -100,7 +100,6 @@
                         console.log(res.data['api_key']);
                         sharedState.setAPIkey(res.data['api_key']);
                         this.$router.push(`/API?API_key=${res.data['api_key']}`);
-                        //this.$router.push("/API");
                     }
                     else {
                       alert(res.data)
