@@ -8,7 +8,7 @@
 import { sharedState } from '../SharedState';
 export default {
     data: () => ({
-        APIKey: sharedState.API_key
+        APIkey: sharedState.API_key
 }),
 }
 </script>
