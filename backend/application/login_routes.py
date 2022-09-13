@@ -40,7 +40,7 @@ def register():
     email = request.json.get('email')
     existinguser = User.query.filter_by(email=email).first()
     if existinguser:
-        return {'message': 'User exists'}
+        return {'message': 'User exists'}, 400
     password = request.json.get('password')
     password_hash = hashlib.sha512(str(password).encode("utf-8") ).hexdigest()
     user = User(email=email, pass_hash=password_hash)
