@@ -9,7 +9,9 @@ create_refresh_token,
 set_access_cookies,
 set_refresh_cookies,
 jwt_required,
-unset_jwt_cookies)
+unset_jwt_cookies,
+jwt_refresh_token_required,
+get_jwt_identity)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -59,10 +61,22 @@ def register():
 
 
 @app.route('/logout', methods=['POST'])
+@jwt_required()
 def logout():
     response = jsonify({'message':'Success'})
     unset_jwt_cookies(response)
     return response
+
+@app.route('/refresh', methods=('GET'))
+@jwt_refresh_token_required()
+def refreshtoken():
+    user_id = get_jwt_identity()
+    user = User.query.filter_by(id=user_id).first()
+    access_token = create_access_token(identity=user.id)
+    response = jsonify()
+    set_access_cookies(response, access_token)
+    return response
+
 
 
 
