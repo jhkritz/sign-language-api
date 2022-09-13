@@ -10,8 +10,8 @@ set_access_cookies,
 set_refresh_cookies,
 jwt_required,
 unset_jwt_cookies,
-jwt_refresh_token_required,
-get_jwt_identity)
+get_jwt_identity
+)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -67,8 +67,7 @@ def logout():
     unset_jwt_cookies(response)
     return response
 
-@app.route('/refresh', methods=('GET'))
-@jwt_refresh_token_required()
+@app.route('/refresh', methods=['GET'])
 def refreshtoken():
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
