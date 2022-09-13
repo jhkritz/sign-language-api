@@ -1,7 +1,11 @@
 <template>
     <h1>
-        API Key: {{APIkey}}
+        API Key: 
+        <p class="font-weight-regular">
+            {{APIkey}}
+        </p>
     </h1>
+    
 </template>
 
 <script>
