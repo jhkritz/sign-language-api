@@ -93,6 +93,7 @@
                         this.email = " ";
                         console.log(res.data);
                         console.log(res.headers);
+                        
                     }
                     else {
                       alert(res.data)
