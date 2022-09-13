@@ -47,21 +47,15 @@
   </template>
 
 <script>
-    /*import {
+    import {
         sharedState
     } from '../SharedState';
-    */
+    
     import {
         baseUrl
     } from '../BaseRequestUrl';
     const axios = require('axios');
     export default {
-      props: {
-        APIkey:{
-          required: true, 
-          type: String
-        }
-        },
       data: () => ({
         valid: true,
         name: '',
@@ -104,9 +98,9 @@
                         console.log(res.data);
                         console.log(res.headers);
                         console.log(res.data['api_key']);
-                        //sharedState.setAPIkey(res.data['api_key']);
-                        //this.$router.push(`/API?API_key=${this.APIkey}`);
-                        this.$router.push("/API");
+                        sharedState.setAPIkey(res.data['api_key']);
+                        this.$router.push(`/API?API_key=${res.data['api_key']}`);
+                        //this.$router.push("/API");
                     }
                     else {
                       alert(res.data)
