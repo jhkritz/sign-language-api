@@ -41,10 +41,9 @@ const routes = [
 		path: '/API',
 		name: 'API',
 		component: API,
-		/*props: route => ({
+		props: route => ({
 			API_key: route.query.API_key
 		})
-		*/
 	},
 	{
 		path: '/dashboard',
