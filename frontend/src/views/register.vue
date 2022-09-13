@@ -48,10 +48,16 @@
 
 <script>
     import {
+        sharedState
+    } from '../SharedState';
+    import {
         baseUrl
     } from '../BaseRequestUrl';
     const axios = require('axios');
     export default {
+      props: {
+        API_key: null
+        },
       data: () => ({
         valid: true,
         name: '',
@@ -93,7 +99,8 @@
                         this.email = " ";
                         console.log(res.data);
                         console.log(res.headers);
-                        
+                        sharedState.setAPIkey(res.data['api_key']);
+                        console.log(res.data['api_key']); 
                     }
                     else {
                       alert(res.data)
