@@ -8,7 +8,8 @@ from flask_jwt_extended import (create_access_token,
 create_refresh_token, 
 set_access_cookies,
 set_refresh_cookies,
-jwt_required)
+jwt_required,
+unset_jwt_cookies)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -66,7 +67,7 @@ def logout():
 
 
 @app.route('/api/resetapikey', methods=['GET'])
-@jwt_required
+@jwt_required()
 def resetapikey():
     userid = request.args['id']
     return generateapikey(userid)
@@ -77,7 +78,7 @@ def resetapikey():
 def generateapikey(id):
 
     #check for existing key and remove it
-    if not (APIKeys.query.filter_by(userid = id).first()):
+    if not (User.query.filter_by(id = id).first()):
         return "0"
     existingkey = APIKeys.query.filter_by(userid = id).delete()
 

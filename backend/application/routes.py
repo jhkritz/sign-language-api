@@ -73,6 +73,7 @@ def upload_signs():
 
 
 @app.route('/library/uploadsign', methods=['POST'])
+@jwt_required()
 def uploadsign():
     # Endpoint to upload a single sign with a name
     try:
@@ -106,6 +107,7 @@ def uploadsign():
 
 
 @app.route('/library/createlibrary', methods=['POST'])
+@jwt_required()
 def createlibrary():
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
@@ -120,6 +122,7 @@ def createlibrary():
 
 
 @app.route('/library/signs', methods=['GET'])
+@jwt_required()
 def get_signs():
     library_name = request.args['library_name']
     img_url_base = '/library/image'
@@ -129,6 +132,7 @@ def get_signs():
 
 
 @app.route('/library/image', methods=['GET'])
+@jwt_required()
 def get_sign_image():
     lib_name = request.args['library_name']
     img_name = request.args['image_name']
@@ -137,12 +141,14 @@ def get_sign_image():
 
 
 @app.route('/libraries/names', methods=['GET'])
+@jwt_required()
 def get_library_names():
     libs = SignLanguageLibrary.query.all()
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
 @app.route('/libraries/getall', methods=['GET'])
+@jwt_required()
 def get_libraries():
     libs = SignLanguageLibrary.query.all()
     all_libs = []
@@ -153,6 +159,7 @@ def get_libraries():
 
 
 @app.route('/library/deletesign', methods=['DELETE'])
+@jwt_required()
 def delete_sign():
     libname = request.json.get('library_name')
     signname = request.json.get('sign_name')
@@ -166,6 +173,7 @@ def delete_sign():
 
 
 @app.route('/library/deletelibrary', methods=['DELETE'])
+@jwt_required()
 def delete_library():
     libname = request.json.get('library_name')
     try:
