@@ -21,6 +21,17 @@
         required
       ></v-text-field>
   
+      <v-text-field
+      v-model="password"
+      :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+      :rules="passwordRules"
+      :type="show1 ? 'text' : 'password'"
+      name="input-10-1"
+      label="Password"
+      counter
+      @click:append="show1 = !show1"
+      required
+    ></v-text-field>
   
       <v-btn
         :disabled="!valid"
@@ -49,7 +60,11 @@
           v => !!v || 'E-mail is required',
           v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
         ],
-        
+        password: "",
+        passwordRules: [
+        (v) => !!v || "Password is required",
+        (v) => v.length <= 20 || "Password must be less than 20 characters",
+        (v) => v.length >= 5 || "Password must be more than 4 characters"],
       }),
   
       methods: {

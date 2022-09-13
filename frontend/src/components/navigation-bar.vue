@@ -1,7 +1,7 @@
 <template>
     <v-app-bar app
     >
-        <v-btn icon id='homeButton' to='/'>
+        <v-btn icon id='homeButton' to='/dashboard'>
             <v-icon>mdi-home</v-icon>
         </v-btn>
         <v-appbar-title id='toolbarTitle' class="text-no-wrap">
