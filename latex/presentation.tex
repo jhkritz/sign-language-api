@@ -20,6 +20,38 @@
 \end{frame}
 
 \begin{frame}[t]
+	\frametitle{Classification performance}
+	\framesubtitle{Initial results}
+	\begin{figure}
+		\includegraphics[width=\textwidth]{initial_classification_performance.png}
+	\end{figure}
+	\begin{itemize}
+		\item Average time taken to classify a single image $= 1.097$
+	\end{itemize}
+	
+\end{frame}
+
+\begin{frame}[t]
+	\frametitle{Classification performance}
+	\framesubtitle{Attempt to improve}
+		\begin{figure}
+			\includegraphics[width=\textwidth]{lda_performance.png}
+		\end{figure}
+			\begin{itemize}
+				\item Average time taken to classify a single image $ = 5.078$.
+				\item Current implementation retrains the model before classifying an image. Classification 
+					would likely be faster than KNN once we start storing the model and the projected
+					vectors.
+			\end{itemize}
+\end{frame}
+
+	%\begin{itemize}
+		%\item LDA.
+		%\item Dimensionality reduction (less memory, faster classification).
+		%\item Maximises between class separation.
+	%\end{itemize}
+
+\begin{frame}[t]
 	\frametitle{Process}
 	\framesubtitle{Issue boards}
 	\begin{figure}
