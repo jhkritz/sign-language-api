@@ -37,7 +37,7 @@
         :disabled="!valid"
         color=#17252A
         class="mr-4 white--text"
-        @click="validate"
+        @click="postInfo()"
       >
         Register
       </v-btn>
@@ -47,6 +47,14 @@
   </template>
 
 <script>
+    import {
+        sharedState
+    } from '../SharedState';
+    
+    import {
+        baseUrl
+    } from '../BaseRequestUrl';
+    const axios = require('axios');
     export default {
       data: () => ({
         valid: true,
@@ -71,6 +79,38 @@
         validate () {
           this.$refs.form.validate()
         },
+        async postInfo() {
+                const data =  {
+                  email: this.email,
+                  password: this.password
+                };
+                const config = {
+                    method: 'post',
+                    url: baseUrl + '/register',
+                    data: data
+                };
+                try {
+                    const res = await axios(config);
+                    if (res.status == 200) {
+                        alert('Success');
+                        this.password = " ";
+                        this.email = " ";
+                        console.log(res.data);
+                        console.log(res.headers);
+                        console.log(res.data['api_key']);
+                        sharedState.setAPIkey(res.data['api_key']);
+                        this.$router.push(`/API?API_key=${res.data['api_key']}`);
+                    }
+                    else {
+                      alert(res.data)
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Registration failed.');
+                }
+            },
+
+        
       },
     }
   </script>

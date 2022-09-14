@@ -1,6 +1,4 @@
-<!-- References:https://www.digitalocean.com/community/tutorials/how-to-handle-file-uploads-in-vue-2 -->
 <template>
-
     <div id='mainContainer'>
         <v-main class="grey lighten-3" id='mainContainer'>
             <v-form v-model="valid">
@@ -87,7 +85,10 @@
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/uploadsign',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);
@@ -109,7 +110,10 @@
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/uploadsigns',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);
