@@ -112,9 +112,7 @@
                     </v-card>
                 </v-dialog>
             </v-row>
-
         </div>
-
     </div>
 </template>
 <script>
