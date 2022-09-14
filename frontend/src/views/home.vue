@@ -81,7 +81,7 @@
 
     <div class="main-text">
       <h1 class="bigtext">Welcome, </h1>
-      <h1 class="bigtext">to the Sign Language API.</h1>
+      <h1 class="bigtext">to the SignMeUp API.</h1>
       <p class="desc">
         Discover how you can start using image based sign language recognition in your projects today, by signing up for
         API usage.
