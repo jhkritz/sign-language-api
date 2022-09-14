@@ -18,21 +18,16 @@ def login():
     email = request.json.get('email')
     existinguser = User.query.filter_by(email=email).first()
     if not existinguser:
-        return {'message':'Unkown user'}
+        return {'message':'Unkown user'}, 400
     password = request.json.get('password')
     password_hash = hashlib.sha512(str(password).encode("utf-8") ).hexdigest()
     if not existinguser.pass_hash == password_hash:
-        return {'message':'Incorrect password'}
+        return {'message':'Incorrect password'}, 400
 
-    response = jsonify({'message':'Success'})
     access_token = create_access_token(identity=existinguser.id)
     refresh_token = create_refresh_token(identity=existinguser.id)
-    #set_access_cookies(response, access_token)
-    #set_refresh_cookies(response, refresh_token)
-    print(access_token)
-
-    #return auth and token in headers
-    return {'access': access_token}, 200
+    #return auth and token in json
+    return {'access': access_token, 'refresh': refresh_token}, 200
 
 
 @app.route('/register', methods=['POST'])
@@ -68,6 +63,7 @@ def logout():
     return response
 
 @app.route('/refresh', methods=['GET'])
+@jwt_required(refresh=True)
 def refreshtoken():
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
