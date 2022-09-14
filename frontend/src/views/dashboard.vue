@@ -117,7 +117,7 @@
 </template>
 <script>
 
-    
+
 import libraryCardVue from '../components/library-card.vue';
 import {
     baseUrl
@@ -186,6 +186,7 @@ export default {
             } catch (err) {
                 console.error(err);
             }
+            this.filteredList = this.libraries.slice();
             //link buttons to lib id
             this.myName = '';
             this.myDesc = '';
