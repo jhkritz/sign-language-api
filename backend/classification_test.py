@@ -9,12 +9,12 @@ smallest = "ABC - 3 images"
 def test_classification_accuracy():
     lib_names = [smallest, "ABC - 30 images", "ABC - 300 images"]
     signs = ['a', 'b', 'c']
-    num_correct = 0
-    total = 0
-    positive_confidence = 0
-    negative_confidence = 0
-    test_signs_per_dir = 10
     for lib_name in lib_names:
+        num_correct = 0
+        total = 0
+        positive_confidence = 0
+        negative_confidence = 0
+        test_signs_per_dir = 10
         print(lib_name)
         for sign in signs:
             count = 0
@@ -24,7 +24,6 @@ def test_classification_accuracy():
                     break
                 count += 1
                 path_to_image = "./test_data/{}/{}".format(sign, img_name)
-                # path_to_image = "/home/river/cs344/sign_language_recognition/backend/test_data/" + img_name
                 cmd = "curl --location --request POST 'http://localhost:5000/library/classifyimage' \
                         --form 'library_name=\"{}\"' \
                         --form 'image=@\"{}\"'".format(lib_name, path_to_image)
@@ -41,13 +40,16 @@ def test_classification_accuracy():
                     print(output['result'])
                 except Exception as e:
                     print(e)
-        avg_pc = positive_confidence / num_correct
-        avg_nc = negative_confidence / (total - num_correct)
-        ratio_correct = num_correct / total
-        print(avg_pc)
-        print(avg_nc)
-        print(ratio_correct)
-        print('-----------------------------------------------------')
+        try:
+            avg_pc = positive_confidence / num_correct
+            avg_nc = negative_confidence / (total - num_correct)
+            ratio_correct = num_correct / total
+            print(avg_pc)
+            print(avg_nc)
+            print(ratio_correct)
+            print('-----------------------------------------------------')
+        except Exception:
+            pass
 
 
 nose2.main()
