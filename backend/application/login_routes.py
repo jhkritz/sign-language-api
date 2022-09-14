@@ -68,9 +68,9 @@ def refreshtoken():
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
     access_token = create_access_token(identity=user.id)
+    refresh_token = create_refresh_token(identity=user.id)
     response = jsonify()
-    set_access_cookies(response, access_token)
-    return response
+    return {'access':access_token, 'refresh': refresh_token}
 
 
 
