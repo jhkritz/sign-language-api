@@ -48,10 +48,10 @@ def register():
     access_token = create_access_token(identity=user.id)
     refresh_token = create_refresh_token(identity=user.id)
 
-    return {'api_key': key, 'access': access_token, 'refresh': refresh_token}
-
     #set_access_cookies(response, access_token)
     #set_refresh_cookies(response, refresh_token)
+
+    return {'api_key': key, 'access': access_token, 'refresh': refresh_token}
 
 
 @app.route('/logout', methods=['POST'])

@@ -75,8 +75,8 @@
                         alert('Success');
                         this.password = " ";
                         this.email = " ";
-                        console.log(res.data);
-                        console.log(res.headers);
+                        localStorage.setItem('access_token',res.data['access'])
+                        localStorage.setItem('refresh_token',res.data['refresh'])
                         console.log(res.data['api_key']);
                         localStorage.setItem('access_token', res.data['access'])
                         localStorage.setItem('refresh_token', res.data['refresh'])
