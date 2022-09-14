@@ -296,42 +296,21 @@ def classify_request():
         # Setup the model
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
         data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
-        # 3
-        print(data.shape)
         lda.fit(data, labels)
-        print('explained var = ' + str(lda.explained_variance_ratio_))
-        print(lda.predict_proba(data))
-        print(data.shape)
-        proj = lda.transform(data)
-        y_pred = lda.predict(data)
-        plt.plot(proj[:, 0], proj[:, 1])
-        plt.show()
-        print(y_pred)
-        count = 0
-        for i in range(len(y_pred)):
-            if y_pred[i] == labels[i]:
-                count += 1
-        print('num correct = ' + str(count))
-        # 3
         processed_image = process_input_single_frame(image, hand_detector, desired_shape)
         result = None
         if processed_image is not None:
-            processed_image = processed_image.flatten()
-            trans = lda.transform(processed_image[np.newaxis, :])
-            print(trans.shape)
-            pred = lda.predict(processed_image[np.newaxis, :])
-            quality_of_match = lda.predict_proba(processed_image[np.newaxis, :])[0]
-            print(quality_of_match)
-            quality_of_match = max(quality_of_match)
+            flat_image = processed_image.flatten()
+            quality_of_match = max(lda.predict_proba(flat_image[np.newaxis, :])[0])
             # quality_of_match = lda.score(processed_image[np.newaxis, :], labels)
             # This conversion is based on the code provided in the following StackOverflow post
             # https://stackoverflow.com/questions/58931854/
             # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
             processed_image = cv2.imencode('.png', processed_image)[1]
             image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-            meaning = label_meanings[int(pred[0])]
+            prediction = lda.predict(flat_image[np.newaxis, :])[0]
+            meaning = label_meanings[int(prediction)]
             result = {'classification': meaning, 'quality_of_match': str(quality_of_match)}
-            print(result)
             response = {'processedImage': image_out, 'result': result}
             # print(response['result'])
             end = time.time()
@@ -340,35 +319,6 @@ def classify_request():
         else:
             print('processed_image is none')
             return Response(status=400)
-        """
-        #projected_data = lda.transform(data)
-        # XXX: this code will crash if the library contains < 3 images
-        #k = min(data.shape[0], 1)
-        k = min(data.shape[0], 10)
-        #print('k = ' + str(k))
-        knn = cv.ml.KNearest_create()
-        #knn.train(projected_data, cv.ml.ROW_SAMPLE, labels)
-        # Process the image
-        processed_image = process_input_single_frame(image, hand_detector, desired_shape).flatten()
-        result = None
-        if processed_image is not None:
-            # Prepare for classification
-            flattened = processed_image.flatten()
-            # knn.findNearest() expects an array of images for classification.
-            to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
-            # Classify the processed image
-            result = classify(to_classify, knn, k, label_meanings)
-            # This conversion is based on the code provided in the following StackOverflow post
-            # https://stackoverflow.com/questions/58931854/
-            # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
-            processed_image = cv2.imencode('.png', processed_image)[1]
-            image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-            response = {'processedImage': image_out, 'result': result}
-            # print(response['result'])
-            print('Time taken = ' + str(end - start))
-            return response
-        """
     except Exception as e:
-        print('exception')
         print(e)
         return Response(status=400)
