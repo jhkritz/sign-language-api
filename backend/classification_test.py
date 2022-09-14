@@ -5,7 +5,7 @@ import os
 
 
 def test_classification_accuracy():
-    lib_name = "ClassificationAccuracy"
+    lib_name = "Classification"
     signs = ['a', 'b', 'c']
     num_correct = 0
     total = 0
@@ -28,7 +28,7 @@ def test_classification_accuracy():
             try:
                 output = json.loads(completed.stdout.decode('utf-8'))
                 res = output['result']
-                if res['classification'] == 'small_' + sign:
+                if res['classification'] == sign:
                     num_correct += 1
                     positive_confidence += float(res['quality_of_match'])
                 else:

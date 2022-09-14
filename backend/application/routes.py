@@ -1,4 +1,5 @@
 from pydoc import describe
+import time
 from flask import current_app as app, Response, request, send_from_directory
 from .models import SignLanguageLibrary, Sign
 from zipfile import ZipFile
@@ -14,6 +15,8 @@ from PIL import Image
 import base64
 import cv2
 import shutil
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from matplotlib import pyplot as plt
 # from aiohttp import web
 # from av import VideoFrame
 
@@ -241,6 +244,7 @@ def process_input_single_frame(frame, hand_detector, desired_shape):
 def return_image(data_image, lib_name):
     # socket function to process image and then return result
     try:
+
         # Note: This code is based on the code given on the webpage linked below:
         # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
         # Open image with opencv
@@ -282,6 +286,8 @@ def classify_request():
     lib_name = request.form['library_name']
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     try:
+        start = time.time()
+        lda = LinearDiscriminantAnalysis()
         # Note: This code is based on the code given on the webpage linked below:
         # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
         # Open image with opencv
@@ -290,14 +296,60 @@ def classify_request():
         # Setup the model
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
         data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
+        # 3
+        print(data.shape)
+        lda.fit(data, labels)
+        print('explained var = ' + str(lda.explained_variance_ratio_))
+        print(lda.predict_proba(data))
+        print(data.shape)
+        proj = lda.transform(data)
+        y_pred = lda.predict(data)
+        plt.plot(proj[:, 0], proj[:, 1])
+        plt.show()
+        print(y_pred)
+        count = 0
+        for i in range(len(y_pred)):
+            if y_pred[i] == labels[i]:
+                count += 1
+        print('num correct = ' + str(count))
+        # 3
+        processed_image = process_input_single_frame(image, hand_detector, desired_shape)
+        result = None
+        if processed_image is not None:
+            processed_image = processed_image.flatten()
+            trans = lda.transform(processed_image[np.newaxis, :])
+            print(trans.shape)
+            pred = lda.predict(processed_image[np.newaxis, :])
+            quality_of_match = lda.predict_proba(processed_image[np.newaxis, :])[0]
+            print(quality_of_match)
+            quality_of_match = max(quality_of_match)
+            # quality_of_match = lda.score(processed_image[np.newaxis, :], labels)
+            # This conversion is based on the code provided in the following StackOverflow post
+            # https://stackoverflow.com/questions/58931854/
+            # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
+            processed_image = cv2.imencode('.png', processed_image)[1]
+            image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
+            meaning = label_meanings[int(pred[0])]
+            result = {'classification': meaning, 'quality_of_match': str(quality_of_match)}
+            print(result)
+            response = {'processedImage': image_out, 'result': result}
+            # print(response['result'])
+            end = time.time()
+            print('Time taken = ' + str(end - start))
+            return response
+        else:
+            print('processed_image is none')
+            return Response(status=400)
+        """
+        #projected_data = lda.transform(data)
         # XXX: this code will crash if the library contains < 3 images
         #k = min(data.shape[0], 1)
         k = min(data.shape[0], 10)
         #print('k = ' + str(k))
         knn = cv.ml.KNearest_create()
-        knn.train(data, cv.ml.ROW_SAMPLE, labels)
+        #knn.train(projected_data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
-        processed_image = process_input_single_frame(image, hand_detector, desired_shape)
+        processed_image = process_input_single_frame(image, hand_detector, desired_shape).flatten()
         result = None
         if processed_image is not None:
             # Prepare for classification
@@ -313,10 +365,9 @@ def classify_request():
             image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
             response = {'processedImage': image_out, 'result': result}
             # print(response['result'])
+            print('Time taken = ' + str(end - start))
             return response
-        else:
-            print('processed_image is none')
-            return Response(status=400)
+        """
     except Exception as e:
         print('exception')
         print(e)
