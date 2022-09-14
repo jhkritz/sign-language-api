@@ -123,7 +123,10 @@
                     url.searchParams.append('library_name', this.library_id);
                     const config = {
                         method: 'get',
-                        url: url
+                        url: url,
+                        headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                     }
                     const res = await axios(config);
                     this.signs = res.data.signs.map(sign => ({

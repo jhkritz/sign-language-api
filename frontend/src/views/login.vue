@@ -26,6 +26,7 @@
   </template>
   
   <script>
+
     import {
         baseUrl
     } from '../BaseRequestUrl';
@@ -64,6 +65,7 @@
                         alert('Success');
                         this.password = " ";
                         this.email = " ";
+                        localStorage.setItem('access_token', res.data['access'])
                     }
                     else {
                       alert(res.data)

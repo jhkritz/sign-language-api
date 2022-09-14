@@ -1,5 +1,5 @@
 from pydoc import describe
-from flask import current_app as app, Response, request, send_from_directory
+from flask import current_app as app, Response, request, send_from_directory, jsonify
 from .models import SignLanguageLibrary, Sign
 from zipfile import ZipFile
 import numpy as np
@@ -16,6 +16,7 @@ import cv2
 import shutil
 from flask_jwt_extended import jwt_required
 from .login_routes import verifykey
+from flask_cors import cross_origin
 # from aiohttp import web
 # from av import VideoFrame
 
@@ -118,7 +119,8 @@ def createlibrary():
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
-    return Response(status=200)
+    response = jsonify()
+    return response, 200
 
 
 @app.route('/library/signs', methods=['GET'])
@@ -155,7 +157,8 @@ def get_libraries():
     for lib in libs:
         thislib = {'name': lib.name, 'description': lib.description}
         all_libs.append(thislib)
-    return {'libraries': all_libs}
+    response = jsonify({'libraries': all_libs})
+    return response,200
 
 
 @app.route('/library/deletesign', methods=['DELETE'])

@@ -118,10 +118,13 @@
     </div>
 </template>
 <script>
+
+    
 import libraryCardVue from '../components/library-card.vue';
 import {
     baseUrl
 } from '../BaseRequestUrl.js';
+
 const axios = require('axios');
 export default {
     data: () => ({
@@ -129,7 +132,7 @@ export default {
         myName: '',
         myDesc: '',
         libraries: [],
-        filteredList: []
+        filteredList: [],
     }),
     components: {
         libraryCardVue
@@ -140,8 +143,9 @@ export default {
                 const config = {
                     method: 'get',
                     url: baseUrl + '/libraries/getall',
-                    withCredentials: true,
-                    'Access-Control-Allow-Credentials' : true
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 // Get list of libraries
                 const res = await axios(config);
@@ -169,7 +173,10 @@ export default {
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/createlibrary',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 const res = await axios(config);
                 if (res.data.message !== 'Library exists') {

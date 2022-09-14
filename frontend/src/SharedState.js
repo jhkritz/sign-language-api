@@ -2,6 +2,13 @@ export const sharedState = {
 	API_key: null, 
 	library_id: null,
 	cameraStream: null,
+	access_token: null,
+
+
+	setAccessToken(token){
+		this.access_token = token;
+	},
+
 	setAPIkey(newAPIkey){
 		this.API_key = newAPIkey; 
 	},

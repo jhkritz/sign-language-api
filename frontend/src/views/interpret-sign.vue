@@ -83,7 +83,10 @@
                 const config = {
                     method: 'post',
                     url: 'http://localhost:5000/library/classifyimage',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);

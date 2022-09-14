@@ -27,12 +27,12 @@ def login():
     response = jsonify({'message':'Success'})
     access_token = create_access_token(identity=existinguser.id)
     refresh_token = create_refresh_token(identity=existinguser.id)
-    set_access_cookies(response, access_token)
-    set_refresh_cookies(response, refresh_token)
-
+    #set_access_cookies(response, access_token)
+    #set_refresh_cookies(response, refresh_token)
+    print(access_token)
 
     #return auth and token in headers
-    return response
+    return {'access': access_token}, 200
 
 
 @app.route('/register', methods=['POST'])
@@ -54,8 +54,8 @@ def register():
 
     response = jsonify({'api_key':key})
 
-    set_access_cookies(response, access_token)
-    set_refresh_cookies(response, refresh_token)
+    #set_access_cookies(response, access_token)
+    #set_refresh_cookies(response, refresh_token)
 
     return response
 
