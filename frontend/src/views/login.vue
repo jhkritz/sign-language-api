@@ -121,7 +121,7 @@
 
 <style scoped>
   .logo {
-    width: 8%;
+    width: 7%;
     margin-left: 1%;
   }
 </style>
