@@ -1,7 +1,19 @@
 <template>
-    <v-container>
-
-    <v-form
+    <v-app>
+      <div>
+      <!--Navigation bar-->  
+      <v-app-bar
+        elevation="0"
+        color=#3AAFA9
+      >
+      <v-btn icon color= "white" id='homeButton' to='/'>
+            <v-icon>mdi-home</v-icon>
+        </v-btn>
+      <v-appbar-title class = "white--text">Sign Language API</v-appbar-title>
+      </v-app-bar>
+    </div>
+      <!--Registration form-->
+      <v-form
       ref="form"
       v-model="valid"
       lazy-validation
@@ -43,7 +55,7 @@
       </v-btn>
   
     </v-form>
-</v-container>
+</v-app>
   </template>
 
 <script>
