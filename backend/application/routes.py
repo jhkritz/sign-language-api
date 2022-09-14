@@ -14,7 +14,7 @@ from PIL import Image
 import base64
 import cv2
 import shutil
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from .login_routes import verifykey
 from flask_cors import cross_origin
 # from aiohttp import web
@@ -112,10 +112,11 @@ def uploadsign():
 def createlibrary():
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
+    user_id = get_jwt_identity()
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}
-    library = SignLanguageLibrary(name=libname, description=lib_description)
+    library = SignLanguageLibrary(name=libname, description=lib_description, ownerid = user_id)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
@@ -145,14 +146,16 @@ def get_sign_image():
 @app.route('/libraries/names', methods=['GET'])
 @jwt_required()
 def get_library_names():
-    libs = SignLanguageLibrary.query.all()
+    user_id = get_jwt_identity()
+    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
 @app.route('/libraries/getall', methods=['GET'])
 @jwt_required()
 def get_libraries():
-    libs = SignLanguageLibrary.query.all()
+    user_id = get_jwt_identity()
+    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     all_libs = []
     for lib in libs:
         thislib = {'name': lib.name, 'description': lib.description}
