@@ -87,7 +87,10 @@
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/uploadsign',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);
@@ -109,7 +112,10 @@
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/uploadsigns',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);

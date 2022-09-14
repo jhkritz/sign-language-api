@@ -130,3 +130,5 @@ new Vue({
 		sharedState: sharedState
 	},
 }).$mount('#app');
+
+axios.defaults.headers.common['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2MzA5OTE1MiwianRpIjoiMGJhY2JmNzItMTA4NS00M2E1LThmMDEtMWY5ZGE3N2YwMjdjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MTUsIm5iZiI6MTY2MzA5OTE1MiwiZXhwIjoxNjYzMTAwMDUyfQ.IFxLYf_Rr54nq4I7G1AVweeVOcswtwYyHB_EZld6LI8' 

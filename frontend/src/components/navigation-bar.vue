@@ -77,8 +77,10 @@
                     method: 'delete',
                     url: 'http://localhost:5000/library/deletelibrary',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
                     },
+
                     data: data
                 };
                 try {
