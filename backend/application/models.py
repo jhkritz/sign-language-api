@@ -22,6 +22,7 @@ class SignLanguageLibrary(db.Model):
     description = db.Column(db.String(256), nullable=False)
     # One to many relationship between SignLanguageLibrary and Sign
     signs = db.relationship('Sign', backref='sign_language_library', cascade="all,delete")
+    ownerid = db.Column(db.Integer, nullable=False)
 
 
 
