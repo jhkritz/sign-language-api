@@ -1,9 +1,11 @@
 <template>
-    <v-app-bar app>
-        <v-btn icon id='homeButton' to='/'>
+    <v-app-bar app
+        color=#3AAFA9
+    >
+        <v-btn icon color= "white" id='homeButton' to='/dashboard'>
             <v-icon>mdi-home</v-icon>
         </v-btn>
-        <v-appbar-title id='toolbarTitle' class="text-no-wrap">
+        <v-appbar-title id='toolbarTitle' class="white--text">
             {{libraryname}}   
         </v-appbar-title>
         <v-tabs centered class="ml-n9">
@@ -13,7 +15,7 @@
         </v-tabs>
         <v-menu>
             <template v-slot:activator="{ on, attrs }">
-                <v-btn icon v-bind="attrs" v-on=on>
+                <v-btn color= "white" icon v-bind="attrs" v-on=on>
                     <v-icon>mdi-dots-vertical</v-icon>
                 </v-btn>
             </template>
@@ -76,15 +78,17 @@
                     method: 'delete',
                     url: 'http://localhost:5000/library/deletelibrary',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
                     },
+
                     data: data
                 };
                 try {
                     const response = await axios(config);
                     console.log(response.data);
                     // Navigate home after deleting library.
-                    this.$router.push('/');
+                    this.$router.push('/dashboard');
                 } catch (err) {
                     console.error(err);
                 }

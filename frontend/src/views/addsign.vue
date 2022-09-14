@@ -1,4 +1,3 @@
-<!-- References:https://www.digitalocean.com/community/tutorials/how-to-handle-file-uploads-in-vue-2 -->
 <template>
     <div id='mainContainer'>
         <v-main class="grey lighten-3" id='mainContainer'>
@@ -10,7 +9,7 @@
                                 <v-container id='container'>
                                     <v-file-input label='Upload a hand sign' v-model='image' />
                                     <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
-                                    <v-btn dark color="orange darken-4" depressed @click="postSign">
+                                    <v-btn dark color=#17252A depressed @click="postSign">
                                         Submit single image
                                     </v-btn>
                                 </v-container>
@@ -19,22 +18,10 @@
                                 <v-container id='container'>
                                     <v-file-input label='Upload a zip file with many photos of the same sign' v-model='zip_file' />
                                     <v-text-field v-model="zip_signname" label="Sign name" :rules="signrules" outlined required />
-                                    <v-btn dark color="orange darken-4" depressed @click="postSigns">
+                                    <v-btn dark color=#17252A depressed @click="postSigns">
                                         Submit zip file
                                     </v-btn>
                                 </v-container>
-                                <!--
-                        <v-container id='container'>
-                            <v-container-title>Take picture to upload</v-container-title>
-                                <video id='webcamVideo' width='100%' height='400' autoplay />
-                                    <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required>
-                                </v-text-field>
-                                    <v-btn dark color="orange darken-4">
-                                        Submit
-                                    </v-btn>
-                                    
-            </v-container>
-						-->
                             </v-col>
                         </v-row>
                     </v-sheet>
@@ -98,7 +85,10 @@
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/uploadsign',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);
@@ -120,7 +110,10 @@
                 const config = {
                     method: 'post',
                     url: baseUrl + '/library/uploadsigns',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);

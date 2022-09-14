@@ -11,7 +11,7 @@
                                 </v-card-title>
                                 <video id='webcamVideo' width='100%' height='400' autoplay />
                                 <v-card-actions class='justify-center align-center'>
-                                    <v-btn dark color="orange darken-4" @click.stop='processSnapshot'>
+                                    <v-btn dark color=#17252A @click.stop='processSnapshot'>
                                         Process a snapshot
                                     </v-btn>
                                 </v-card-actions>
@@ -83,7 +83,10 @@
                 const config = {
                     method: 'post',
                     url: 'http://localhost:5000/library/classifyimage',
-                    data: data
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
                 };
                 try {
                     const res = await axios(config);
