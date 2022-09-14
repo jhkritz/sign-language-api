@@ -17,7 +17,11 @@
             label="Password"
             required
           ></v-text-field>
-          <v-btn :disabled="!valid" color=#17252A class="mr-4 white--text" @click="postInfo()">
+          <v-btn 
+          :disabled="!valid" 
+          color=#17252A 
+          class="mr-4 white--text" 
+          @click="postInfo()">
             Log In
           </v-btn>
         </v-form>
@@ -66,6 +70,7 @@
                         this.password = " ";
                         this.email = " ";
                         localStorage.setItem('access_token', res.data['access'])
+                        this.$router.push("/dashboard");
                     }
                     else {
                       alert(res.data)
