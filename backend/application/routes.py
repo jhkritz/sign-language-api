@@ -20,6 +20,7 @@ from matplotlib import pyplot as plt
 from flask_jwt_extended import jwt_required
 from .login_routes import verifykey
 from flask_cors import cross_origin
+import sklearn.decomposition
 
 hand_detector = HandDetector(maxHands=1)
 desired_shape = (200, 200)
@@ -46,16 +47,13 @@ def upload_signs():
             # XXX: what happens if the file already exists? Is it overwritten?
             zpfl.extract(filename, path=img_path)
             img = cv.imread(img_path + filename)
-            img = process_input_single_frame(
-                img, hand_detector=hand_detector, desired_shape=desired_shape
-            )
+            img = preprocess_image(img)
             os.remove(img_path + filename)
             if img is None:
                 continue
             else:
                 num_good_images += 1
                 cv.imwrite(img_path + filename, img)
-                #Image.fromarray(img).save(img_path + filename)
                 libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
                 sign = Sign(
                     meaning=sign_name,
@@ -88,9 +86,7 @@ def uploadsign():
             pass
         image.save(img_path + 'temp.jpg')
         image = cv2.imread(img_path + 'temp.jpg')
-        image = process_input_single_frame(
-            image, hand_detector=hand_detector, desired_shape=desired_shape
-        )
+        image = preprocess_image(image)
         os.remove(img_path + 'temp.jpg')
         if image is None:
             msg = 'A hand could not be found in the image.'
@@ -193,22 +189,8 @@ def delete_library():
 ####################################################################################################
 
 
-def classify(to_classify, knn, k, label_meanings):
-    retval, results, responses, dists = knn.findNearest(to_classify, k=k)
-    classification = results[0][0]
-    meaning = label_meanings[int(classification)]
-    #meaning = Sign.get_sign_meaning(int(classification))
-    quality_of_match = 0
-    for resp in responses[0]:
-        if resp == classification:
-            quality_of_match += 1
-    # print(responses[0])
-    #print('len(responses) = ' + str(len(responses[0])))
-    quality_of_match = 100 * quality_of_match / len(responses[0])
-    return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
-
-
-def get_data_and_labels(lib_name, lib_path):
+def get_data_and_labels(lib_name):
+    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     # Read library images and get labels
     lib = SignLanguageLibrary.query.filter_by(name=lib_name).first()
     labels = []
@@ -230,7 +212,7 @@ def get_data_and_labels(lib_name, lib_path):
     return data, labels, label_meanings
 
 
-def process_input_single_frame(frame, hand_detector, desired_shape):
+def preprocess_image(frame):
     # TODO: reference tutorial video
     offset = 30
     input_img = frame
@@ -248,82 +230,41 @@ def process_input_single_frame(frame, hand_detector, desired_shape):
     return None
 
 
-@socketio.on('image_request')
-def return_image(data_image, lib_name):
-    # socket function to process image and then return result
-    try:
-
-        # Note: This code is based on the code given on the webpage linked below:
-        # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
-        # Open image with opencv
-        b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
-        image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-        # Setup the model
-        lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-        data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
-        # XXX: this code will crash if the library contains < 3 images
-        k = min(data.shape[0], 10)
-        knn = cv.ml.KNearest_create()
-        knn.train(data, cv.ml.ROW_SAMPLE, labels)
-        # Process the image
-        processed_image = process_input_single_frame(image, hand_detector, desired_shape)
-        # Prepare for classification
-        flattened = processed_image.flatten()
-        # knn.findNearest() expects an array of images for classification.
-        to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
-        # Classify the processed image
-        result = None
-        if type(processed_image):
-            result = classify(to_classify, knn, k, label_meanings)
-        # This conversion is based on the code provided in the following StackOverflow post
-        # https://stackoverflow.com/questions/58931854/
-        # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
-        processed_image = cv2.imencode('.png', processed_image)[1]
-        image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-        response = {'frame': image_out, 'result': result}
-        # print(response['result'])
-        emit('image_response', response)
-    except Exception as e:
-        print(e)
-
-
 @app.route('/library/classifyimage', methods=['POST'])
 def classify_request():
-    # Majority of code copied from function above
+    """
+    https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
+    https://www.geeksforgeeks.org/python-opencv-imdecode-function/
+    """
+    classification_alg = 'KNN'
     data_image = request.files['image'].read()
     lib_name = request.form['library_name']
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     try:
-        start = time.time()
-        lda = LinearDiscriminantAnalysis()
-        # Note: This code is based on the code given on the webpage linked below:
-        # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
-        # Open image with opencv
-        #b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-        # Setup the model
-        lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-        data, labels, label_meanings = get_data_and_labels(lib_name, lib_path)
-        lda.fit(data, labels)
-        processed_image = process_input_single_frame(image, hand_detector, desired_shape)
-        result = None
+        data, labels, label_meanings = get_data_and_labels(lib_name)
+        processed_image = preprocess_image(image)
         if processed_image is not None:
             flat_image = processed_image.flatten()
-            quality_of_match = max(lda.predict_proba(flat_image[np.newaxis, :])[0])
-            # quality_of_match = lda.score(processed_image[np.newaxis, :], labels)
-            # This conversion is based on the code provided in the following StackOverflow post
-            # https://stackoverflow.com/questions/58931854/
-            # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
             processed_image = cv2.imencode('.png', processed_image)[1]
             image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-            prediction = lda.predict(flat_image[np.newaxis, :])[0]
-            meaning = label_meanings[int(prediction)]
-            result = {'classification': meaning, 'quality_of_match': str(quality_of_match)}
-            response = {'processedImage': image_out, 'result': result}
-            # print(response['result'])
-            end = time.time()
-            print('Time taken = ' + str(end - start))
-            return response
+            result = None
+            if classification_alg == 'LDA':
+                start = time.time()
+                result = lda_classify(data, labels, label_meanings, flat_image)
+                end = time.time()
+                print('Time taken = ' + str(end - start))
+            elif classification_alg == 'KNN':
+                start = time.time()
+                result = knn_classify(data, labels, label_meanings, flat_image)
+                end = time.time()
+                print('Time taken = ' + str(end - start))
+            elif classification_alg == 'LGR':
+                start = time.time()
+                result = logistic_regression(data, labels, label_meanings, flat_image)
+                end = time.time()
+                print('Time taken = ' + str(end - start))
+            return {'processedImage': image_out, 'result': result}
         else:
             print('processed_image is none')
             return Response(status=400)
@@ -331,12 +272,88 @@ def classify_request():
         print(e)
         return Response(status=400)
 
+
+def train_lgr(lib_name, data, labels):
+    lgr = cv.ml.LogisticRegression.create()
+    lgr.setStreamMethod(cv.ml.LogisticRegression_MINI_BATCH)
+    lgr.setMiniBatchSize(1)
+    lgr.setIterations(100)
+    lgr.train(data, cv.ml.ROW_SAMPLE, labels)
+    lgr.save(lib_name)
+
+
+def train_lda(lib_name, data, labels):
+    lda = LinearDiscriminantAnalysis()
+    lda.fit(data, labels)
+    params = lda.get_params(deep=True)
+    f = open(lib_name + '.lda', 'w')
+    f.write(json.dumps(params))
+
+
+def get_lda(lib_name):
+    lda = LinearDiscriminantAnalysis()
+    f = open(lib_name + '.lda', 'r')
+    lda.set_params(json.loads(f.read()))
+    return lda
+
+
+def lda_classify(data, labels, label_meanings, processed_image):
+    lda = LinearDiscriminantAnalysis()
+    lda.fit(data, labels)
+    flat_image = processed_image.flatten()
+    quality_of_match = max(lda.predict_proba(flat_image[np.newaxis, :])[0])
+    prediction = lda.predict(flat_image[np.newaxis, :])[0]
+    meaning = label_meanings[int(prediction)]
+    return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
+
+
+def pca_transform(data, flat_image):
+    pca = decomposition.PCA()
+    pca.fit(data)
+    print('pca evr = ' + str(pca.explained_variance_ratio_))
+    data = pca.transform(data)
+    flat_image = pca.transform(flat_image[np.newaxis, :])[0]
+    return data, flat_image
+
+
+def knn_classify(data, labels, label_meanings, flat_image):
+    k = min(int(data.shape[0] / 3), 50)
+    knn = cv.ml.KNearest_create()
+    should_use_pca = False
+    if should_use_pca:
+        data, flat_image = pca_transform(data, flat_image)
+    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    to_classify = np.array(flat_image[np.newaxis, :], dtype=np.float32)
+    retval, results, responses, dists = knn.findNearest(to_classify, k=k)
+    classification = results[0][0]
+    meaning = label_meanings[int(classification)]
+    quality_of_match = 0
+    for resp in responses[0]:
+        if resp == classification:
+            quality_of_match += 1
+    quality_of_match = 100 * quality_of_match / len(responses[0])
+    return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
+
+
+def logistic_regression(data, labels, label_meanings, processed_image):
+    lgr = cv.ml.LogisticRegression.create()
+    lgr.setStreamMethod(cv.ml.LogisticRegression_MINI_BATCH)
+    lgr.setMiniBatchSize(1)
+    lgr.setIterations(100)
+    lgr.train(data, cv.ml.ROW_SAMPLE, labels)
+    pred = lgr.predict(processed_image[np.newaxis, :])
+    print(pred)
+    meaning = label_meanings[int(pred[0])]
+    quality_of_match = '?'
+    return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
+
+
 #########################################################################
 # API routes using API keys instead of JWT
 #########################################################################
 
 
-@app.route('/api/library/uploadsign', methods=['POST'])
+@ app.route('/api/library/uploadsign', methods=['POST'])
 def uploadsignapi():
     key = request.form.get('key')
     if verifykey(key) <= 0:
@@ -352,8 +369,7 @@ def uploadsignapi():
         image = cv2.imread(img_path)
         hand_detector = HandDetector(maxHands=1)
         desired_shape = (200, 200)
-        image = process_input_single_frame(
-            image, hand_detector=hand_detector, desired_shape=desired_shape)
+        image = preprocess_image(image)
         os.remove(img_path)
         if image is None:
             return {"Error": "A hand could not be found in the image"}, 400
@@ -370,7 +386,7 @@ def uploadsignapi():
     return Response(status=200)
 
 
-@app.route('/api/library/createlibrary', methods=['POST'])
+@ app.route('/api/library/createlibrary', methods=['POST'])
 def createlibraryapi():
     key = request.form.get('key')
     if verifykey(key) <= 0:
@@ -388,7 +404,7 @@ def createlibraryapi():
     return Response(status=200)
 
 
-@app.route('/api/library/signs', methods=['GET'])
+@ app.route('/api/library/signs', methods=['GET'])
 def get_signsapi():
     key = request.args['key']
     if verifykey(key) <= 0:
@@ -401,7 +417,7 @@ def get_signsapi():
     return {'signs': signs}
 
 
-@app.route('/api/library/image', methods=['GET'])
+@ app.route('/api/library/image', methods=['GET'])
 def get_sign_imageapi():
     key = request.args['key']
     if verifykey(key) <= 0:
@@ -413,7 +429,7 @@ def get_sign_imageapi():
     return send_from_directory(path, img_name)
 
 
-@app.route('/api/libraries/names', methods=['GET'])
+@ app.route('/api/libraries/names', methods=['GET'])
 def get_library_namesapi():
     key = request.args['key']
     if verifykey(key) <= 0:
@@ -426,7 +442,7 @@ def get_library_namesapi():
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
-@app.route('/api/libraries/getall', methods=['GET'])
+@ app.route('/api/libraries/getall', methods=['GET'])
 def get_librariesapi():
     key = request.args['key']
     if verifykey(key) <= 0:
@@ -440,7 +456,7 @@ def get_librariesapi():
     return {'libraries': all_libs}
 
 
-@app.route('/api/library/deletesign', methods=['DELETE'])
+@ app.route('/api/library/deletesign', methods=['DELETE'])
 def delete_signapi():
     key = request.json.get('key')
     if verifykey(key) <= 0:
@@ -457,7 +473,7 @@ def delete_signapi():
         return Response(status=400)
 
 
-@app.route('/api/library/deletelibrary', methods=['DELETE'])
+@ app.route('/api/library/deletelibrary', methods=['DELETE'])
 def delete_libraryapi():
     key = request.json.get('key')
     if verifykey(key) <= 0:
@@ -475,8 +491,10 @@ def delete_libraryapi():
         return Response(status=400)
 
 
+"""
 @app.route('/api/library/classifyimage', methods=['POST'])
 def classify_requestapi():
+    # https: // www.geeksforgeeks.org/python-opencv-imdecode-function/
     key = request.form['key']
     if verifykey(key) <= 0:
         return {'message': 'Authentication failed'}, 401
@@ -486,29 +504,22 @@ def classify_requestapi():
     lib_name = request.form['library_name']
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     try:
-        # Note: This code is based on the code given on the webpage linked below:
-        # https://www.geeksforgeeks.org/python-opencv-imdecode-function/
-        # Open image with opencv
-        #b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
         hand_detector = HandDetector(maxHands=1)
         # Setup the model
         desired_shape = (200, 200)
         lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-        data, labels = get_data_and_labels(lib_name, lib_path)
+        data, labels = get_data_and_labels(lib_name)
         # XXX: this code will crash if the library contains < 3 images
         k = min(data.shape[0], 1)
         knn = cv.ml.KNearest_create()
         knn.train(data, cv.ml.ROW_SAMPLE, labels)
         # Process the image
-        processed_image = process_input_single_frame(image, hand_detector, desired_shape)
+        processed_image = preprocess_image(image)
         result = None
         if processed_image is not None:
-            # Prepare for classification
-            flattened = processed_image.flatten()
-            # knn.findNearest() expects an array of images for classification.
-            to_classify = np.array(flattened[np.newaxis, :], dtype=np.float32)
-            # Classify the processed image
+            flat_image = processed_image.flatten()
+            to_classify = np.array(flat_image[np.newaxis, :], dtype=np.float32)
             result = classify(to_classify, knn, k)
             # This conversion is based on the code provided in the following StackOverflow post
             # https://stackoverflow.com/questions/58931854/
@@ -525,3 +536,4 @@ def classify_requestapi():
         print('exception')
         print(e)
         return Response(status=400)
+"""
