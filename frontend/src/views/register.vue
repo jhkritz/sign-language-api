@@ -3,10 +3,12 @@
         <div>
             <!--Navigation bar-->
             <v-app-bar elevation="0" color=#3AAFA9>
+                <!--v-appbar-title class="white--text">Sign Language API</v-appbar-title-->
+                <img class="logo" src='../assets/logopic.jpeg'/>
+                <v-spacer></v-spacer>
                 <v-btn icon color="white" id='homeButton' to='/'>
                     <v-icon>mdi-home</v-icon>
                 </v-btn>
-                <v-appbar-title class="white--text">Sign Language API</v-appbar-title>
             </v-app-bar>
         </div>
         <!--Registration form-->
@@ -95,3 +97,9 @@
         },
     }
 </script>
+<style scoped>
+    .logo {
+      width: 8%;
+      margin-left: 1%;
+    }
+</style>
