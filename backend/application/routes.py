@@ -331,7 +331,7 @@ def classify_request():
 @app.route('/api/library/uploadsign', methods=['POST'])
 def uploadsignapi():
     key = request.form.get('key')
-    if verifykey(key) <=0:
+    if verifykey(key) == "0":
         return {'message':'Authentication failed'}, 401
 
 
@@ -365,24 +365,26 @@ def uploadsignapi():
 @app.route('/api/library/createlibrary', methods=['POST'])
 def createlibraryapi():
     key = request.form.get('key')
-    if verifykey(key) <=0:
+    if verifykey(key) == "0":
         return {'message':'Authentication failed'}, 401
 
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
+    user_id = key[0]
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}
-    library = SignLanguageLibrary(name=libname, description=lib_description)
+    library = SignLanguageLibrary(name=libname, description=lib_description, ownerid = user_id)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
-    return Response(status=200)
+    response = jsonify()
+    return response, 200
 
 @app.route('/api/library/signs', methods=['GET'])
 def get_signsapi():
     key = request.args['key']
-    if verifykey(key) <=0:
+    if verifykey(key) == "0":
         return {'message':'Authentication failed'}, 401
         
     library_name = request.args['library_name']
@@ -394,7 +396,7 @@ def get_signsapi():
 @app.route('/api/library/image', methods=['GET'])
 def get_sign_imageapi():
     key = request.args['key']
-    if verifykey(key) <=0:
+    if verifykey(key) == "0":
         return {'message':'Authentication failed'}, 401
 
     lib_name = request.args['library_name']
@@ -405,33 +407,33 @@ def get_sign_imageapi():
 @app.route('/api/libraries/names', methods=['GET'])
 def get_library_namesapi():
     key = request.args['key']
-    if verifykey(key) <=0:
+    if verifykey(key) == "0":
         return {'message':'Authentication failed'}, 401
 
-    key = request.args['key']
-    if verifykey(key) <=0:
-        return {'message':'Authentication failed'}, 401
-    libs = SignLanguageLibrary.query.all()
+    user_id = key[0]
+    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 @app.route('/api/libraries/getall', methods=['GET'])
 def get_librariesapi():
     key = request.args['key']
-    if verifykey(key) <=0:
+    if verifykey(key) == "0":
         return {'message':'Authentication failed'}, 401
 
-    libs = SignLanguageLibrary.query.all()
+    user_id = key[0]
+    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     all_libs = []
     for lib in libs:
         thislib = {'name': lib.name, 'description': lib.description}
         all_libs.append(thislib)
-    return {'libraries': all_libs}
+    response = jsonify({'libraries': all_libs})
+    return response,200
 
 
 @app.route('/api/library/deletesign', methods=['DELETE'])
 def delete_signapi():
     key = request.json.get('key')
-    if verifykey(key) <=0:
+    if verifykey(key) =="0":
         return {'message':'Authentication failed'}, 401
 
     libname = request.json.get('library_name')
@@ -448,7 +450,7 @@ def delete_signapi():
 @app.route('/api/library/deletelibrary', methods=['DELETE'])
 def delete_libraryapi():
     key = request.json.get('key')
-    if verifykey(key) <=0:
+    if verifykey(key) =="0":
         return {'message':'Authentication failed'}, 401
 
     libname = request.json.get('library_name')
@@ -466,7 +468,7 @@ def delete_libraryapi():
 @app.route('/api/library/classifyimage', methods=['POST'])
 def classify_requestapi():
     key = request.form['key']
-    if verifykey(key) <=0:
+    if verifykey(key) =="0":
         return {'message':'Authentication failed'}, 401
 
 
