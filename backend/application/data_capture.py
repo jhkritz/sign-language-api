@@ -16,7 +16,7 @@ def get_signs(filename):
     hand_detector = HandDetector(maxHands=1)
     capture = cv.VideoCapture(0)
     i = 0
-    while True:
+    while i < 100:
         s, img = capture.read()
         cv.imwrite(filename + str(i) + '.png', img)
         hands, hands_img = hand_detector.findHands(img)
@@ -24,12 +24,9 @@ def get_signs(filename):
             x, y, w, h = hands[0]['bbox']
             cropped = hands_img[y-offset:y+offset+h, x-offset:x+w+offset]
             cropped = cv.resize(cropped, desired_shape)
-            cv.imshow('cropped', cropped)
+            cv.imshow('img', img)
             cv.waitKey(1)
             i += 1
-            # Write the unprocessed image.
-            #cv.imwrite(filename, img)
-            #cv.imwrite(filename, cropped)
         except Exception as e:
             print(e)
             os.remove(filename + str(i) + '.png')
