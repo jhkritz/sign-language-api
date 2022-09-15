@@ -8,7 +8,7 @@
             {{APIkey}}
         </p>
         <h3>
-            Click here to update your API key (note that this will make your previous API key void).
+            Click here to generate your API key (note that this will deactivate any previous API keys):
         </h3>
         <br/>
         <v-btn
@@ -16,7 +16,7 @@
             class="mr-4 white--text"
             @click="UpdateApi"
         >
-            Update API_key
+            Update API Key
         </v-btn>
         <br/>
         <br/>
@@ -33,6 +33,11 @@
 
 <script>
 import { sharedState } from '../SharedState';
+import {
+    baseUrl
+} from '../BaseRequestUrl.js';
+
+const axios = require('axios');
 export default {
     data: () => ({
         APIkey: sharedState.API_key
@@ -41,8 +46,22 @@ export default {
         goToDashboard(){
             this.$router.push("/dashboard");
         },
-        UpdateApi(){
-            this.$router.push("/api/resetapikey")
+        async UpdateApi(){
+            try {
+                const config = {
+                    method: 'get',
+                    url: baseUrl + '/api/resetapikey',
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
+                };
+                // Get list of libraries
+                const res = await axios(config);
+                this.APIkey = res.data['api_key'];
+                console.log(res.data['api_key']);
+            } catch (err) {
+                console.error(err);
+            }
         }
     },
 }

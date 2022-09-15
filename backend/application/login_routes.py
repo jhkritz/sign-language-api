@@ -76,8 +76,8 @@ def refreshtoken():
 @app.route('/api/resetapikey', methods=['GET'])
 @jwt_required()
 def resetapikey():
-    userid = request.args['id']
-    return generateapikey(userid)
+    userid = get_jwt_identity()
+    return {'api_key': generateapikey(userid)}
 
 
 # create api key and store hash in DB
