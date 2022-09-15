@@ -295,7 +295,7 @@ def knn_classify(lib_name, flat_image):
     data, labels, label_meanings = get_data_and_labels(lib_name)
     k = min(int(data.shape[0] / len(label_meanings)), 100)
     knn = cv.ml.KNearest_create()
-    should_use_pca = True
+    should_use_pca = False
     if should_use_pca:
         data, flat_image = pca_transform(data, flat_image)
     knn.train(data, cv.ml.ROW_SAMPLE, labels)
