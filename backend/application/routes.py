@@ -354,14 +354,13 @@ def createlibraryapi():
     key = request.form.get('key')
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
-
-   libname = request.form.get('library_name')
+    libname = request.form.get('library_name')
     lib_description = request.form.get('description')
     user_id = key[0]
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}
-    library = SignLanguageLibrary(name=libname, description=lib_description, ownerid= user_id)
+    library = SignLanguageLibrary(name=libname, description=lib_description, ownerid=user_id)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
@@ -458,8 +457,8 @@ def classify_requestapi():
     https://www.geeksforgeeks.org/python-opencv-imdecode-function/
     """
     key = request.form['key']
-    if verifykey(key) =="0":
-        return {'message':'Authentication failed'}, 401
+    if verifykey(key) == "0":
+        return {'message': 'Authentication failed'}, 401
     classification_alg = 'KNN'
     data_image = request.files['image'].read()
     lib_name = request.form['library_name']
