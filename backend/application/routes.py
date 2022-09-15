@@ -1,4 +1,5 @@
 from pydoc import describe
+import json
 import time
 from flask import current_app as app, Response, request, send_from_directory, jsonify
 from .models import SignLanguageLibrary, Sign
@@ -20,7 +21,7 @@ from matplotlib import pyplot as plt
 from flask_jwt_extended import jwt_required
 from .login_routes import verifykey
 from flask_cors import cross_origin
-import sklearn.decomposition
+from sklearn.decomposition import PCA
 
 hand_detector = HandDetector(maxHands=1)
 desired_shape = (200, 200)
@@ -236,13 +237,12 @@ def classify_request():
     https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
     https://www.geeksforgeeks.org/python-opencv-imdecode-function/
     """
-    classification_alg = 'KNN'
+    classification_alg = 'LDA'
     data_image = request.files['image'].read()
     lib_name = request.form['library_name']
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     try:
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-        data, labels, label_meanings = get_data_and_labels(lib_name)
         processed_image = preprocess_image(image)
         if processed_image is not None:
             flat_image = processed_image.flatten()
@@ -251,17 +251,12 @@ def classify_request():
             result = None
             if classification_alg == 'LDA':
                 start = time.time()
-                result = lda_classify(data, labels, label_meanings, flat_image)
+                result = lda_classify(lib_name, flat_image)
                 end = time.time()
                 print('Time taken = ' + str(end - start))
             elif classification_alg == 'KNN':
                 start = time.time()
-                result = knn_classify(data, labels, label_meanings, flat_image)
-                end = time.time()
-                print('Time taken = ' + str(end - start))
-            elif classification_alg == 'LGR':
-                start = time.time()
-                result = logistic_regression(data, labels, label_meanings, flat_image)
+                result = knn_classify(lib_name, flat_image)
                 end = time.time()
                 print('Time taken = ' + str(end - start))
             return {'processedImage': image_out, 'result': result}
@@ -273,32 +268,9 @@ def classify_request():
         return Response(status=400)
 
 
-def train_lgr(lib_name, data, labels):
-    lgr = cv.ml.LogisticRegression.create()
-    lgr.setStreamMethod(cv.ml.LogisticRegression_MINI_BATCH)
-    lgr.setMiniBatchSize(1)
-    lgr.setIterations(100)
-    lgr.train(data, cv.ml.ROW_SAMPLE, labels)
-    lgr.save(lib_name)
-
-
-def train_lda(lib_name, data, labels):
+def lda_classify(lib_name, processed_image):
     lda = LinearDiscriminantAnalysis()
-    lda.fit(data, labels)
-    params = lda.get_params(deep=True)
-    f = open(lib_name + '.lda', 'w')
-    f.write(json.dumps(params))
-
-
-def get_lda(lib_name):
-    lda = LinearDiscriminantAnalysis()
-    f = open(lib_name + '.lda', 'r')
-    lda.set_params(json.loads(f.read()))
-    return lda
-
-
-def lda_classify(data, labels, label_meanings, processed_image):
-    lda = LinearDiscriminantAnalysis()
+    data, labels, label_meanings = get_data_and_labels(lib_name)
     lda.fit(data, labels)
     flat_image = processed_image.flatten()
     quality_of_match = max(lda.predict_proba(flat_image[np.newaxis, :])[0])
@@ -308,7 +280,7 @@ def lda_classify(data, labels, label_meanings, processed_image):
 
 
 def pca_transform(data, flat_image):
-    pca = decomposition.PCA()
+    pca = PCA(n_components=min(min(10, data.shape[0]), data.shape[1]))
     pca.fit(data)
     print('pca evr = ' + str(pca.explained_variance_ratio_))
     data = pca.transform(data)
@@ -316,10 +288,11 @@ def pca_transform(data, flat_image):
     return data, flat_image
 
 
-def knn_classify(data, labels, label_meanings, flat_image):
-    k = min(int(data.shape[0] / 3), 50)
+def knn_classify(lib_name, flat_image):
+    data, labels, label_meanings = get_data_and_labels(lib_name)
+    k = min(int(data.shape[0] / len(label_meanings)), 100)
     knn = cv.ml.KNearest_create()
-    should_use_pca = False
+    should_use_pca = True
     if should_use_pca:
         data, flat_image = pca_transform(data, flat_image)
     knn.train(data, cv.ml.ROW_SAMPLE, labels)
@@ -332,19 +305,6 @@ def knn_classify(data, labels, label_meanings, flat_image):
         if resp == classification:
             quality_of_match += 1
     quality_of_match = 100 * quality_of_match / len(responses[0])
-    return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
-
-
-def logistic_regression(data, labels, label_meanings, processed_image):
-    lgr = cv.ml.LogisticRegression.create()
-    lgr.setStreamMethod(cv.ml.LogisticRegression_MINI_BATCH)
-    lgr.setMiniBatchSize(1)
-    lgr.setIterations(100)
-    lgr.train(data, cv.ml.ROW_SAMPLE, labels)
-    pred = lgr.predict(processed_image[np.newaxis, :])
-    print(pred)
-    meaning = label_meanings[int(pred[0])]
-    quality_of_match = '?'
     return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
 
 
