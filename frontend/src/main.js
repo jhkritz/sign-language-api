@@ -4,7 +4,7 @@ import vuetify from './plugins/vuetify'
 import VueRouter from 'vue-router'
 import axios from 'axios'
 import VueAuth from 'vue-auth'
-
+import ViewAPI from './views/ViewApi'
 import dashboard from './views/dashboard'
 import addsign from './views/addsign'
 import page_not_found from './views/page-not-found';
@@ -49,6 +49,14 @@ const routes = [
 		path: '/dashboard',
 		name: 'dashboard',
 		component: dashboard
+	},
+	{
+		path: '/library/api',
+		name: 'api',
+		component: ViewAPI,
+		props: route => ({
+			library_id: route.query.library_id
+		})
 	},
 	{
 		path: '/library/explore',
