@@ -13,7 +13,7 @@
         </div>
         <!--Registration form-->
         <v-form ref="form" v-model="valid" lazy-validation>
-            <v-text-field v-model="name" :counter="10" :rules="nameRules" label="Name" required></v-text-field>
+            <!---- <v-text-field v-model="name" :counter="10" :rules="nameRules" label="Name" required></v-text-field> -->
 
             <v-text-field v-model="email" :rules="emailRules" label="E-mail" required></v-text-field>
 
@@ -80,8 +80,6 @@
                         localStorage.setItem('access_token',res.data['access'])
                         localStorage.setItem('refresh_token',res.data['refresh'])
                         console.log(res.data['api_key']);
-                        localStorage.setItem('access_token', res.data['access'])
-                        localStorage.setItem('refresh_token', res.data['refresh'])
                         sharedState.setAPIkey(res.data['api_key']);
                         this.$router.push(`/API?API_key=${res.data['api_key']}`);
                     } else {
