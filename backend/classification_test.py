@@ -2,13 +2,16 @@ import subprocess
 import json
 import nose2
 import os
+import sys
 
 smallest = "ABC - 3 images"
+largest = 'ABC - 300 images'
 
 
 def test_classification_accuracy():
-    lib_names = [smallest, "ABC - 30 images", "ABC - 300 images"]
+    lib_names = ["ABC - 30 images"]
     signs = ['a', 'b', 'c']
+    i = 0
     for lib_name in lib_names:
         num_correct = 0
         total = 0
@@ -18,7 +21,7 @@ def test_classification_accuracy():
         print(lib_name)
         for sign in signs:
             count = 0
-            for img_name in os.listdir('./test_data/{}'.format(sign)):
+            for img_name in os.listdir('./tougher_test_data/{}'.format(sign)):
                 print(img_name)
                 if count >= test_signs_per_dir:
                     break
@@ -41,15 +44,21 @@ def test_classification_accuracy():
                 except Exception as e:
                     print(e)
         try:
-            avg_pc = positive_confidence / num_correct
-            avg_nc = negative_confidence / (total - num_correct)
+            if num_correct > 0:
+                avg_pc = positive_confidence / num_correct
+                print(avg_pc)
+            else:
+                print('Undefined')
+            if total > num_correct:
+                avg_nc = negative_confidence / (total - num_correct)
+                print(avg_nc)
+            else:
+                print('Undefined')
             ratio_correct = num_correct / total
-            print(avg_pc)
-            print(avg_nc)
-            print(ratio_correct)
+            print(ratio_correct*100)
             print('-----------------------------------------------------')
         except Exception:
             pass
 
 
-nose2.main()
+test_classification_accuracy()
