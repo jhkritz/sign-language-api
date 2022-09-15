@@ -240,7 +240,7 @@ def classify_request():
     https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
     https://www.geeksforgeeks.org/python-opencv-imdecode-function/
     """
-    classification_alg = 'LDA'
+    classification_alg = 'KNN'
     data_image = request.files['image'].read()
     lib_name = request.form['library_name']
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
