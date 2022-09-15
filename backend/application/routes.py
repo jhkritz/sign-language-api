@@ -319,7 +319,7 @@ def knn_classify(lib_name, flat_image):
 @ app.route('/api/library/uploadsign', methods=['POST'])
 def uploadsignapi():
     key = request.form.get('key')
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
 
     # Endpoint to upload a single sign with a name
@@ -352,27 +352,28 @@ def uploadsignapi():
 @ app.route('/api/library/createlibrary', methods=['POST'])
 def createlibraryapi():
     key = request.form.get('key')
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
 
-    libname = request.form.get('library_name')
+   libname = request.form.get('library_name')
     lib_description = request.form.get('description')
+    user_id = key[0]
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}
-    library = SignLanguageLibrary(name=libname, description=lib_description)
+    library = SignLanguageLibrary(name=libname, description=lib_description, ownerid= user_id)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
-    return Response(status=200)
+    response = jsonify()
+    return response, 200
 
 
 @ app.route('/api/library/signs', methods=['GET'])
 def get_signsapi():
     key = request.args['key']
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
-
     library_name = request.args['library_name']
     img_url_base = '/library/image'
     lib = SignLanguageLibrary.query.filter_by(name=library_name).first_or_404()
@@ -383,9 +384,8 @@ def get_signsapi():
 @ app.route('/api/library/image', methods=['GET'])
 def get_sign_imageapi():
     key = request.args['key']
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
-
     lib_name = request.args['library_name']
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
@@ -395,36 +395,34 @@ def get_sign_imageapi():
 @ app.route('/api/libraries/names', methods=['GET'])
 def get_library_namesapi():
     key = request.args['key']
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
 
-    key = request.args['key']
-    if verifykey(key) <= 0:
-        return {'message': 'Authentication failed'}, 401
-    libs = SignLanguageLibrary.query.all()
+    user_id = key[0]
+    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
 @ app.route('/api/libraries/getall', methods=['GET'])
 def get_librariesapi():
     key = request.args['key']
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
-
-    libs = SignLanguageLibrary.query.all()
+    user_id = key[0]
+    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     all_libs = []
     for lib in libs:
         thislib = {'name': lib.name, 'description': lib.description}
         all_libs.append(thislib)
-    return {'libraries': all_libs}
+    response = jsonify({'libraries': all_libs})
+    return response, 200
 
 
 @ app.route('/api/library/deletesign', methods=['DELETE'])
 def delete_signapi():
     key = request.json.get('key')
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
-
     libname = request.json.get('library_name')
     signname = request.json.get('sign_name')
     try:
@@ -439,9 +437,8 @@ def delete_signapi():
 @ app.route('/api/library/deletelibrary', methods=['DELETE'])
 def delete_libraryapi():
     key = request.json.get('key')
-    if verifykey(key) <= 0:
+    if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
-
     libname = request.json.get('library_name')
     try:
         libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
@@ -454,49 +451,41 @@ def delete_libraryapi():
         return Response(status=400)
 
 
-"""
 @app.route('/api/library/classifyimage', methods=['POST'])
 def classify_requestapi():
-    # https: // www.geeksforgeeks.org/python-opencv-imdecode-function/
+    """
+    https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
+    https://www.geeksforgeeks.org/python-opencv-imdecode-function/
+    """
     key = request.form['key']
-    if verifykey(key) <= 0:
-        return {'message': 'Authentication failed'}, 401
-
-    # Majority of code copied from function above
+    if verifykey(key) =="0":
+        return {'message':'Authentication failed'}, 401
+    classification_alg = 'KNN'
     data_image = request.files['image'].read()
     lib_name = request.form['library_name']
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
     try:
         image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-        hand_detector = HandDetector(maxHands=1)
-        # Setup the model
-        desired_shape = (200, 200)
-        lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-        data, labels = get_data_and_labels(lib_name)
-        # XXX: this code will crash if the library contains < 3 images
-        k = min(data.shape[0], 1)
-        knn = cv.ml.KNearest_create()
-        knn.train(data, cv.ml.ROW_SAMPLE, labels)
-        # Process the image
         processed_image = preprocess_image(image)
-        result = None
         if processed_image is not None:
             flat_image = processed_image.flatten()
-            to_classify = np.array(flat_image[np.newaxis, :], dtype=np.float32)
-            result = classify(to_classify, knn, k)
-            # This conversion is based on the code provided in the following StackOverflow post
-            # https://stackoverflow.com/questions/58931854/
-            # how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
             processed_image = cv2.imencode('.png', processed_image)[1]
             image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-            response = {'processedImage': image_out, 'result': result}
-            print(response['result'])
-            return response
+            result = None
+            if classification_alg == 'LDA':
+                start = time.time()
+                result = lda_classify(lib_name, flat_image)
+                end = time.time()
+                print('Time taken = ' + str(end - start))
+            elif classification_alg == 'KNN':
+                start = time.time()
+                result = knn_classify(lib_name, flat_image)
+                end = time.time()
+                print('Time taken = ' + str(end - start))
+            return {'processedImage': image_out, 'result': result}
         else:
             print('processed_image is none')
             return Response(status=400)
     except Exception as e:
-        print('exception')
         print(e)
         return Response(status=400)
-"""

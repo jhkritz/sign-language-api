@@ -62,12 +62,19 @@
   min-width: 20em;
   min-height: 5em;
   backdrop-filter: blur(40px) hue-rotate(0deg);
+
 }
+
+.logo {
+    width: 5%;
+    margin-left: 1%;
+  }
 </style>
 
 <template>
   <div class="bg">
     <v-app-bar elevation="0" color=transparent class="bar">
+      <img class="logo" src='../assets/logopic.jpeg'/>
       <!--v-toolbar-title class="white--text">Sign Language API</v-toolbar-title-->
       <v-spacer></v-spacer>
       <v-btn color=#17252A class="mr-4 white--text" @click="goToRegister()">
@@ -163,3 +170,5 @@ export default defineComponent({
   },
 })
 </script>
+
+  

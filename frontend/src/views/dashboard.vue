@@ -56,8 +56,7 @@
         <div class="header">
             <div class="center">
 
-                <p class="maintitle">Sign Language API</p>
-
+                <p class="maintitle">SignMeUp</p>
                 <v-toolbar flat floating rounded>
                     <v-text-field v-model="libraries.name" hide-details label="Search for a library..."
                         prepend-icon="mdi-magnify" single-line @input="filterLibraries">
