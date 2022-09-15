@@ -15,41 +15,54 @@
 	\frametitle{Introduction}
 	\begin{itemize}
 		\item In this presentation we will discuss our project.
-		\item We will also have more than one bullet point on this slide.
+		\item We will also have more than one bullet point on this slide, probably.
 	\end{itemize}
 \end{frame}
 
 \begin{frame}[t]
-	\frametitle{Classification performance}
+	\frametitle{Classification accuracy}
 	\framesubtitle{Initial results}
 	\begin{figure}
 		\includegraphics[width=\textwidth]{initial_classification_performance.png}
 	\end{figure}
 	\begin{itemize}
-		\item Average time taken to classify a single image $= 1.097$
+		\item These results occurred when $K$ was set to an improper value.
 	\end{itemize}
-	
 \end{frame}
 
 \begin{frame}[t]
-	\frametitle{Classification performance}
-	\framesubtitle{Attempt to improve}
-		\begin{figure}
-			\includegraphics[width=\textwidth]{lda_performance.png}
-		\end{figure}
-			\begin{itemize}
-				\item Average time taken to classify a single image $ = 5.078$.
-				\item Current implementation retrains the model before classifying an image. Classification 
-					would likely be faster than KNN once we start storing the model and the projected
-					vectors.
-			\end{itemize}
+	\frametitle{Classification accuracy}
+	\framesubtitle{After adjusting k}
+	\begin{figure}
+		\includegraphics[width=\textwidth]{k_adjusted.png}
+	\end{figure}
 \end{frame}
 
-	%\begin{itemize}
-		%\item LDA.
-		%\item Dimensionality reduction (less memory, faster classification).
-		%\item Maximises between class separation.
-	%\end{itemize}
+\begin{frame}[t]
+	\frametitle{Classification accuracy}
+	\framesubtitle{KNN after PCA}
+	\begin{figure}
+		\includegraphics[width=\textwidth]{knn_pca.png}
+	\end{figure}
+	\begin{itemize}
+		\item Images are projected onto at most 10 features.
+		\item Without PCA, each image would consist of $120000$ features.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+	\frametitle{Classification accuracy}
+	\framesubtitle{Using Linear Discriminant Analysis}
+	\begin{figure}
+		\includegraphics[width=\textwidth]{lda.png}
+	\end{figure}
+	\begin{itemize}
+		\item LDA maximises between class separation.
+		\item It also assumes all classes have the same variance.
+		\item It also projects onto at most $N-1$ features,
+			where $N$ is the number of classes.
+	\end{itemize}
+\end{frame}
 
 \begin{frame}[t]
 	\frametitle{Process}
@@ -60,24 +73,24 @@
 	\end{figure}
 \end{frame}
 
-\begin{frame}[t]
-	\frametitle{This slide has a figure in it}
-	\begin{columns}
-	\begin{column}{0.5\textwidth}
-		\begin{figure}
-			\includegraphics[width=\textwidth]{missing_figure.png}
-			\caption{This is the caption of the figure}
-			\label{fig:missing_figure}
-		\end{figure}
-		\end{column}
-		\begin{column}{0.5\textwidth}
-			\begin{itemize}
-				\item According to \cite{me} there is a figure to the left of this bullet point.
-				\item Additionally, this is another bullet point.
-			\end{itemize}
-		\end{column}
-	\end{columns}
-\end{frame}
+%\begin{frame}[t]
+%	\frametitle{This slide has a figure in it}
+%	\begin{columns}
+%	\begin{column}{0.5\textwidth}
+%		\begin{figure}
+%			\includegraphics[width=\textwidth]{missing_figure.png}
+%			\caption{This is the caption of the figure}
+%			\label{fig:missing_figure}
+%		\end{figure}
+%		\end{column}
+%		\begin{column}{0.5\textwidth}
+%			\begin{itemize}
+%				\item According to \cite{me} there is a figure to the left of this bullet point.
+%				\item Additionally, this is another bullet point.
+%			\end{itemize}
+%		\end{column}
+%	\end{columns}
+%\end{frame}
 
 \begin{frame}[t]
 	\frametitle{References}
