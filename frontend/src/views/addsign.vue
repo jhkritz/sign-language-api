@@ -94,8 +94,6 @@
                     const res = await axios(config);
                     if (res.status == 200) {
                         alert('Success');
-                        this.signname = " ";
-                        this.image = null;
                     }
                 } catch (err) {
                     console.error(err);
@@ -119,8 +117,6 @@
                     const res = await axios(config);
                     if (res.status == 200) {
                         alert(res.data.message);
-                        this.signname = " "
-                        this.image = " ";
                     }
                 } catch (err) {
                     console.error(err);
