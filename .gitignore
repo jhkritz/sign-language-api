@@ -56,3 +56,6 @@ pnpm-debug.log*
 latex
 docker
 *.zip
+frontend/dist
+backend/miscellaneous
+backend/library_images/*/*
