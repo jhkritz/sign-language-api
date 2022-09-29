@@ -16,12 +16,10 @@ from PIL import Image
 import base64
 import cv2
 import shutil
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from matplotlib import pyplot as plt
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .login_routes import verifykey
 from flask_cors import cross_origin
-from sklearn.decomposition import PCA
 
 hand_detector = HandDetector(maxHands=1)
 desired_shape = (200, 200)
