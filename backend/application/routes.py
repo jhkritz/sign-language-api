@@ -9,8 +9,6 @@ from . import db
 import os
 import cv2 as cv
 from cvzone.HandTrackingModule import HandDetector
-from flask_socketio import SocketIO, emit
-from . import socketio
 import io
 from PIL import Image
 import base64

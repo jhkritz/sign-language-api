@@ -1,14 +1,17 @@
+"""
+Flask configuration.
+"""
+
 import os
 import datetime
 
-"""Flask configuration."""
 
 TESTING = True
 DEBUG = True
 FLASK_ENV = 'development'
 SECRET_KEY = 'GDtfDCFdwafwafwafYjD'
-JWT_SECRET_KEY='GDtfDCFdwafwafwafYjD'
-JWT_TOKEN_LOCATION=['headers']
+JWT_SECRET_KEY = 'GDtfDCFdwafwafwafYjD'
+JWT_TOKEN_LOCATION = ['headers']
 JWT_COOKIE_CSRF_PROTECT = True
 JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(minutes=15)
 JWT_REFRESH_TOKEN_EXPIRES = datetime.timedelta(days=1)
@@ -17,7 +20,8 @@ SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 IMAGE_PATH = './library_images'
 
-"""Heroku database configuration."""
+
+# Heroku database configuration.
 try:
     HEROKU_DATABASE_URL = os.environ['DB_URL'].replace('postgres://', 'postgresql://')
     print(HEROKU_DATABASE_URL)
