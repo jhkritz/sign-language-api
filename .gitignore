@@ -52,3 +52,7 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+latex
+docker
+*.zip
