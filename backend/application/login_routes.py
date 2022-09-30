@@ -48,8 +48,8 @@ def register():
     access_token = create_access_token(identity=user.id)
     refresh_token = create_refresh_token(identity=user.id)
 
-    #set_access_cookies(response, access_token)
-    #set_refresh_cookies(response, refresh_token)
+    # set_access_cookies(response, access_token)
+    # set_refresh_cookies(response, refresh_token)
 
     return {'api_key': key, 'access': access_token, 'refresh': refresh_token}
 
@@ -87,7 +87,7 @@ def generateapikey(id):
     # check for existing key and remove it
     if not (User.query.filter_by(id=id).first()):
         return "0"
-    existingkey = APIKeys.query.filter_by(userid=id).delete()
+    APIKeys.query.filter_by(userid=id).delete()
 
     key = str(id) + "." + str(uuid.uuid4())
     key_hash = hashlib.sha512(str(key).encode("utf-8")).hexdigest()
