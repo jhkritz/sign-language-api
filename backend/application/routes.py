@@ -98,13 +98,13 @@ def uploadsign():
 
 @app.route('/library/createlibrary', methods=['POST'])
 @jwt_required()
-def createlibrary():
+def create_library():
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
     user_id = get_jwt_identity()
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
-        return {'message': 'Library exists'}
+        return {'message': 'Library exists'}, 403
     library = SignLanguageLibrary(name=libname, description=lib_description, ownerid=user_id)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
