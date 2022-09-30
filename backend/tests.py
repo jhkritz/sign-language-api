@@ -1,7 +1,5 @@
 import subprocess
-import json
 import nose2
-import os
 
 
 def log_process(proc):

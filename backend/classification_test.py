@@ -1,11 +1,9 @@
 import subprocess
 import json
-import nose2
 import os
-import sys
 
-smallest = "ABC - 3 images"
-largest = 'ABC - 300 images'
+SMALLEST = "ABC - 3 images"
+LARGEST = 'ABC - 300 images'
 
 
 def test_classification_accuracy():
