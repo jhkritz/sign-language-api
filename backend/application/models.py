@@ -13,11 +13,14 @@ class User(db.Model):
 class UserRoles(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    userid = db.Column(db.Integer,nullable=False)
-    libraryid = db.Column(db.Integer,nullable=False)
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    libraryid = db.Column(db.Integer, db.ForeignKey('sign_language_library.id'), nullable=False)
 
+    role = db.Column(db.Integer,nullable=False)
  
-
+class Roles(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(256), nullable=False)
 
 
 class APIKeys(db.Model):
