@@ -9,6 +9,17 @@ class User(db.Model):
     email = db.Column(db.String(256), nullable=False, unique = True)
     pass_hash = db.Column(db.String(256), nullable=False)
 
+
+class UserRoles(db.Model):
+    __tablename__ = 'user_roles'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    userid = db.Column(db.Integer,nullable=False)
+    libraryid = db.Column(db.Integer,nullable=False)
+
+ 
+
+
+
 class APIKeys(db.Model):
     userid = db.Column(db.Integer, primary_key=True)
     api_key_hash = db.Column(db.String(256), nullable=False)
