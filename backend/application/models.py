@@ -10,17 +10,20 @@ class User(db.Model):
     pass_hash = db.Column(db.String(256), nullable=False)
 
 
-class UserRoles(db.Model):
-    __tablename__ = 'user_roles'
+class UserRole(db.Model):
+    __tablename__ = 'user_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     libraryid = db.Column(db.Integer, db.ForeignKey('sign_language_library.id'), nullable=False)
 
+    #options = 1-admin,
+    #          2-editor,
+    #          3-viewer,
     role = db.Column(db.Integer,nullable=False)
  
-class Roles(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(256), nullable=False)
+# class Roles(db.Model):
+#     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     name = db.Column(db.String(256), nullable=False)
 
 
 class APIKeys(db.Model):
@@ -36,7 +39,7 @@ class SignLanguageLibrary(db.Model):
     description = db.Column(db.String(256), nullable=False)
     # One to many relationship between SignLanguageLibrary and Sign
     signs = db.relationship('Sign', backref='sign_language_library', cascade="all,delete")
-    ownerid = db.Column(db.Integer, nullable=False)
+    #ownerid = db.Column(db.Integer, nullable=False)
 
 
 

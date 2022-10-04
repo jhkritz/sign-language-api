@@ -1,6 +1,6 @@
 import time
 from flask import current_app as app, Response, request, send_from_directory, jsonify
-from .models import SignLanguageLibrary, Sign
+from .models import SignLanguageLibrary, Sign, User, UserRole
 from zipfile import ZipFile
 import numpy as np
 from . import db
@@ -102,12 +102,18 @@ def create_library():
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
     user_id = get_jwt_identity()
+    user = User.query.filter_by(id=id)
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}, 403
-    library = SignLanguageLibrary(name=libname, description=lib_description, ownerid=user_id)
+    library = SignLanguageLibrary(name=libname, description=lib_description)
+    
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
+
+    db.session.commit()
+    owner_role = UserRole(userid=user_id, libraryid = library.id, role = 1)
+    db.session.add(owner_role)
     db.session.commit()
     response = jsonify()
     return response, 200
