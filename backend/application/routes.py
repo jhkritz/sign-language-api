@@ -265,7 +265,7 @@ def adduser():
 
     newuser = User.query.filter_by(email=useremail).first()
     if not newuser:
-        return {"Error": "User cannot be found"}
+        return {"Error": "User cannot be found"}, 400
 
     newrole = UserRole(userid=newuser.id, libraryid=libid, admin=False)
     db.session.add(newrole)

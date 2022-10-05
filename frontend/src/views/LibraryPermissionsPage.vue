@@ -96,14 +96,16 @@
                     method: 'post',
                     url: baseUrl + '/library/adduser',
                     data: JSON.stringify({
-                        libname: localStorage.getItem('library_id'),
-                        useremail: userEmail
+                        library_name: localStorage.getItem('library_id'),
+                        user_email: userEmail
                     }),
                     headers: {
-                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+                        'Content-Type': 'application/json'
                     }
                 };
                 try {
+                    console.log(config);
                     await axios(config);
                 } catch (err) {
                     alert('Failed to grant user permission');
