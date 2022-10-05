@@ -76,7 +76,7 @@ def upload_sign_video():
         video_capture = cv2.VideoCapture('./' + filename)
         frame_grabbed, img = video_capture.read()
         count = 0
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + sign_name + '/'
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
         try:
             os.makedirs(img_path[:-1])
         except Exception as e:
