@@ -9,7 +9,7 @@
                                 <v-card-title class='justify-center align-center'>
                                     Camera
                                 </v-card-title>
-                                <video id='webcamVideo' width='100%' autoplay />
+                                <video id='interpretationVideo' autoplay />
                                 <v-card-actions class='justify-center align-center'>
                                     <v-btn dark color=#17252A @click.stop='processSnapshot'>
                                         Process a snapshot
@@ -40,6 +40,11 @@
         width: 100%;
         height: 100%;
         box-sizing: border-box;
+    }
+
+    #interpretationVideo {
+        border: 3px solid;
+        width: 100%;
     }
 
     #sheet {
@@ -105,7 +110,7 @@
                     video: true,
                     audio: false
                 });
-                const videoElement = document.querySelector('video#webcamVideo');
+                const videoElement = document.querySelector('video#interpretationVideo');
                 videoElement.srcObject = this.cameraStream;
                 this.imgCapture = new ImageCapture(this.cameraStream.getVideoTracks()[0]);
                 sharedState.setCameraStream(this.cameraStream);
