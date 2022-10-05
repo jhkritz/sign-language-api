@@ -2,28 +2,77 @@
     <v-app>
         <div>
             <!--Navigation bar-->
-            <v-app-bar elevation="0" color=#3AAFA9>
-                <!--v-appbar-title class="white--text">Sign Language API</v-appbar-title-->
-                <img class="logo" src='../assets/logopic.jpeg'/>
-                <v-spacer></v-spacer>
-                <v-btn icon color="white" id='homeButton' to='/'>
-                    <v-icon>mdi-home</v-icon>
+            <v-app-bar 
+            elevation="0" 
+            color=#3AAFA9>
+                <v-appbar-title 
+                class="white--text">
+                Sign Language API
+                </v-appbar-title>
+                <v-spacer>
+                </v-spacer>
+                <v-btn icon 
+                color="white" 
+                id='homeButton' 
+                to='/'>
+                    <v-icon>
+                        mdi-home
+                    </v-icon>
                 </v-btn>
             </v-app-bar>
         </div>
         <!--Registration form-->
-        <v-form ref="form" v-model="valid" lazy-validation>
-            <!---- <v-text-field v-model="name" :counter="10" :rules="nameRules" label="Name" required></v-text-field> -->
+        <v-container 
+        fill-height>
+        <v-layout 
+        align-center 
+        justify-center>
+        <v-form 
+        ref="form" 
+        v-model="valid" 
+        lazy-validation>
+        <center>
+        <p class="font-weight-black">
+      Create an account
+    </p>
+</center>
+            <v-text-field 
+            filled 
+            rounded 
+            dense 
+            single-line
+            v-model="email" 
+            :rules="emailRules" 
+            label="E-mail" 
+            required>
+            </v-text-field>
 
-            <v-text-field v-model="email" :rules="emailRules" label="E-mail" required></v-text-field>
-
-            <v-text-field v-model="password" :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" :rules="passwordRules" :type="show1 ? 'text' : 'password'" name="input-10-1" label="Password" counter @click:append="show1 = !show1" required></v-text-field>
-
-            <v-btn :disabled="!valid" color=#17252A class="mr-4 white--text" @click="postInfo()">
+            <v-text-field 
+            filled 
+            rounded 
+            dense 
+            single-line
+            v-model="password" 
+            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
+            :rules="passwordRules" :type="show1 ? 'text' : 'password'" 
+            name="input-10-1" 
+            label="Password" 
+            counter @click:append="show1 = !show1" 
+            required >
+            </v-text-field>
+               
+            <center>
+            <v-btn :disabled="!valid" 
+            color=#17252A 
+            class="mr-4 white--text" 
+            @click="postInfo()">
                 Register
             </v-btn>
-
+            </center>
+    
         </v-form>
+    </v-layout>
+        </v-container>
     </v-app>
 </template>
 
