@@ -32,15 +32,13 @@
         v-model="valid" 
         lazy-validation>
         <center>
-        <p class="font-weight-black">
-      Create an account
-    </p>
+        <h1 class = "pb-8" >
+      Create your account
+        </h1>
+        
 </center>
             <v-text-field 
-            filled 
-            rounded 
-            dense 
-            single-line
+            outlined
             v-model="email" 
             :rules="emailRules" 
             label="E-mail" 
@@ -48,16 +46,11 @@
             </v-text-field>
 
             <v-text-field 
-            filled 
-            rounded 
-            dense 
-            single-line
+            outlined
             v-model="password" 
-            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
             :rules="passwordRules" :type="show1 ? 'text' : 'password'" 
             name="input-10-1" 
             label="Password" 
-            counter @click:append="show1 = !show1" 
             required >
             </v-text-field>
                
@@ -88,11 +81,6 @@
     export default {
         data: () => ({
             valid: true,
-            name: '',
-            nameRules: [
-                v => !!v || 'Name is required',
-                v => (v && v.length <= 10) || 'Name must be less than 10 characters',
-            ],
             email: '',
             emailRules: [
                 v => !!v || 'E-mail is required',
