@@ -441,7 +441,7 @@ def createlibraryapi():
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}
-    library = SignLanguageLibrary(name=libname, description=lib_description, ownerid=user_id)
+    library = SignLanguageLibrary(name=libname, description=lib_description)
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
     db.session.commit()
