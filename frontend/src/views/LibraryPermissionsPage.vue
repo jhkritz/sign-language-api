@@ -8,63 +8,27 @@
                             <v-col cols=4>
                                 <v-card>
                                     <v-card-title>
-                                        Users without permission
+                                        Users without any permissions
                                     </v-card-title>
                                     <v-list>
-                                        <v-list-item v-for="user in users" :key="user">
-                                            <v-list-item-content>
-                                                {{user}}
-                                            </v-list-item-content>
-                                            <v-list-item-action>
-                                                <v-icon>
-                                                    mdi-check
-                                                </v-icon>
-                                            </v-list-item-action>
-                                        </v-list-item>
+                                        <template v-for="user in users">
+                                            <v-divider :key="user + 'div'" />
+                                            <v-list-item :key="user">
+                                                <v-list-item-content>
+                                                    {{user}}
+                                                </v-list-item-content>
+                                                <v-list-item-action>
+                                                    <v-icon @click='grantUserAccess'>
+                                                        mdi-check
+                                                    </v-icon>
+                                                    <v-icon @click='grantAdminAccess'>
+                                                        mdi-account-check
+                                                    </v-icon>
+                                                </v-list-item-action>
+                                            </v-list-item>
+                                        </template>
                                     </v-list>
                                 </v-card>
-                            </v-col>
-                            <v-col cols=4>
-                                <v-card>
-                                    <v-card-title>
-                                        Users with permission to use
-                                    </v-card-title>
-                                    <v-list>
-                                        <v-list-item v-for="user in users" :key="user">
-                                            <v-list-item-content>
-                                                {{user}}
-                                            </v-list-item-content>
-                                            <v-list-item-action>
-                                                <v-icon>
-                                                    mdi-close-box
-                                                </v-icon>
-                                            </v-list-item-action>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-card>
-                            </v-col>
-                            <v-col cols=4>
-                                <v-card>
-                                    <v-card-title>
-                                        Admin users
-                                    </v-card-title>
-                                    <v-list>
-                                        <v-list-item v-for="user in users" :key="user">
-                                            <v-list-item-content>
-                                                {{user}}
-                                            </v-list-item-content>
-                                            <v-list-item-action>
-                                                <v-icon>
-                                                    mdi-close-box
-                                                </v-icon>
-                                            </v-list-item-action>
-                                        </v-list-item>
-                                    </v-list>
-                                </v-card>
-                            </v-col>
-                        </v-row>
-                        <v-row id='row'>
-                            <v-col cols=6>
                             </v-col>
                         </v-row>
                     </v-sheet>
@@ -127,6 +91,10 @@
             recording: false,
         }),
         methods: {
+            async grantUserAccess() {
+
+            },
+            async grantAdminAccess() {},
             async submitInput() {
                 const data = new FormData();
                 data.append('sign_name', this.signname);
