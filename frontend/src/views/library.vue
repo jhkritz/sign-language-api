@@ -7,7 +7,7 @@
                         <template v-slot:top>
                             <v-toolbar flat>
                                 <v-toolbar-title>
-                                    MY SIGNS
+                                    Library Signs
                                 </v-toolbar-title>
                                 <v-divider class="mx-4" inset vertical>
                                 </v-divider>
@@ -125,13 +125,18 @@
                         method: 'get',
                         url: url,
                         headers: {
-                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
-                    }
+                            Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                        }
                     }
                     const res = await axios(config);
-                    this.signs = res.data.signs.map(sign => ({
-                        name: sign.meaning,
-                        status: 'Trained'
+                    this.signs = res.data.signs.map(
+                        sign => sign.meaning
+                    ).filter(
+                        (item, index, self) => self.indexOf(item) === index
+                    );
+                    this.signs = this.signs.map(meaning => ({
+                        name: meaning,
+                        status: 'trained'
                     }));
                 } catch (err) {
                     console.error(err);
