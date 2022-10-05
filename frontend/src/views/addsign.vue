@@ -4,11 +4,13 @@
             <v-form v-model="valid">
                 <v-container id='sheet'>
                     <v-sheet id='sheet' min-height="70vh" rounded="lg">
-                        <v-row id='row'>
-                            <v-row>
+                        <v-row class='align-center justify-center'>
+                            <v-col cols=6>
                                 <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
-                            </v-row>
-                            <v-col>
+                            </v-col>
+                        </v-row>
+                        <v-row class='align-center justify-center'>
+                            <v-col cols=6>
                                 <v-container id='container'>
                                     <v-file-input label='Upload a hand sign' v-model='image' />
                                     <v-btn dark color=#17252A depressed @click="postSign">
@@ -16,7 +18,9 @@
                                     </v-btn>
                                 </v-container>
                             </v-col>
-                            <v-col>
+                        </v-row>
+                        <v-row class='align-center justify-center'>
+                            <v-col cols=6>
                                 <v-container id='container'>
                                     <v-file-input label='Upload a zip file with many photos of the same sign' v-model='zip_file' />
                                     <v-btn dark color=#17252A depressed @click="postSigns">
@@ -25,21 +29,23 @@
                                 </v-container>
                             </v-col>
                         </v-row>
-                        <v-row>
-                            <v-card id='card' class='justify-center align-center'>
-                                <v-card-title class='justify-center align-center'>
-                                    Camera
-                                </v-card-title>
-                                <video id='webcamVideo' width='100%' height='400' autoplay />
-                                <v-card-actions class='justify-center align-center'>
-                                    <v-btn dark color=#17252A @click.stop='postSignVideo'>
-                                        Submit video
-                                    </v-btn>
-                                    <v-btn dark color=#17252A @click.stop='toggleRecording'>
-                                        Toggle recording
-                                    </v-btn>
-                                </v-card-actions>
-                            </v-card>
+                        <v-row class='align-center justify-center'>
+                            <v-col cols=6>
+                                <v-card id='card' class='justify-center align-center'>
+                                    <v-card-title class='justify-center align-center'>
+                                        Camera
+                                    </v-card-title>
+                                    <video id='webcamVideo' width='100%' height='400' autoplay />
+                                    <v-card-actions class='justify-center align-center'>
+                                        <v-btn dark color=#17252A @click.stop='postSignVideo'>
+                                            Submit video
+                                        </v-btn>
+                                        <v-btn dark color=#17252A @click.stop='toggleRecording'>
+                                            Toggle recording
+                                        </v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-col>
                         </v-row>
                     </v-sheet>
                 </v-container>
