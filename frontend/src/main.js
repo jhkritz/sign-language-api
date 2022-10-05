@@ -21,8 +21,7 @@ import {
 
 Vue.config.productionTip = false;
 
-const routes = [
-	{
+const routes = [{
 		path: '/',
 		name: 'home',
 		component: home
@@ -121,7 +120,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-	if (from.path === '/library/test') {
+	if (from.path.includes('/library/test')) {
 		sharedState.stopCamera();
 	}
 	next();
@@ -139,4 +138,5 @@ new Vue({
 	},
 }).$mount('#app');
 
-axios.defaults.headers.common['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2MzA5OTE1MiwianRpIjoiMGJhY2JmNzItMTA4NS00M2E1LThmMDEtMWY5ZGE3N2YwMjdjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MTUsIm5iZiI6MTY2MzA5OTE1MiwiZXhwIjoxNjYzMTAwMDUyfQ.IFxLYf_Rr54nq4I7G1AVweeVOcswtwYyHB_EZld6LI8' 
+axios.defaults.headers.common['Authorization'] =
+	'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY2MzA5OTE1MiwianRpIjoiMGJhY2JmNzItMTA4NS00M2E1LThmMDEtMWY5ZGE3N2YwMjdjIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MTUsIm5iZiI6MTY2MzA5OTE1MiwiZXhwIjoxNjYzMTAwMDUyfQ.IFxLYf_Rr54nq4I7G1AVweeVOcswtwYyHB_EZld6LI8'

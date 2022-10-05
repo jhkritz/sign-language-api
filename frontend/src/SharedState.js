@@ -14,6 +14,7 @@ export const sharedState = {
 	stopCamera() {
 		if (this.cameraStream != null) {
 			this.cameraStream.getVideoTracks()[0].stop();
+			this.cameraStream = null;
 		}
 	}
 };
