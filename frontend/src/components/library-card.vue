@@ -20,29 +20,26 @@
 </template>
 
 <script>
-import {
-    sharedState
-} from '../SharedState';
-export default {
-    props: {
-        libraryname: {
-            required: true,
-            type: String
+    export default {
+        props: {
+            libraryname: {
+                required: true,
+                type: String
+            },
+            librarydesc: {
+                required: true,
+                type: String
+            }
         },
-        librarydesc: {
-            required: true,
-            type: String
+        methods: {
+            navigateToLibraryPage() {
+                localStorage.setItem('library_id', this.libraryname);
+                this.$router.push(`/library/explore?library_id=${this.libraryname}`);
+            },
+            navigateToAPI() {
+                localStorage.setItem('library_id', this.libraryname);
+                this.$router.push(`/library/api?library_id=${this.libraryname}`);
+            }
         }
-    },
-    methods: {
-        navigateToLibraryPage() {
-            sharedState.setLibraryID(this.libraryname);
-            this.$router.push(`/library/explore?library_id=${this.libraryname}`);
-        },
-        navigateToAPI() {
-            sharedState.setLibraryID(this.libraryname);
-            this.$router.push(`/library/api?library_id=${this.libraryname}`);
-        }
-    }
-};
+    };
 </script>
