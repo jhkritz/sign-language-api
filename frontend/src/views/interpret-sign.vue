@@ -9,7 +9,7 @@
                                 <v-card-title class='justify-center align-center'>
                                     Camera
                                 </v-card-title>
-                                <video id='webcamVideo' width='100%' height='400' autoplay />
+                                <video id='webcamVideo' width='100%' autoplay />
                                 <v-card-actions class='justify-center align-center'>
                                     <v-btn dark color=#17252A @click.stop='processSnapshot'>
                                         Process a snapshot

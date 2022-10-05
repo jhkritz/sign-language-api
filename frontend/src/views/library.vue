@@ -3,7 +3,44 @@
         <v-main class="grey lighten-3" id='mainContainer'>
             <v-container id='sheet'>
                 <v-sheet id='sheet' min-height="70vh" rounded="lg">
-                    <v-data-table :headers="headers" :items="signs" class="elevation-1">
+                    <v-data-table v-if="showEditSignTable" :headers="headers" :items="signs" class="elevation-1">
+                        <template v-slot:top>
+                            <v-toolbar flat>
+                                <v-toolbar-title>
+                                    Images associated with {{signToEdit}}
+                                </v-toolbar-title>
+                                <v-divider class="mx-4" inset vertical>
+                                </v-divider>
+                                <v-spacer></v-spacer>
+                                <v-btn dark color=#17252A class="mb-2" @click="swapTable">
+                                    Finish editing
+                                </v-btn>
+                                <v-dialog v-model="dialogDelete" max-width="500px">
+                                    <v-card>
+                                        <v-card-title class="text-h5">Are you sure you want to delete this sign?</v-card-title>
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn color=#17252A text @click="closeDelete">Cancel</v-btn>
+                                            <v-btn color=#17252A text @click="deleteItemConfirm">OK</v-btn>
+                                            <v-spacer></v-spacer>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
+                            </v-toolbar>
+                        </template>
+                        <template v-slot:item.actions="{ item }">
+                            <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
+                            <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+                        </template>
+                        <template v-slot:no-data>
+                            <v-btn icon @click="initialize">
+                                <v-icon>
+                                    mdi-cached
+                                </v-icon>
+                            </v-btn>
+                        </template>
+                    </v-data-table>
+                    <v-data-table v-if="showSignTable" :headers="headers" :items="signs" class="elevation-1">
                         <template v-slot:top>
                             <v-toolbar flat>
                                 <v-toolbar-title>
@@ -69,7 +106,9 @@
             library_id: null
         },
         data: () => ({
-            dialog: false,
+            signToEdit: null,
+            showSignTable: true,
+            showEditSignTable: false,
             itemToDelete: null,
             dialogDelete: false,
             headers: [{
@@ -147,14 +186,26 @@
                     console.error(err);
                 }
             },
+
             goto_addsign() {
                 this.$router.push(`/library/addsign?library_id=${this.library_id}`);
             },
 
             editItem(item) {
+                this.signToEdit = item.name;
                 this.editedIndex = this.signs.indexOf(item);
                 this.editedItem = Object.assign({}, item);
-                this.dialog = true;
+                this.swapTable();
+            },
+
+            swapTable() {
+                if (this.showSignTable) {
+                    this.showEditSignTable = true;
+                    this.showSignTable = false;
+                } else {
+                    this.showEditSignTable = false;
+                    this.showSignTable = true;
+                }
             },
 
             deleteItem(item) {
@@ -184,14 +235,6 @@
                 }
                 this.signs.splice(this.editedIndex, 1);
                 this.closeDelete();
-            },
-
-            close() {
-                this.dialog = false;
-                this.$nextTick(() => {
-                    this.editedItem = Object.assign({}, this.defaultItem);
-                    this.editedIndex = -1;
-                });
             },
 
             closeDelete() {
