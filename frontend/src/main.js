@@ -15,6 +15,7 @@ import register from './views/register';
 import login from './views/login';
 import home from './views/home';
 import API from './views/API';
+import LibraryPermissionsPage from './views/LibraryPermissionsPage';
 import {
 	sharedState
 } from './SharedState';
@@ -53,6 +54,14 @@ const routes = [{
 		path: '/library/api',
 		name: 'api',
 		component: ViewAPI,
+		props: route => ({
+			library_id: route.query.library_id
+		})
+	},
+	{
+		path: '/library/permissions',
+		name: 'permissions',
+		component: LibraryPermissionsPage,
 		props: route => ({
 			library_id: route.query.library_id
 		})
