@@ -29,9 +29,12 @@
       v-model="valid" 
       lazy-validation>
       <center>
-      <h1 class = "pb-8" >
+      <h1 class = "pb-2" >
       Log in
         </h1>
+        <p class = "pb-3">
+          Log in to your account
+        </p>
       </center>
         <v-text-field 
         outlined
