@@ -6,7 +6,7 @@
                     <v-sheet id='sheet' rounded="lg" class='justify-center align-center'>
 
                         <v-row id="row">
-                            <v-tabs centered v-model="selectedOption" @change="() => { if (selectedOption === 0) { initCamera() }}">
+                            <v-tabs centered v-model="selectedOption" @change="handleOptionChange">
                                 <v-tab v-for="option in options" :key="option">
                                     {{ option }}
                                 </v-tab>
@@ -36,6 +36,7 @@
                                 <video id='webcamVideo' autoplay />
                             </v-col>
                         </v-row>
+
                         <v-row id="row" v-if="selectedOption === 0">
                             <v-col cols=6>
                                 <v-btn dark color=#17252A @click.stop='toggleRecording'>
@@ -49,24 +50,6 @@
                                 <v-btn dark color=#17252A depressed @click="postSign">
                                     Submit
                                 </v-btn>
-                            </v-col>
-                        </v-row>
-                        <v-row class='align-center justify-center'>
-                            <v-col cols=6>
-                                <v-card id='card' class='justify-center align-center'>
-                                    <v-card-title class='justify-center align-center'>
-                                        Camera
-                                    </v-card-title>
-                                    <video id='webcamVideo' width='100%' height='400' autoplay />
-                                    <v-card-actions class='justify-center align-center'>
-                                        <v-btn dark color=#17252A @click.stop='postSignVideo'>
-                                            Submit video
-                                        </v-btn>
-                                        <v-btn dark color=#17252A @click.stop='toggleRecording'>
-                                            Toggle recording
-                                        </v-btn>
-                                    </v-card-actions>
-                                </v-card>
                             </v-col>
                         </v-row>
                     </v-sheet>
@@ -98,9 +81,9 @@
     }
 
     #webcamVideo {
+        border: 3px solid;
         height: auto;
         width: 100%;
-        display: none;
     }
 </style>
 
@@ -135,6 +118,14 @@
             this.initCamera();
         },
         methods: {
+            handleOptionChange() {
+                if (this.selectedOption === 0) {
+                    this.initCamera();
+                } else {
+                    this.cameraStream.getVideoTracks()[0].stop();
+                    this.cameraStream = null;
+                }
+            },
             async postSign() {
                 const data = new FormData();
                 data.append('sign_name', this.signname);
