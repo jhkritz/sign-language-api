@@ -21,13 +21,13 @@
 
                         <v-row id="row" v-if="selectedOption === 1">
                             <v-col cols=6>
-                                <v-file-input label='Upload an image' v-model='image' />
+                                <v-file-input label='Upload an image' v-model='file' />
                             </v-col>
                         </v-row>
 
                         <v-row id="row" v-if="selectedOption === 2">
                             <v-col cols=6>
-                                <v-file-input label='Upload a zip file containing images' v-model='zip_file' />
+                                <v-file-input label='Upload a zip file containing images' v-model='file' />
                             </v-col>
                         </v-row>
 
@@ -47,7 +47,7 @@
 
                         <v-row id="row">
                             <v-col cols=6 id="row">
-                                <v-btn dark color=#17252A depressed @click="postSign">
+                                <v-btn dark color=#17252A depressed @click="submitInput">
                                     Submit
                                 </v-btn>
                             </v-col>
@@ -82,8 +82,8 @@
 
     #webcamVideo {
         border: 3px solid;
-        height: auto;
         width: 100%;
+        display: none;
     }
 </style>
 
@@ -126,14 +126,33 @@
                     this.cameraStream = null;
                 }
             },
-            async postSign() {
+            async submitInput() {
                 const data = new FormData();
                 data.append('sign_name', this.signname);
                 data.append('lib_name', this.library_id);
-                data.append('image_file', this.image);
+                var url = '';
+                switch (this.selectedOption) {
+                    case 0:
+                        url = baseUrl + '/library/upload_sign_video';
+                        data.append('video', new Blob(this.videoRecorded.map(e => e.data), {
+                            type: 'video/webm'
+                        }));
+                        break;
+                    case 1:
+                        url = baseUrl + '/library/uploadsign';
+                        data.append('image_file', this.file);
+                        break;
+                    case 2:
+                        url = baseUrl + '/library/uploadsigns';
+                        data.append('zip_file', this.file);
+                        break;
+                    default:
+                        console.log('Error: default case reached.');
+                        break;
+                }
                 const config = {
                     method: 'post',
-                    url: baseUrl + '/library/uploadsign',
+                    url: url,
                     data: data,
                     headers: {
                         Authorization: 'Bearer ' + localStorage.getItem('access_token')
@@ -149,55 +168,6 @@
                     alert('Failed to upload image.');
                 }
             },
-            async postSigns() {
-                const data = new FormData();
-                data.append('sign_name', this.signname);
-                data.append('lib_name', this.library_id);
-                data.append('zip_file', this.zip_file);
-                const config = {
-                    method: 'post',
-                    url: baseUrl + '/library/uploadsigns',
-                    data: data,
-                    headers: {
-                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
-                    }
-                };
-                try {
-                    const res = await axios(config);
-                    if (res.status == 200) {
-                        alert(res.data.message);
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Failed to upload image')
-                }
-            },
-            async postSignVideo() {
-                const data = new FormData();
-                data.append('sign_name', this.signname);
-                data.append('lib_name', this.library_id);
-                console.log(this.videoRecorded);
-                data.append('video', new Blob(this.videoRecorded.map(e => e.data), {
-                    type: 'video/webm'
-                }));
-                const config = {
-                    method: 'post',
-                    url: baseUrl + '/library/upload_sign_video',
-                    data: data,
-                    headers: {
-                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
-                    }
-                };
-                try {
-                    const res = await axios(config);
-                    if (res.status == 200) {
-                        alert(res.data.message);
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Failed to upload video');
-                }
-            },
             async initCamera() {
                 this.cameraStream = await window.navigator.mediaDevices.getUserMedia({
                     video: true,
@@ -211,6 +181,8 @@
                 this.videoRecorder.addEventListener(
                     'dataavailable', (data) => this.videoRecorded.push(data)
                 );
+                await videoElement.load();
+                videoElement.style.display = "block";
                 sharedState.setCameraStream(this.cameraStream);
             },
             async toggleRecording() {
