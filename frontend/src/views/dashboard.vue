@@ -75,7 +75,7 @@
             <v-row justify="center">
                 <v-dialog v-model="dialog" persistent max-width="600px">
                     <template v-slot:activator="{ on, attrs }">
-                        <v-btn class="mx-2" fab dark color=#17252A v-bind="attrs" v-on="on">
+                        <v-btn class="mx-2" fab dark color="#17252A" v-bind="attrs" v-on="on">
                             <v-icon dark>
                                 mdi-plus
                             </v-icon>
@@ -89,14 +89,13 @@
                             <v-container>
                                 <v-row>
                                     <v-col cols="12">
-                                        <v-text-field v-model="myName" label="Library Name *" required></v-text-field>
+                                        <v-text-field v-model="myName" label="Library Name" required></v-text-field>
                                     </v-col>
                                     <v-col cols="12">
-                                        <v-text-field v-model="myDesc" label="Description *" required></v-text-field>
+                                        <v-text-field v-model="myDesc" label="Description" required></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-container>
-                            <small>*indicates required field</small>
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
