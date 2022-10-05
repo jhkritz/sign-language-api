@@ -18,7 +18,7 @@
                                                     {{user}}
                                                 </v-list-item-content>
                                                 <v-list-item-action>
-                                                    <v-icon @click='grantUserAccess'>
+                                                    <v-icon @click='grantUserAccess(user)'>
                                                         mdi-check
                                                     </v-icon>
                                                     <v-icon @click='grantAdminAccess'>
@@ -91,8 +91,23 @@
             recording: false,
         }),
         methods: {
-            async grantUserAccess() {
-
+            async grantUserAccess(userEmail) {
+                const config = {
+                    method: 'post',
+                    url: baseUrl + '/library/adduser',
+                    data: JSON.stringify({
+                        libname: localStorage.getItem('library_id'),
+                        useremail: userEmail
+                    }),
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
+                };
+                try {
+                    await axios(config);
+                } catch (err) {
+                    alert('Failed to grant user permission');
+                }
             },
             async grantAdminAccess() {},
             async submitInput() {
