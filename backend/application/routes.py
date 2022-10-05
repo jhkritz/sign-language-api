@@ -191,14 +191,15 @@ def get_libraries():
 @app.route('/library/deletesign', methods=['DELETE'])
 @jwt_required()
 def delete_sign():
-    libname = request.json.get('library_name')
-    signname = request.json.get('sign_name')
+    libname = request.args['library_name']
+    signname = request.args['sign_name']
     try:
         lib = SignLanguageLibrary.query.filter_by(name=libname).first()
         Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
         db.session.commit()
         return Response(status=200)
-    except:
+    except Exception as e:
+        print(e)
         return Response(status=400)
 
 

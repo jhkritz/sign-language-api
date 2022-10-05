@@ -21,7 +21,7 @@
                                         <v-card-actions>
                                             <v-spacer></v-spacer>
                                             <v-btn color=#17252A text @click="closeDelete">Cancel</v-btn>
-                                            <v-btn color=#17252A text @click="deleteItemConfirm">OK</v-btn>
+                                            <v-btn color=#17252A text @click="deleteItemConfirm()">OK</v-btn>
                                             <v-spacer></v-spacer>
                                         </v-card-actions>
                                     </v-card>
@@ -60,6 +60,9 @@
 
 <script>
     const axios = require('axios');
+    import {
+        baseUrl
+    } from '../BaseRequestUrl';
     export default {
         components: {},
         props: {
@@ -67,6 +70,7 @@
         },
         data: () => ({
             dialog: false,
+            itemToDelete: null,
             dialogDelete: false,
             headers: [{
                     text: "Sign",
@@ -120,6 +124,7 @@
             async getSigns() {
                 try {
                     const url = new URL('http://localhost:5000/library/signs');
+                    console.log(this.library_id);
                     url.searchParams.append('library_name', this.library_id);
                     const config = {
                         method: 'get',
@@ -145,9 +150,6 @@
             goto_addsign() {
                 this.$router.push(`/library/addsign?library_id=${this.library_id}`);
             },
-            initialize() {
-
-            },
 
             editItem(item) {
                 this.editedIndex = this.signs.indexOf(item);
@@ -158,10 +160,28 @@
             deleteItem(item) {
                 this.editedIndex = this.signs.indexOf(item);
                 this.editedItem = Object.assign({}, item);
+                this.itemToDelete = item.name;
                 this.dialogDelete = true;
             },
 
-            deleteItemConfirm() {
+            async deleteItemConfirm() {
+                const url = new URL(baseUrl + '/library/deletesign');
+                url.searchParams.append('library_name', localStorage.getItem('library_id'));
+                url.searchParams.append('sign_name', this.itemToDelete);
+                const config = {
+                    method: 'delete',
+                    url: url,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    },
+                };
+                try {
+                    await axios(config);
+                } catch (err) {
+                    this.closeDelete();
+                    alert('Failed to delete sign.');
+                    return;
+                }
                 this.signs.splice(this.editedIndex, 1);
                 this.closeDelete();
             },
@@ -176,6 +196,7 @@
 
             closeDelete() {
                 this.dialogDelete = false;
+                this.itemToDelete = null;
                 this.$nextTick(() => {
                     this.editedItem = Object.assign({}, this.defaultItem);
                     this.editedIndex = -1;
