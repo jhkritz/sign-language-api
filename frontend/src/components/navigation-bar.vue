@@ -47,9 +47,6 @@
 </style>
 
 <script charset="utf-8">
-    import {
-        sharedState
-    } from '../SharedState';
     export default {
         data: () => ({
             links: [{
@@ -70,7 +67,7 @@
             async deleteLibrary() {
                 var axios = require('axios');
                 var data = JSON.stringify({
-                    "library_name": sharedState.library_id
+                    "library_name": localStorage.getItem('library_id')
                 });
                 var config = {
                     method: 'delete',
@@ -79,7 +76,6 @@
                         'Content-Type': 'application/json',
                         Authorization: 'Bearer ' + localStorage.getItem('access_token')
                     },
-
                     data: data
                 };
                 try {
