@@ -2,25 +2,64 @@
   <v-app>
     <div>
       <!--Navigation bar-->
-      <v-app-bar elevation="0" color=#3AAFA9>
-        <v-appbar-title class="white--text">Sign Language API</v-appbar-title>
-        <!--img class="logo" src='../assets/logopic.jpeg'/-->
-        <v-spacer></v-spacer>
-        <v-btn icon color="white" id='homeButton' to='/'>
+      <v-app-bar 
+      elevation="0" 
+      color=#3AAFA9>
+        <v-appbar-title 
+        class="white--text">Sign Language API
+        </v-appbar-title>
+        <v-spacer>
+        </v-spacer>
+        <v-btn 
+        icon color="white" 
+        id='homeButton' 
+        to='/'>
           <v-icon>mdi-home</v-icon>
         </v-btn>
       </v-app-bar>
     </div>
-    <v-row>
-      <v-form ref="form" v-model="valid" lazy-validation>
-        <v-text-field v-model="email" :counter="40" :rules="emailRules" label="Email" required></v-text-field>
+    <!--Login form-->
+    <v-container 
+        fill-height>
+        <v-layout 
+        align-center 
+        justify-center>
+      <v-form 
+      ref="form" 
+      v-model="valid" 
+      lazy-validation>
+      <center>
+      <h1 class = "pb-8" >
+      Log in
+        </h1>
+      </center>
+        <v-text-field 
+        outlined
+        v-model="email" 
+        :counter="40" 
+        :rules="emailRules" 
+        label="Email" 
+        required>
+        </v-text-field>
 
-        <v-text-field v-model="password" type="password" :rules="passRules" label="Password" required></v-text-field>
-        <v-btn :disabled="!valid" color=#17252A class="mr-4 white--text" @click="postInfo()">
+        <v-text-field 
+        outlined
+        v-model="password" 
+        type="password" 
+        :rules="passRules" 
+        label="Password" 
+        required>
+        </v-text-field>
+        <v-btn 
+        :disabled="!valid" 
+        color=#17252A 
+        class="mr-4 white--text" 
+        @click="postInfo()">
           Log In
         </v-btn>
       </v-form>
-    </v-row>
+        </v-layout>
+    </v-container>
   </v-app>
 </template>
   
