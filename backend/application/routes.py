@@ -379,7 +379,7 @@ def classify_request():
 
 def knn_classify(lib_name, flat_image):
     data, labels, label_meanings = get_data_and_labels(lib_name)
-    k = min(int(data.shape[0] / len(label_meanings)), 100)
+    k = min(int(data.shape[0] / len(label_meanings)), 20)
     knn = cv.ml.KNearest_create()
     knn.train(data, cv.ml.ROW_SAMPLE, labels)
     to_classify = np.array(flat_image[np.newaxis, :], dtype=np.float32)
