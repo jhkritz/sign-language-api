@@ -39,7 +39,7 @@
 
                         <v-row id="row" v-if="selectedOption === 0">
                             <v-col cols=6>
-                                <v-btn dark color=#17252A @click.stop='toggleRecording'>
+                                <v-btn dark color=#17252A @click.stop="toggleRecording">
                                     {{ recording ? "Stop recording" : "Start recording" }}
                                 </v-btn>
                             </v-col>
@@ -106,8 +106,7 @@
             signrules: [
                 v => !!v || 'Sign name is required'
             ],
-            image: null,
-            zip_file: null,
+            file: null,
             videoRecorder: null,
             videoRecorded: [],
             options: ['Video', 'Single image', 'Zip file'],
@@ -121,9 +120,10 @@
             handleOptionChange() {
                 if (this.selectedOption === 0) {
                     this.initCamera();
-                } else {
+                } else if (this.cameraStream != null) {
                     this.cameraStream.getVideoTracks()[0].stop();
                     this.cameraStream = null;
+                    this.videoRecorder = null;
                 }
             },
             async submitInput() {
@@ -175,13 +175,6 @@
                 });
                 const videoElement = document.querySelector('video#webcamVideo');
                 videoElement.srcObject = this.cameraStream;
-                this.videoRecorder = new MediaRecorder(this.cameraStream, {
-                    mimeType: 'video/webm'
-                });
-                this.videoRecorder.addEventListener(
-                    'dataavailable', (data) => this.videoRecorded.push(data)
-                );
-                await videoElement.load();
                 videoElement.style.display = "block";
                 sharedState.setCameraStream(this.cameraStream);
             },
@@ -203,8 +196,8 @@
                         'dataavailable', (data) => this.videoRecorded.push(data)
                     );
                     this.videoRecorder.start(100);
-                    this.recording = true;
                     videoElement.style.border = "3px solid #ff0000";
+                    this.recording = true;
                 }
             },
         },
