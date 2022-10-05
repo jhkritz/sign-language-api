@@ -65,10 +65,29 @@
 
 }
 
-.logo {
-    width: 5%;
-    margin-left: 1%;
+.colourtext {
+  background: linear-gradient(to right, #FFF 20%, #b2faff 40%, #b2faff 60%, #FFF 80%);
+  background-size: 200% auto;
+
+  color: rgb(255, 255, 255);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: grad 3s linear infinite;
+}
+
+@keyframes grad {
+  to {
+    background-position: -200% center;
   }
+}
+
+
+.logo {
+  width: 5%;
+  margin-left: 1%;
+}
 </style>
 
 <template>
@@ -87,7 +106,7 @@
 
     <div class="main-text">
       <h1 class="bigtext">Welcome, </h1>
-      <h1 class="bigtext">to the SignMeUp API.</h1>
+      <h1 class="bigtext">to the <span class="colourtext">Sign Language API.</span></h1>
       <p class="desc">
         Discover how you can start using image based sign language recognition in your projects today, by signing up for
         API usage.
