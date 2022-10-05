@@ -74,10 +74,8 @@ def uploadsign():
         sign_name = request.form.get('sign_name')
         libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
         user_id = get_jwt_identity()
-        role = UserRole.query.filter_by(userid=user_id, libraryid=libid).first()
+        role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin = True).first()
         if role is None:
-            return {"Error":"Permission Denied"}, 400
-        if not role.admin:
             return {"Error":"Permission Denied"}, 400
 
         image = request.files['image_file']
@@ -167,11 +165,11 @@ def get_library_names():
 @jwt_required()
 def get_libraries():
     user_id = get_jwt_identity()
-    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
+    libs = SignLanguageLibrary.query.all()
     all_libs = []
     for lib in libs:
         #skip all libs that the user doesn't have access to.
-        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id)
+        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id).first()
         if not user_role:
             continue
 
@@ -189,11 +187,9 @@ def delete_sign():
     signname = request.json.get('sign_name')
     try:
         lib = SignLanguageLibrary.query.filter_by(name=libname).first()
-        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id)
+        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id, admin=True)
         if user_role is None:
             return {"Error":"Permission Denied"}, 400
-        if not user_role.admin:
-            return {"Error":"Permission Denied"}, 400        
 
         Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
         db.session.commit()
@@ -209,11 +205,9 @@ def delete_library():
     user_id = get_jwt_identity()
     try:
         libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-        user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid)
+        user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin = True)
         if user_role is None:
             return {"Error":"Permission Denied"}, 400
-        if not user_role.admin:
-            return {"Error":"Permission Denied"}, 400   
         Sign.query.filter_by(library_id=libid).delete()
         SignLanguageLibrary.query.filter_by(name=libname).delete()
         shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
@@ -221,6 +215,55 @@ def delete_library():
         return Response(status=200)
     except Exception:
         return Response(status=400)
+
+
+@app.route('/library/adduser', methods = ['POST'])
+@jwt_required()
+def adduser():
+    libname = request.json.get('library_name')
+    useremail = request.json.get('user_email')
+    user_id = get_jwt_identity()
+  
+    #check if sending user is admin first.
+    libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
+    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
+    if user_role is None:
+        return {"Error":"Permission Denied"}, 400
+
+    newuser = User.query.filter_by(email=useremail).first()
+    if not newuser:
+        return {"Error": "User cannot be found"}
+
+
+    newrole = UserRole(userid=newuser.id, libraryid=libid, admin = False)
+    db.session.add(newrole)
+    db.session.commit()
+    return jsonify(), 200
+    
+@app.route('/library/addadmin', methods = ['POST'])
+@jwt_required()
+def addadmin():
+    libname = request.json.get('library_name')
+    useremail = request.json.get('user_email')
+    user_id = get_jwt_identity()
+  
+    #check if sending user is admin first.
+    libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
+    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin = True).first()
+    if user_role is None:
+        return {"Error":"Permission Denied"}, 400
+    if not user_role.admin:
+        return {"Error":"Permission Denied"}, 400    
+
+    newuser = User.query.filter_by(email=useremail).first()
+    if not newuser:
+        return {"Error": "User cannot be found"}
+
+
+    newrole = UserRole(userid=newuser.id, libraryid=libid, admin = True)
+    db.session.add(newrole)
+    db.session.commit()
+    return jsonify(), 200
 
 
 # Functions used to classify images.
