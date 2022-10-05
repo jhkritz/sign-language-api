@@ -32,6 +32,11 @@
                         </v-list-item-title>
                     </v-list-item>
 
+                    <v-list-item @click="navigateToPermissions">
+                        <v-list-item-title>
+                            Manage permissions
+                        </v-list-item-title>
+                    </v-list-item>
                 </v-list-item-group>
             </v-list>
         </v-menu>
@@ -63,6 +68,9 @@
         methods: {
             navigateToAPI() {
                 this.$router.push(`/library/api?library_id=${localStorage.getItem('library_id')}`);
+            },
+            navigateToPermissions() {
+                this.$router.push(`/library/permissions?library_id=${localStorage.getItem('library_id')}`);
             },
             async deleteLibrary() {
                 var axios = require('axios');
