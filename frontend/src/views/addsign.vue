@@ -3,29 +3,6 @@
         <v-main class="grey lighten-3" id='mainContainer'>
             <v-form v-model="valid">
                 <v-container id='sheet'>
-<<<<<<< Updated upstream
-                    <v-sheet id='sheet' min-height="70vh" rounded="lg">
-                        <v-row id='row'>
-                            <v-col>
-                                <v-container id='container'>
-                                    <v-file-input label='Upload a hand sign' v-model='image' />
-                                    <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
-                                    <v-btn dark color=#17252A depressed @click="postSign">
-                                        Submit single image
-                                    </v-btn>
-                                </v-container>
-                            </v-col>
-                            <v-col>
-                                <v-container id='container'>
-                                    <v-file-input label='Upload a zip file with many photos of the same sign' v-model='zip_file' />
-                                    <v-text-field v-model="zip_signname" label="Sign name" :rules="signrules" outlined required />
-                                    <v-btn dark color=#17252A depressed @click="postSigns">
-                                        Submit zip file
-                                    </v-btn>
-                                </v-container>
-                            </v-col>
-                        </v-row>
-=======
                     <v-sheet id='sheet' rounded="lg" class='justify-center align-center'>
 
                         <v-row id="row">
@@ -74,7 +51,6 @@
                                 </v-btn>
                             </v-col>
                         </v-row>
->>>>>>> Stashed changes
                     </v-sheet>
                 </v-container>
             </v-form>
@@ -126,26 +102,21 @@
         data: () => ({
             valid: false,
             signname: '',
-            zip_signname: '',
             signrules: [
                 v => !!v || 'Sign name is required'
             ],
             image: null,
             zip_file: null,
-<<<<<<< Updated upstream
-=======
             videoRecorder: null,
             videoRecorded: [],
             options: ['Video', 'Single image', 'Zip file'],
             selectedOption: 0,
             recording: false,
->>>>>>> Stashed changes
         }),
         created() {
-            //this.initCamera();
+            this.initCamera();
         },
         methods: {
-
             async postSign() {
                 const data = new FormData();
                 data.append('sign_name', this.signname);
@@ -171,7 +142,7 @@
             },
             async postSigns() {
                 const data = new FormData();
-                data.append('sign_name', this.zip_signname);
+                data.append('sign_name', this.signname);
                 data.append('lib_name', this.library_id);
                 data.append('zip_file', this.zip_file);
                 const config = {
@@ -192,6 +163,32 @@
                     alert('Failed to upload image')
                 }
             },
+            async postSignVideo() {
+                const data = new FormData();
+                data.append('sign_name', this.signname);
+                data.append('lib_name', this.library_id);
+                console.log(this.videoRecorded);
+                data.append('video', new Blob(this.videoRecorded.map(e => e.data), {
+                    type: 'video/webm'
+                }));
+                const config = {
+                    method: 'post',
+                    url: baseUrl + '/library/upload_sign_video',
+                    data: data,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    }
+                };
+                try {
+                    const res = await axios(config);
+                    if (res.status == 200) {
+                        alert(res.data.message);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to upload video');
+                }
+            },
             async initCamera() {
                 this.cameraStream = await window.navigator.mediaDevices.getUserMedia({
                     video: true,
@@ -200,11 +197,6 @@
                 const videoElement = document.querySelector('video#webcamVideo');
                 console.log(videoElement);
                 videoElement.srcObject = this.cameraStream;
-<<<<<<< Updated upstream
-                this.imgCapture = new ImageCapture(this.cameraStream.getVideoTracks()[0]);
-                sharedState.setCameraStream(this.cameraStream);
-            },
-=======
                 console.log(videoElement);
                 videoElement.style.border = "3px solid";
                 sharedState.setCameraStream(this.cameraStream);
@@ -231,8 +223,6 @@
                     videoElement.style.border = "3px solid #ff0000";
                 }
             },
->>>>>>> Stashed changes
         },
-
     }
 </script>
