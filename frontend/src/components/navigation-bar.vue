@@ -1,12 +1,10 @@
 <template>
-    <v-app-bar app
-        color=#3AAFA9
-    >
-        <v-btn icon color= "white" id='homeButton' to='/dashboard'>
+    <v-app-bar app color=#3AAFA9>
+        <v-btn icon color="white" id='homeButton' to='/dashboard'>
             <v-icon>mdi-home</v-icon>
         </v-btn>
         <v-appbar-title id='toolbarTitle' class="white--text">
-            {{libraryname}}   
+            {{libraryname}}
         </v-appbar-title>
         <v-tabs centered class="ml-n9">
             <v-tab v-for="link in links" :key="link.text" :to='link.route'>
@@ -15,7 +13,7 @@
         </v-tabs>
         <v-menu>
             <template v-slot:activator="{ on, attrs }">
-                <v-btn color= "white" icon v-bind="attrs" v-on=on>
+                <v-btn color="white" icon v-bind="attrs" v-on=on>
                     <v-icon>mdi-dots-vertical</v-icon>
                 </v-btn>
             </template>
@@ -56,18 +54,18 @@
         data: () => ({
             links: [{
                     text: 'Explore library',
-                    route: `/library/explore?library_id=${sharedState.library_id}`
+                    route: `/library/explore?library_id=${localStorage.getItem('library_id')}`
                 },
                 {
                     text: 'Interpet my hand signs',
-                    route: `/library/test?library_id=${sharedState.library_id}`
+                    route: `/library/test?library_id=${localStorage.getItem('library_id')}`
                 },
             ],
-            libraryname: sharedState.library_id
+            libraryname: localStorage.getItem('library_id')
         }),
         methods: {
             navigateToAPI() {
-                this.$router.push(`/library/api?library_id=${sharedState.library_id}`);
+                this.$router.push(`/library/api?library_id=${localStorage.getItem('library_id')}`);
             },
             async deleteLibrary() {
                 var axios = require('axios');
