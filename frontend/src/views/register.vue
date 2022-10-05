@@ -4,7 +4,6 @@
             <!--Navigation bar-->
             <v-app-bar elevation="0" color=#3AAFA9>
                 <!--v-appbar-title class="white--text">Sign Language API</v-appbar-title-->
-                <img class="logo" src='../assets/logopic.jpeg'/>
                 <v-spacer></v-spacer>
                 <v-btn icon color="white" id='homeButton' to='/'>
                     <v-icon>mdi-home</v-icon>
@@ -12,6 +11,7 @@
             </v-app-bar>
         </div>
         <!--Registration form-->
+        <v-container>
         <v-form ref="form" v-model="valid" lazy-validation>
             <!---- <v-text-field v-model="name" :counter="10" :rules="nameRules" label="Name" required></v-text-field> -->
 
@@ -24,6 +24,7 @@
             </v-btn>
 
         </v-form>
+        </v-container>
     </v-app>
 </template>
 
