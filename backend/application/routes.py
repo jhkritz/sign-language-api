@@ -24,6 +24,38 @@ def home():
     return "Hello World!"
 
 
+@app.route('/library/uploadsign', methods=['POST'])
+@jwt_required()
+def uploadsign():
+    # Endpoint to upload a single sign with a name
+    try:
+        lib_name = request.form.get('lib_name')
+        sign_name = request.form.get('sign_name')
+        image = request.files['image_file']
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
+        try:
+            os.makedirs(img_path[:-1])
+        except Exception as e:
+            pass
+        image.save(img_path + 'temp.jpg')
+        image = cv2.imread(img_path + 'temp.jpg')
+        image = preprocess_image(image)
+        os.remove(img_path + 'temp.jpg')
+        if image is None:
+            msg = 'A hand could not be found in the image.'
+            print(msg)
+            return {"Error": msg}, 400
+        Image.fromarray(image).save(img_path + sign_name + '.jpg')
+        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+        sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg', library_id=libid)
+        db.session.add(sign)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return {"Error": str(e)}, 400
+    return Response(status=200)
+
+
 @app.route('/library/uploadsigns', methods=['POST'])
 def upload_signs():
     try:
@@ -64,36 +96,39 @@ def upload_signs():
         return Response(status=400)
 
 
-@app.route('/library/uploadsign', methods=['POST'])
-@jwt_required()
-def uploadsign():
-    # Endpoint to upload a single sign with a name
+@app.route('/library/upload_sign_video', methods=['POST'])
+def upload_sign_video():
     try:
-        lib_name = request.form.get('lib_name')
-        sign_name = request.form.get('sign_name')
-        image = request.files['image_file']
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
+        lib_name = request.form['lib_name']
+        sign_name = request.form['sign_name']
+        video = request.files['video']
+        filename = 'temp_video.webm'
+        video.save(filename)
+        video_capture = cv2.VideoCapture('./' + filename)
+        frame_grabbed, img = video_capture.read()
+        count = 0
+        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + sign_name + '/'
         try:
             os.makedirs(img_path[:-1])
         except Exception as e:
             pass
-        image.save(img_path + 'temp.jpg')
-        image = cv2.imread(img_path + 'temp.jpg')
-        image = preprocess_image(image)
-        os.remove(img_path + 'temp.jpg')
-        if image is None:
-            msg = 'A hand could not be found in the image.'
-            print(msg)
-            return {"Error": msg}, 400
-        Image.fromarray(image).save(img_path + sign_name + '.jpg')
-        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-        sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg', library_id=libid)
-        db.session.add(sign)
+        while frame_grabbed:
+            img = preprocess_image(img)
+            if img is not None:
+                img_name = sign_name + str(count) + '.png'
+                cv2.imwrite(img_path + img_name, img)
+                libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+                sign = Sign(meaning=sign_name, image_filename=img_name, library_id=libid)
+                db.session.add(sign)
+                count += 1
+                print(count)
+            frame_grabbed, img = video_capture.read()
+        print('Successfully uploaded ' + str(count) + ' images.')
         db.session.commit()
+        return Response(status=200)
     except Exception as e:
         print(e)
-        return {"Error": str(e)}, 400
-    return Response(status=200)
+    return Response(status=404)
 
 
 @app.route('/library/createlibrary', methods=['POST'])
