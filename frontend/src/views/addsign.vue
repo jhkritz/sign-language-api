@@ -187,20 +187,6 @@
             },
             async toggleRecording() {
                 const videoElement = document.querySelector('video#webcamVideo');
-                if (this.videoRecorder.state === 'inactive') {
-                    this.videoRecorder.start(100);
-                } else if (this.videoRecorder.state === 'paused') {
-                    this.videoRecorder.resume();
-                } else {
-                    this.videoRecorder.pause();
-                }
-                console.log(this.videoRecorder.state);
-                console.log(videoElement);
-                videoElement.style.border = "3px solid";
-                sharedState.setCameraStream(this.cameraStream);
-            },
-            async toggleRecording() {
-                const videoElement = document.querySelector('video#webcamVideo');
                 if (this.recording) {
                     this.videoRecorder.pause();
                     this.recording = false;
