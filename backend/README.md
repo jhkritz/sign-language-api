@@ -23,8 +23,9 @@ You can download an ASL dataset [here](https://www.kaggle.com/datasets/grassknot
 		pip install -r requirements.txt
 
 - Run the Flask server:
+	
+		python3 app.py
 
-		flask run
 
 ## API Documentation
 
