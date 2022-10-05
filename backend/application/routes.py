@@ -25,6 +25,7 @@ def home():
 
 
 @app.route('/library/uploadsigns', methods=['POST'])
+@jwt_required()
 def upload_signs():
     try:
         lib_name = request.form['lib_name']
@@ -71,6 +72,14 @@ def uploadsign():
     try:
         lib_name = request.form.get('lib_name')
         sign_name = request.form.get('sign_name')
+        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+        user_id = get_jwt_identity()
+        role = UserRole.query.filter_by(userid=user_id, libraryid=libid).first()
+        if role is None:
+            return {"Error":"Permission Denied"}, 400
+        if not role.admin:
+            return {"Error":"Permission Denied"}, 400
+
         image = request.files['image_file']
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
         try:
@@ -86,7 +95,7 @@ def uploadsign():
             print(msg)
             return {"Error": msg}, 400
         Image.fromarray(image).save(img_path + sign_name + '.jpg')
-        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+        
         sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg', library_id=libid)
         db.session.add(sign)
         db.session.commit()
@@ -102,7 +111,6 @@ def create_library():
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
     user_id = get_jwt_identity()
-    user = User.query.filter_by(id=id)
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}, 403
@@ -112,7 +120,7 @@ def create_library():
     db.session.add(library)
 
     db.session.commit()
-    owner_role = UserRole(userid=user_id, libraryid = library.id, role = 1)
+    owner_role = UserRole(userid=user_id, libraryid = library.id, admin = True)
     db.session.add(owner_role)
     db.session.commit()
     response = jsonify()
@@ -122,9 +130,13 @@ def create_library():
 @app.route('/library/signs', methods=['GET'])
 @jwt_required()
 def get_signs():
+    user_id = get_jwt_identity()
     library_name = request.args['library_name']
     img_url_base = '/library/image'
     lib = SignLanguageLibrary.query.filter_by(name=library_name).first_or_404()
+    user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id).first()
+    if not user_role:
+        return {"Error":"Permission Denied"}, 400
     signs = [sign.to_dict(img_url_base) for sign in lib.signs]
     return {'signs': signs}
 
@@ -132,7 +144,12 @@ def get_signs():
 @app.route('/library/image', methods=['GET'])
 @jwt_required()
 def get_sign_image():
+    user_id = get_jwt_identity()
     lib_name = request.args['library_name']
+    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
+    user_role = UserRole(userid=user_id, libraryid=lib.id)
+    if not user_role:
+        return {"Error":"Permission Denied"}, 400
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     return send_from_directory(path, img_name)
@@ -153,6 +170,11 @@ def get_libraries():
     libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     all_libs = []
     for lib in libs:
+        #skip all libs that the user doesn't have access to.
+        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id)
+        if not user_role:
+            continue
+
         thislib = {'name': lib.name, 'description': lib.description}
         all_libs.append(thislib)
     response = jsonify({'libraries': all_libs})
@@ -162,10 +184,17 @@ def get_libraries():
 @app.route('/library/deletesign', methods=['DELETE'])
 @jwt_required()
 def delete_sign():
+    user_id = get_jwt_identity()
     libname = request.json.get('library_name')
     signname = request.json.get('sign_name')
     try:
         lib = SignLanguageLibrary.query.filter_by(name=libname).first()
+        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id)
+        if user_role is None:
+            return {"Error":"Permission Denied"}, 400
+        if not user_role.admin:
+            return {"Error":"Permission Denied"}, 400        
+
         Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
         db.session.commit()
         return Response(status=200)
@@ -177,8 +206,14 @@ def delete_sign():
 @jwt_required()
 def delete_library():
     libname = request.json.get('library_name')
+    user_id = get_jwt_identity()
     try:
         libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
+        user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid)
+        if user_role is None:
+            return {"Error":"Permission Denied"}, 400
+        if not user_role.admin:
+            return {"Error":"Permission Denied"}, 400   
         Sign.query.filter_by(library_id=libid).delete()
         SignLanguageLibrary.query.filter_by(name=libname).delete()
         shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)

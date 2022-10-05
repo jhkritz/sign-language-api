@@ -16,10 +16,9 @@ class UserRole(db.Model):
     userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     libraryid = db.Column(db.Integer, db.ForeignKey('sign_language_library.id'), nullable=False)
 
-    #options = 1-admin,
-    #          2-editor,
-    #          3-viewer,
-    role = db.Column(db.Integer,nullable=False)
+    #options = true = admin,
+    #          false = viewer
+    admin = db.Column(db.Boolean,nullable=False)
  
 # class Roles(db.Model):
 #     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
