@@ -1,5 +1,5 @@
 <template>
-    <v-card class="mx-auto" elevation=6>
+    <v-card class="mx-auto" elevation=6 height="10em" width="23em">
         <v-card-text>
             <p class="text-h4 text--primary">
                 {{libraryname}}
@@ -20,29 +20,29 @@
 </template>
 
 <script>
-    import {
-        sharedState
-    } from '../SharedState';
-    export default {
-        props: {
-            libraryname: {
-                required: true,
-                type: String
-            },
-            librarydesc: {
-                required: true,
-                type: String
-            }
+import {
+    sharedState
+} from '../SharedState';
+export default {
+    props: {
+        libraryname: {
+            required: true,
+            type: String
         },
-        methods: {
-            navigateToLibraryPage() {
-                sharedState.setLibraryID(this.libraryname);
-                this.$router.push(`/library/explore?library_id=${this.libraryname}`);
-            },
-            navigateToAPI() {
-                sharedState.setLibraryID(this.libraryname);
-                this.$router.push(`/library/api?library_id=${this.libraryname}`);
-            }
+        librarydesc: {
+            required: true,
+            type: String
         }
-    };
+    },
+    methods: {
+        navigateToLibraryPage() {
+            sharedState.setLibraryID(this.libraryname);
+            this.$router.push(`/library/explore?library_id=${this.libraryname}`);
+        },
+        navigateToAPI() {
+            sharedState.setLibraryID(this.libraryname);
+            this.$router.push(`/library/api?library_id=${this.libraryname}`);
+        }
+    }
+};
 </script>

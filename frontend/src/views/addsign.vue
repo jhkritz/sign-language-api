@@ -3,30 +3,52 @@
         <v-main class="grey lighten-3" id='mainContainer'>
             <v-form v-model="valid">
                 <v-container id='sheet'>
-                    <v-sheet id='sheet' min-height="70vh" rounded="lg">
-                        <v-row class='align-center justify-center'>
+                    <v-sheet id='sheet' rounded="lg" class='justify-center align-center'>
+
+                        <v-row id="row">
+                            <v-tabs centered v-model="selectedOption" @change="() => { if (selectedOption === 0) { initCamera() }}">
+                                <v-tab v-for="option in options" :key="option">
+                                    {{ option }}
+                                </v-tab>
+                            </v-tabs>
+                        </v-row>
+
+                        <v-row id="row">
                             <v-col cols=6>
-                                <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required></v-text-field>
+                                <v-text-field v-model="signname" label="Sign name" :rules="signrules" outlined required />
                             </v-col>
                         </v-row>
-                        <v-row class='align-center justify-center'>
+
+                        <v-row id="row" v-if="selectedOption === 1">
                             <v-col cols=6>
-                                <v-container id='container'>
-                                    <v-file-input label='Upload a hand sign' v-model='image' />
-                                    <v-btn dark color=#17252A depressed @click="postSign">
-                                        Submit single image
-                                    </v-btn>
-                                </v-container>
+                                <v-file-input label='Upload an image' v-model='image' />
                             </v-col>
                         </v-row>
-                        <v-row class='align-center justify-center'>
+
+                        <v-row id="row" v-if="selectedOption === 2">
                             <v-col cols=6>
-                                <v-container id='container'>
-                                    <v-file-input label='Upload a zip file with many photos of the same sign' v-model='zip_file' />
-                                    <v-btn dark color=#17252A depressed @click="postSigns">
-                                        Submit zip file
-                                    </v-btn>
-                                </v-container>
+                                <v-file-input label='Upload a zip file containing images' v-model='zip_file' />
+                            </v-col>
+                        </v-row>
+
+                        <v-row id="row" v-if="selectedOption === 0">
+                            <v-col cols=6>
+                                <video id='webcamVideo' autoplay />
+                            </v-col>
+                        </v-row>
+                        <v-row id="row" v-if="selectedOption === 0">
+                            <v-col cols=6>
+                                <v-btn dark color=#17252A @click.stop='toggleRecording'>
+                                    {{ recording ? "Stop recording" : "Start recording" }}
+                                </v-btn>
+                            </v-col>
+                        </v-row>
+
+                        <v-row id="row">
+                            <v-col cols=6 id="row">
+                                <v-btn dark color=#17252A depressed @click="postSign">
+                                    Submit
+                                </v-btn>
                             </v-col>
                         </v-row>
                         <v-row class='align-center justify-center'>
@@ -56,19 +78,29 @@
 
 <style>
     #row {
-        align-content: start;
-        justify-content: start;
+        align-content: center;
+        justify-content: center;
+        box-sizing: border-box;
+        display: flex;
     }
 
     #sheet {
         width: 100%;
         padding: 2.5%;
+        min-height: 80vh;
         box-sizing: border-box;
+        text-align: center;
     }
 
     #mainContainer {
         height: 100%;
         box-sizing: border-box;
+    }
+
+    #webcamVideo {
+        height: auto;
+        width: 100%;
+        display: none;
     }
 </style>
 
@@ -95,6 +127,9 @@
             zip_file: null,
             videoRecorder: null,
             videoRecorded: [],
+            options: ['Video', 'Single image', 'Zip file'],
+            selectedOption: 0,
+            recording: false,
         }),
         created() {
             this.initCamera();
@@ -188,6 +223,7 @@
                 sharedState.setCameraStream(this.cameraStream);
             },
             async toggleRecording() {
+                const videoElement = document.querySelector('video#webcamVideo');
                 if (this.videoRecorder.state === 'inactive') {
                     this.videoRecorder.start(100);
                 } else if (this.videoRecorder.state === 'paused') {
@@ -196,6 +232,31 @@
                     this.videoRecorder.pause();
                 }
                 console.log(this.videoRecorder.state);
+                console.log(videoElement);
+                videoElement.style.border = "3px solid";
+                sharedState.setCameraStream(this.cameraStream);
+            },
+            async toggleRecording() {
+                const videoElement = document.querySelector('video#webcamVideo');
+                if (this.recording) {
+                    this.videoRecorder.pause();
+                    this.recording = false;
+                    videoElement.style.border = "3px solid";
+                } else if (this.videoRecorder != null) {
+                    this.videoRecorder.resume();
+                    this.recording = true;
+                    videoElement.style.border = "3px solid #ff0000";
+                } else {
+                    this.videoRecorder = new MediaRecorder(this.cameraStream, {
+                        mimeType: 'video/webm'
+                    });
+                    this.videoRecorder.addEventListener(
+                        'dataavailable', (data) => this.videoRecorded.push(data)
+                    );
+                    this.videoRecorder.start(100);
+                    this.recording = true;
+                    videoElement.style.border = "3px solid #ff0000";
+                }
             },
         },
     }
