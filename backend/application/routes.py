@@ -215,10 +215,10 @@ def get_libraries():
 @app.route('/library/deletesign', methods=['DELETE'])
 @jwt_required()
 def delete_sign():
-   user_id = get_jwt_identity()
-   libname = request.args['library_name']
+    user_id = get_jwt_identity()
+    libname = request.args['library_name']
     signname = request.args['sign_name']
-   try:
+    try:
         lib = SignLanguageLibrary.query.filter_by(name=libname).first()
         user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id, admin=True)
         if user_role is None:
@@ -238,7 +238,7 @@ def delete_library():
     user_id = get_jwt_identity()
     try:
         libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-        user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin= True)
+        user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True)
         if user_role is None:
             return {"Error": "Permission Denied"}, 400
         Sign.query.filter_by(library_id=libid).delete()
@@ -250,7 +250,7 @@ def delete_library():
         return Response(status=400)
 
 
-@app.route('/library/adduser', methods= ['POST'])
+@app.route('/library/adduser', methods=['POST'])
 @jwt_required()
 def adduser():
     libname = request.json.get('library_name')
@@ -267,13 +267,13 @@ def adduser():
     if not newuser:
         return {"Error": "User cannot be found"}
 
-    newrole = UserRole(userid=newuser.id, libraryid=libid, admin= False)
+    newrole = UserRole(userid=newuser.id, libraryid=libid, admin=False)
     db.session.add(newrole)
     db.session.commit()
     return jsonify(), 200
 
 
-@app.route('/library/addadmin', methods = ['POST'])
+@app.route('/library/addadmin', methods=['POST'])
 @jwt_required()
 def addadmin():
     libname = request.json.get('library_name')
@@ -282,17 +282,17 @@ def addadmin():
 
     # check if sending user is admin first.
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin= True).first()
+    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
     if user_role is None:
         return {"Error": "Permission Denied"}, 400
     if not user_role.admin:
-        return {"Error": "Permission Denied"}, 400    
+        return {"Error": "Permission Denied"}, 400
 
     newuser = User.query.filter_by(email=useremail).first()
     if not newuser:
         return {"Error": "User cannot be found"}
 
-    newrole = UserRole(userid=newuser.id, libraryid=libid, admin= True)
+    newrole = UserRole(userid=newuser.id, libraryid=libid, admin=True)
     db.session.add(newrole)
     db.session.commit()
     return jsonify(), 200
