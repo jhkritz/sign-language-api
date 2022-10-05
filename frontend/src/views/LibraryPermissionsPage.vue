@@ -4,6 +4,69 @@
             <v-form v-model="valid">
                 <v-container id='sheet'>
                     <v-sheet id='sheet' rounded="lg" class='justify-center align-center'>
+                        <v-row id='row'>
+                            <v-col cols=4>
+                                <v-card>
+                                    <v-card-title>
+                                        Users without permission
+                                    </v-card-title>
+                                    <v-list>
+                                        <v-list-item v-for="user in users" :key="user">
+                                            <v-list-item-content>
+                                                {{user}}
+                                            </v-list-item-content>
+                                            <v-list-item-action>
+                                                <v-icon>
+                                                    mdi-check
+                                                </v-icon>
+                                            </v-list-item-action>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card>
+                            </v-col>
+                            <v-col cols=4>
+                                <v-card>
+                                    <v-card-title>
+                                        Users with permission to use
+                                    </v-card-title>
+                                    <v-list>
+                                        <v-list-item v-for="user in users" :key="user">
+                                            <v-list-item-content>
+                                                {{user}}
+                                            </v-list-item-content>
+                                            <v-list-item-action>
+                                                <v-icon>
+                                                    mdi-close-box
+                                                </v-icon>
+                                            </v-list-item-action>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card>
+                            </v-col>
+                            <v-col cols=4>
+                                <v-card>
+                                    <v-card-title>
+                                        Admin users
+                                    </v-card-title>
+                                    <v-list>
+                                        <v-list-item v-for="user in users" :key="user">
+                                            <v-list-item-content>
+                                                {{user}}
+                                            </v-list-item-content>
+                                            <v-list-item-action>
+                                                <v-icon>
+                                                    mdi-close-box
+                                                </v-icon>
+                                            </v-list-item-action>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                        <v-row id='row'>
+                            <v-col cols=6>
+                            </v-col>
+                        </v-row>
                     </v-sheet>
                 </v-container>
             </v-form>
@@ -41,9 +104,6 @@
 
 <script>
     import {
-        sharedState
-    } from '../SharedState';
-    import {
         baseUrl
     } from '../BaseRequestUrl';
     const axios = require('axios');
@@ -53,6 +113,7 @@
             library_id: null
         },
         data: () => ({
+            users: ["John", "Shelly"],
             valid: false,
             signname: '',
             signrules: [
@@ -66,15 +127,6 @@
             recording: false,
         }),
         methods: {
-            handleOptionChange() {
-                if (this.selectedOption === 0) {
-                    this.initCamera();
-                } else if (this.cameraStream != null) {
-                    this.cameraStream.getVideoTracks()[0].stop();
-                    this.cameraStream = null;
-                    this.videoRecorder = null;
-                }
-            },
             async submitInput() {
                 const data = new FormData();
                 data.append('sign_name', this.signname);
@@ -115,38 +167,6 @@
                 } catch (err) {
                     console.error(err);
                     alert('Failed to upload image.');
-                }
-            },
-            async initCamera() {
-                this.cameraStream = await window.navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: false
-                });
-                const videoElement = document.querySelector('video#webcamVideo');
-                videoElement.srcObject = this.cameraStream;
-                videoElement.style.display = "block";
-                sharedState.setCameraStream(this.cameraStream);
-            },
-            async toggleRecording() {
-                const videoElement = document.querySelector('video#webcamVideo');
-                if (this.recording) {
-                    this.videoRecorder.pause();
-                    this.recording = false;
-                    videoElement.style.border = "3px solid";
-                } else if (this.videoRecorder != null) {
-                    this.videoRecorder.resume();
-                    this.recording = true;
-                    videoElement.style.border = "3px solid #ff0000";
-                } else {
-                    this.videoRecorder = new MediaRecorder(this.cameraStream, {
-                        mimeType: 'video/webm'
-                    });
-                    this.videoRecorder.addEventListener(
-                        'dataavailable', (data) => this.videoRecorded.push(data)
-                    );
-                    this.videoRecorder.start(100);
-                    videoElement.style.border = "3px solid #ff0000";
-                    this.recording = true;
                 }
             },
         },
