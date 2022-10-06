@@ -7,6 +7,12 @@
     </v-app>
 </template>
 
+<style>
+    html {
+        overflow-y: hidden;
+    }
+</style>
+
 <script>
     import navBar from './components/navigation-bar';
     import {
