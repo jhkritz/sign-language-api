@@ -121,11 +121,11 @@
             };
             try {
                 const res = await axios(config);
+                this.processedImageSrc = res.data;
                 console.log(res);
             } catch (err) {
                 console.log(err);
             }
-            this.processedImageSrc = res;
         },
         methods: {
             async processSnapshot() {
