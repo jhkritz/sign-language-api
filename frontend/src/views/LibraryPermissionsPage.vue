@@ -121,9 +121,9 @@
             library_id: null
         },
         data: () => ({
-            permissionlessUsers: ["John", "Shelly"],
-            normalUsers: ["Steve", "Harry"],
-            adminUsers: ["Admin", "user"],
+            permissionlessUsers: [],
+            normalUsers: [],
+            adminUsers: [],
             valid: false,
             signname: '',
             signrules: [
