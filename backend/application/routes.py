@@ -273,8 +273,49 @@ def adduser():
     return jsonify(), 200
 
 
-@app.route('/library/addadmin', methods=['POST'])
+@app.route('/library/get/user/groups', methods=['GET'])
 @jwt_required()
+def get_user_groups():
+    lib_name = request.args['library_name']
+    user_id = get_jwt_identity()
+
+    # check if sending user is admin first.
+    lib_id = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+    user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib_id, admin=True).first()
+    print(user_role)
+    if user_role is None:
+        return {"Error": "Permission Denied"}, 400
+    admins = UserRole.query.filter_by(libraryid=lib_id, admin=True).all()
+    normalUsers = UserRole.query.filter_by(libraryid=lib_id, admin=False).all()
+    admins = list(map(lambda role: User.query.filter_by(id=role.userid).first().email, admins))
+    normalUsers = list(
+        map(
+            lambda role: User.query.filter_by(id=role.userid).first().email,
+            normalUsers
+        )
+    )
+    all_users = User.query.all()
+    roles = UserRole.query.filter_by(libraryid=lib_id).all()
+    permissionlessUsers = []
+    for user_a in all_users:
+        has_permissions = False
+        print(user_a.id)
+        for role in roles:
+            if user_a.id == role.userid:
+                print('yes')
+                has_permissions = True
+                break
+        if not has_permissions:
+            permissionlessUsers += [user_a.email]
+    return {
+        'permissionlessUsers': permissionlessUsers,
+        'normalUsers': normalUsers,
+        'adminUsers': admins
+    }, 200
+
+
+@ app.route('/library/addadmin', methods=['POST'])
+@ jwt_required()
 def addadmin():
     libname = request.json.get('library_name')
     useremail = request.json.get('user_email')
@@ -365,7 +406,7 @@ def classify(data_image, lib_name):
         return Response(status=400)
 
 
-@app.route('/library/classifyimage', methods=['POST'])
+@ app.route('/library/classifyimage', methods=['POST'])
 def classify_request():
     """
     https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
@@ -399,7 +440,7 @@ def knn_classify(lib_name, flat_image):
 #########################################################################
 
 
-@app.route('/api/library/uploadsign', methods=['POST'])
+@ app.route('/api/library/uploadsign', methods=['POST'])
 def uploadsignapi():
     key = request.form.get('key')
     if verifykey(key) == "0":
@@ -430,7 +471,7 @@ def uploadsignapi():
     return Response(status=200)
 
 
-@app.route('/api/library/createlibrary', methods=['POST'])
+@ app.route('/api/library/createlibrary', methods=['POST'])
 def createlibraryapi():
     key = request.form.get('key')
     if verifykey(key) == "0":
@@ -449,7 +490,7 @@ def createlibraryapi():
     return response, 200
 
 
-@app.route('/api/library/signs', methods=['GET'])
+@ app.route('/api/library/signs', methods=['GET'])
 def get_signsapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -461,7 +502,7 @@ def get_signsapi():
     return {'signs': signs}
 
 
-@app.route('/api/library/image', methods=['GET'])
+@ app.route('/api/library/image', methods=['GET'])
 def get_sign_imageapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -472,7 +513,7 @@ def get_sign_imageapi():
     return send_from_directory(path, img_name)
 
 
-@app.route('/api/libraries/names', methods=['GET'])
+@ app.route('/api/libraries/names', methods=['GET'])
 def get_library_namesapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -483,7 +524,7 @@ def get_library_namesapi():
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
-@app.route('/api/libraries/getall', methods=['GET'])
+@ app.route('/api/libraries/getall', methods=['GET'])
 def get_librariesapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -498,7 +539,7 @@ def get_librariesapi():
     return response, 200
 
 
-@app.route('/api/library/deletesign', methods=['DELETE'])
+@ app.route('/api/library/deletesign', methods=['DELETE'])
 def delete_signapi():
     key = request.json.get('key')
     if verifykey(key) == "0":
@@ -514,7 +555,7 @@ def delete_signapi():
         return Response(status=400)
 
 
-@app.route('/api/library/deletelibrary', methods=['DELETE'])
+@ app.route('/api/library/deletelibrary', methods=['DELETE'])
 def delete_libraryapi():
     key = request.json.get('key')
     if verifykey(key) == "0":
@@ -531,7 +572,7 @@ def delete_libraryapi():
         return Response(status=400)
 
 
-@app.route('/api/library/classifyimage', methods=['POST'])
+@ app.route('/api/library/classifyimage', methods=['POST'])
 def classify_requestapi():
     key = request.form['key']
     if verifykey(key) == "0":
