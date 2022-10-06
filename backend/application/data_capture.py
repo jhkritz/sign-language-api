@@ -1,7 +1,7 @@
-from cvzone.HandTrackingModule import HandDetector
-import cv2 as cv
 import sys
 import os
+from cvzone.HandTrackingModule import HandDetector
+import cv2 as cv
 
 """
 Note: this code is inspired by the following video, and it is only for getting initial test data.
