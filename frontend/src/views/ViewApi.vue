@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+<v-container>
         <h1>
             Your current API Key is :
         </h1> 
@@ -20,14 +20,20 @@
         </v-btn>
         <br/>
         <br/>
+        <h3>
+            Add explanation here
+        </h3>
         <br/>
         <v-btn
             color=#17252A
             class="mr-4 white--text"
-            @click="goToDashboard"
         >
-            Done
+             <a href="../api_docs.html" style="text-decoration: none; color: inherit;">View Api Documentation</a>
         </v-btn>
+       
+        <br/>
+        <br/>
+        <br/>
     </v-container>
 </template>
 
