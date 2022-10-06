@@ -278,11 +278,9 @@ def adduser():
 def get_user_groups():
     lib_name = request.args['library_name']
     user_id = get_jwt_identity()
-
     # check if sending user is admin first.
     lib_id = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
     user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib_id, admin=True).first()
-    print(user_role)
     if user_role is None:
         return {"Error": "Permission Denied"}, 400
     admins = UserRole.query.filter_by(libraryid=lib_id, admin=True).all()
@@ -299,10 +297,8 @@ def get_user_groups():
     permissionlessUsers = []
     for user_a in all_users:
         has_permissions = False
-        print(user_a.id)
         for role in roles:
             if user_a.id == role.userid:
-                print('yes')
                 has_permissions = True
                 break
         if not has_permissions:
