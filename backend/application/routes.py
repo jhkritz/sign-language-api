@@ -1,10 +1,8 @@
 import os
 import shutil
 from zipfile import ZipFile
-
 from flask import send_from_directory, jsonify, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
 from . import db
 from .image_processing import *
 from .models import User, UserRole, Sign
@@ -184,7 +182,7 @@ def get_library_names():
 
 def get_library_names(user_id):
     libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
-    return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
+    return {'library_names': name for name in map(lambda lib: lib.name, libs)}
 
 
 @library_routes.route('/libraries/getall', methods=['GET'])
