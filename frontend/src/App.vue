@@ -13,9 +13,7 @@
         baseUrl
     } from './BaseRequestUrl';
     const axios = require('axios');
-
-    const delta = 14 * 60 * 1000;
-    // setInterval(this.refreshTokens, delta);
+    const delta = 13 * 60 * 1000;
     export default {
         name: "App",
         data: () => ({}),
@@ -30,6 +28,7 @@
 
             async refreshTokens() {
                 if (!localStorage.getItem('refresh_token')) {
+                    console.error('Missing refresh token.');
                     return;
                 }
                 const refresh_token = localStorage.getItem('refresh_token');
@@ -46,6 +45,7 @@
                     const res = await axios(config);
                     localStorage.setItem('access_token', res.data['access']);
                     localStorage.setItem('refresh_token', res.data['refresh']);
+                    console.log('access token' + localStorage.getItem('access_token'));
                     console.log('new token: ' + localStorage.getItem('refresh_token'));
                 } catch (err) {
                     console.log(err);
@@ -53,9 +53,9 @@
 
             },
         },
+
         created() {
-            //setInterval(this.refreshTokens, delta);
-            console.log(delta);
+            setInterval(this.refreshTokens, delta);
         }
 
     };
