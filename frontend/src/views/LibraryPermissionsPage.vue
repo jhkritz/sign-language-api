@@ -11,7 +11,7 @@
                                         Users without any permissions
                                     </v-card-title>
                                     <v-list>
-                                        <template v-for="user in users">
+                                        <template v-for="user in permissionlessUsers">
                                             <v-divider :key="user + 'div'" />
                                             <v-list-item :key="user">
                                                 <v-list-item-content>
@@ -23,6 +23,50 @@
                                                     </v-icon>
                                                     <v-icon @click='grantAdminAccess'>
                                                         mdi-account-check
+                                                    </v-icon>
+                                                </v-list-item-action>
+                                            </v-list-item>
+                                        </template>
+                                    </v-list>
+                                </v-card>
+                            </v-col>
+                            <v-col cols=4>
+                                <v-card>
+                                    <v-card-title>
+                                        Users with basic permissions
+                                    </v-card-title>
+                                    <v-list>
+                                        <template v-for="user in permissionlessUsers">
+                                            <v-divider :key="user + 'div'" />
+                                            <v-list-item :key="user">
+                                                <v-list-item-content>
+                                                    {{user}}
+                                                </v-list-item-content>
+                                                <v-list-item-action>
+                                                    <v-icon>
+                                                        mdi-close-box
+                                                    </v-icon>
+                                                </v-list-item-action>
+                                            </v-list-item>
+                                        </template>
+                                    </v-list>
+                                </v-card>
+                            </v-col>
+                            <v-col cols=4>
+                                <v-card>
+                                    <v-card-title>
+                                        Users with admin permissions
+                                    </v-card-title>
+                                    <v-list>
+                                        <template v-for="user in adminUsers">
+                                            <v-divider :key="user + 'div'" />
+                                            <v-list-item :key="user">
+                                                <v-list-item-content>
+                                                    {{user}}
+                                                </v-list-item-content>
+                                                <v-list-item-action>
+                                                    <v-icon>
+                                                        mdi-close-box
                                                     </v-icon>
                                                 </v-list-item-action>
                                             </v-list-item>
@@ -77,7 +121,9 @@
             library_id: null
         },
         data: () => ({
-            users: ["John", "Shelly"],
+            permissionlessUsers: ["John", "Shelly"],
+            normalUsers: ["Steve", "Harry"],
+            adminUsers: ["Admin", "user"],
             valid: false,
             signname: '',
             signrules: [
@@ -90,7 +136,31 @@
             selectedOption: 0,
             recording: false,
         }),
+        created() {
+            this.getUserGroups();
+        },
         methods: {
+            async getUserGroups() {
+                console.log('getting users');
+                const url = new URL(baseUrl + '/library/get/user/groups');
+                url.searchParams.append('library_name', localStorage.getItem('library_id'));
+                const config = {
+                    method: 'get',
+                    url: url,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+                    }
+                }
+                try {
+                    const res = await axios(config);
+                    console.log(res.data);
+                    this.permissionlessUsers = res.data.permissionlessUsers;
+                    this.normalUsers = res.data.normalUsers;
+                    this.adminUsers = res.data.adminUsers;
+                } catch (err) {
+                    alert(err);
+                }
+            },
             async grantUserAccess(userEmail) {
                 const config = {
                     method: 'post',
