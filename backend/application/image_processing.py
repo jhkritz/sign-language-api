@@ -1,12 +1,14 @@
+"""
+Functions used to classify images.
+"""
+
 import base64
 import io
 import time
-
 import cv2
 import numpy as np
 from cvzone.HandTrackingModule import HandDetector
 from flask import request, current_app as app, Response
-
 from .models import SignLanguageLibrary
 
 hand_detector = HandDetector(maxHands=1)
@@ -31,10 +33,6 @@ def classify():
     else:
         print('processed_image is none')
         return Response(status=400)
-
-
-# Functions used to classify images.
-####################################################################################################
 
 
 def get_data_and_labels(lib_name):
@@ -65,10 +63,13 @@ def preprocess_image(frame):
     input_img = frame
     hands, hands_img = hand_detector.findHands(input_img)
     if hands:
-        x, y, w, h = hands[0]['bbox']
+        center_x, center_y, width, height = hands[0]['bbox']
         try:
             # All the images used need to be the same size
-            cropped = hands_img[y - offset:y + offset + h, x - offset:x + w + offset]
+            cropped = hands_img[
+                center_y - offset:center_y + offset + height,
+                center_x - offset:center_x + width + offset
+            ]
             cropped = cv2.resize(cropped, desired_shape)
             return cropped
         except Exception as e:
