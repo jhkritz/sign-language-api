@@ -1,13 +1,10 @@
-from flask import current_app as app, Response, request, jsonify
+from flask import current_app as app, request, jsonify
 from . import db
 from .models import User, APIKeys
 import hashlib
-import random
 import uuid
 from flask_jwt_extended import (create_access_token,
                                 create_refresh_token,
-                                set_access_cookies,
-                                set_refresh_cookies,
                                 jwt_required,
                                 unset_jwt_cookies,
                                 get_jwt_identity
@@ -69,7 +66,6 @@ def refreshtoken():
     user = User.query.filter_by(id=user_id).first()
     access_token = create_access_token(identity=user.id)
     refresh_token = create_refresh_token(identity=user.id)
-    response = jsonify()
     return {'access': access_token, 'refresh': refresh_token}
 
 
@@ -82,16 +78,16 @@ def resetapikey():
 
 # create api key and store hash in DB
 # return unhashed key
-def generateapikey(id):
+def generateapikey(user_id):
 
     # check for existing key and remove it
-    if not (User.query.filter_by(id=id).first()):
+    if not (User.query.filter_by(id=user_id).first()):
         return "0"
-    APIKeys.query.filter_by(userid=id).delete()
+    APIKeys.query.filter_by(userid=user_id).delete()
 
-    key = str(id) + "." + str(uuid.uuid4())
+    key = str(user_id) + "." + str(uuid.uuid4())
     key_hash = hashlib.sha512(str(key).encode("utf-8")).hexdigest()
-    apikey = APIKeys(userid=id, api_key_hash=key_hash)
+    apikey = APIKeys(userid=user_id, api_key_hash=key_hash)
     db.session.add(apikey)
     db.session.commit()
 
@@ -101,12 +97,11 @@ def generateapikey(id):
 
 
 def verifykey(api_key):
-    hash = hashlib.sha512(str(api_key).encode("utf-8")).hexdigest()
+    calculated_hash = hashlib.sha512(str(api_key).encode("utf-8")).hexdigest()
     keys = APIKeys.query.all()
-
     userid = 0
     for key in keys:
-        if key.api_key_hash == hash:
+        if key.api_key_hash == calculated_hash:
             userid = key.userid
     return str(userid)
 

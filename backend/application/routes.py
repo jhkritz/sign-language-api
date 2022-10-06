@@ -1,19 +1,18 @@
 import time
-from flask import current_app as app, Response, request, send_from_directory, jsonify
-from .models import SignLanguageLibrary, Sign, User, UserRole
-from zipfile import ZipFile
-import numpy as np
-from . import db
 import os
-import cv2 as cv
-from cvzone.HandTrackingModule import HandDetector
 import io
-from PIL import Image
-import base64
-import cv2
 import shutil
+import base64
+from zipfile import ZipFile
+import cv2
+import numpy as np
+from flask import current_app as app, Response, request, send_from_directory, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from cvzone.HandTrackingModule import HandDetector
+from PIL import Image
+from .models import SignLanguageLibrary, Sign, User, UserRole
 from .login_routes import verifykey
+from . import db
 
 hand_detector = HandDetector(maxHands=1)
 desired_shape = (200, 200)
@@ -37,7 +36,9 @@ def upload_signs():
         lib_name = request.form['lib_name']
         sign_name = request.form['sign_name']
         zip_file = request.files['zip_file']
-        zpfl = ZipFile(zip_file.stream._file)
+        zip_name = 'temp_zip.zip'
+        zip_file.save(zip_name)
+        zpfl = ZipFile(zip_name)
         filenames = zpfl.namelist()
         total_num_images = 0
         num_good_images = 0
@@ -46,14 +47,14 @@ def upload_signs():
             total_num_images += 1
             # XXX: what happens if the file already exists? Is it overwritten?
             zpfl.extract(filename, path=img_path)
-            img = cv.imread(img_path + filename)
+            img = cv2.imread(img_path + filename)
             img = preprocess_image(img)
             os.remove(img_path + filename)
             if img is None:
                 continue
             else:
                 num_good_images += 1
-                cv.imwrite(img_path + filename, img)
+                cv2.imwrite(img_path + filename, img)
                 libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
                 sign = Sign(
                     meaning=sign_name,
@@ -83,10 +84,7 @@ def upload_sign_video():
         frame_grabbed, img = video_capture.read()
         count = 0
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
-        try:
-            os.makedirs(img_path[:-1])
-        except Exception as e:
-            pass
+        os.makedirs(img_path[:-1], exist_ok=True)
         while frame_grabbed:
             img = preprocess_image(img)
             if img is not None:
@@ -120,10 +118,7 @@ def uploadsign():
             return {"Error": "Permission Denied"}, 400
         image = request.files['image_file']
         img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
-        try:
-            os.makedirs(img_path[:-1])
-        except Exception as e:
-            pass
+        os.makedirs(img_path[:-1], exist_ok=True)
         image.save(img_path + 'temp.jpg')
         image = cv2.imread(img_path + 'temp.jpg')
         image = preprocess_image(image)
@@ -225,17 +220,13 @@ def delete_sign():
     user_id = get_jwt_identity()
     libname = request.args['library_name']
     signname = request.args['sign_name']
-    try:
-        lib = SignLanguageLibrary.query.filter_by(name=libname).first()
-        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id, admin=True)
-        if user_role is None:
-            return {"Error": "Permission Denied"}, 400
-        Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
-        db.session.commit()
-        return Response(status=200)
-    except Exception as e:
-        print(e)
-        return Response(status=400)
+    lib = SignLanguageLibrary.query.filter_by(name=libname).first()
+    user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id, admin=True)
+    if user_role is None:
+        return {"Error": "Permission Denied"}, 400
+    Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
+    db.session.commit()
+    return Response(status=200)
 
 
 @app.route('/library/deletelibrary', methods=['DELETE'])
@@ -244,20 +235,16 @@ def delete_library():
     print(request)
     libname = request.args.get('library_name')
     user_id = get_jwt_identity()
-    try:
-        libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-        user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True)
-        if user_role is None:
-            return {"Error": "Permission Denied"}, 400
-        UserRole.query.filter_by(libraryid=libid).delete()
-        Sign.query.filter_by(library_id=libid).delete()
-        SignLanguageLibrary.query.filter_by(name=libname).delete()
-        shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
-        db.session.commit()
-        return Response(status=200)
-    except Exception as e:
-        print(e)
-        return Response(status=400)
+    libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
+    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True)
+    if user_role is None:
+        return {"Error": "Permission Denied"}, 400
+    UserRole.query.filter_by(libraryid=libid).delete()
+    Sign.query.filter_by(library_id=libid).delete()
+    SignLanguageLibrary.query.filter_by(name=libname).delete()
+    shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
+    db.session.commit()
+    return Response(status=200)
 
 
 @app.route('/library/adduser', methods=['POST'])
@@ -290,21 +277,26 @@ def get_user_groups():
     user_id = get_jwt_identity()
     # check if sending user is admin first.
     lib_id = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-    user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib_id, admin=True).first()
-    if user_role is None:
+    callers_role = UserRole.query.filter_by(userid=user_id, libraryid=lib_id, admin=True).first()
+    if callers_role is None:
         return {"Error": "Permission Denied"}, 400
     admins = UserRole.query.filter_by(libraryid=lib_id, admin=True).all()
-    normalUsers = UserRole.query.filter_by(libraryid=lib_id, admin=False).all()
-    admins = list(map(lambda role: User.query.filter_by(id=role.userid).first().email, admins))
-    normalUsers = list(
+    normal_users = UserRole.query.filter_by(libraryid=lib_id, admin=False).all()
+    admins = list(
         map(
-            lambda role: User.query.filter_by(id=role.userid).first().email,
-            normalUsers
+            lambda user_role: User.query.filter_by(id=user_role.userid).first().email,
+            admins
+        )
+    )
+    normal_users = list(
+        map(
+            lambda user_role: User.query.filter_by(id=user_role.userid).first().email,
+            normal_users
         )
     )
     all_users = User.query.all()
     roles = UserRole.query.filter_by(libraryid=lib_id).all()
-    permissionlessUsers = []
+    permissionless_users = []
     for user_a in all_users:
         has_permissions = False
         for role in roles:
@@ -312,12 +304,12 @@ def get_user_groups():
                 has_permissions = True
                 break
         if not has_permissions:
-            permissionlessUsers += [user_a.email]
+            permissionless_users += [user_a.email]
     return {
-        'permissionlessUsers': permissionlessUsers,
-        'normalUsers': normalUsers,
-        'adminUsers': admins
-    }, 200
+               'permissionlessUsers': permissionless_users,
+               'normalUsers': normal_users,
+               'adminUsers': admins
+           }, 200
 
 
 @app.route('/library/addadmin', methods=['POST'])
@@ -356,6 +348,7 @@ def revoke_permissions():
     db.session.commit()
     return {}, 200
 
+
 # Functions used to classify images.
 ####################################################################################################
 
@@ -374,8 +367,7 @@ def get_data_and_labels(lib_name):
             meaning_labels[sign.meaning] = next_label
             label_meanings += [sign.meaning]
             next_label += 1
-        fullpath = lib_path + sign.meaning + '/' + sign.image_filename
-        img = cv.imread(lib_path + sign.meaning + '/' + sign.image_filename)
+        img = cv2.imread(lib_path + sign.meaning + '/' + sign.image_filename)
         data += [img.flatten()]
         labels += [meaning_labels[sign.meaning]]
     data = np.array(data, dtype=np.float32)
@@ -393,7 +385,7 @@ def preprocess_image(frame):
         try:
             # All the images used need to be the same size
             cropped = hands_img[y - offset:y + offset + h, x - offset:x + w + offset]
-            cropped = cv.resize(cropped, desired_shape)
+            cropped = cv2.resize(cropped, desired_shape)
             return cropped
         except Exception as e:
             print(e)
@@ -401,45 +393,11 @@ def preprocess_image(frame):
     return None
 
 
-def classify(data_image, lib_name):
-    b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
-    try:
-        image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-        processed_image = preprocess_image(image)
-        if processed_image is not None:
-            flat_image = processed_image.flatten()
-            processed_image = cv2.imencode('.png', processed_image)[1]
-            image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-            start = time.time()
-            result = knn_classify(lib_name, flat_image)
-            end = time.time()
-            print('Time taken = ' + str(end - start))
-            return {'processedImage': image_out, 'result': result}
-        else:
-            print('processed_image is none')
-            return Response(status=400)
-    except Exception as e:
-        print(e)
-        return Response(status=400)
-
-
-@ app.route('/library/classifyimage', methods=['POST'])
-def classify_request():
-    """
-    https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
-    https://www.geeksforgeeks.org/python-opencv-imdecode-function/
-    """
-    classification_alg = 'KNN'
-    data_image = request.files['image'].read()
-    lib_name = request.form['library_name']
-    return classify(data_image, lib_name)
-
-
 def knn_classify(lib_name, flat_image):
     data, labels, label_meanings = get_data_and_labels(lib_name)
     k = min(int(data.shape[0] / len(label_meanings)), 20)
-    knn = cv.ml.KNearest_create()
-    knn.train(data, cv.ml.ROW_SAMPLE, labels)
+    knn = cv2.ml.KNearest_create()
+    knn.train(data, cv2.ml.ROW_SAMPLE, labels)
     to_classify = np.array(flat_image[np.newaxis, :], dtype=np.float32)
     retval, results, responses, dists = knn.findNearest(to_classify, k=k)
     classification = results[0][0]
@@ -457,7 +415,7 @@ def knn_classify(lib_name, flat_image):
 #########################################################################
 
 
-@ app.route('/api/library/uploadsign', methods=['POST'])
+@app.route('/api/library/uploadsign', methods=['POST'])
 def uploadsignapi():
     key = request.form.get('key')
     if verifykey(key) == "0":
@@ -488,14 +446,13 @@ def uploadsignapi():
     return Response(status=200)
 
 
-@ app.route('/api/library/createlibrary', methods=['POST'])
+@app.route('/api/library/createlibrary', methods=['POST'])
 def createlibraryapi():
     key = request.form.get('key')
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
-    user_id = key[0]
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}
@@ -507,7 +464,7 @@ def createlibraryapi():
     return response, 200
 
 
-@ app.route('/api/library/signs', methods=['GET'])
+@app.route('/api/library/signs', methods=['GET'])
 def get_signsapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -519,7 +476,7 @@ def get_signsapi():
     return {'signs': signs}
 
 
-@ app.route('/api/library/image', methods=['GET'])
+@app.route('/api/library/image', methods=['GET'])
 def get_sign_imageapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -530,7 +487,7 @@ def get_sign_imageapi():
     return send_from_directory(path, img_name)
 
 
-@ app.route('/api/libraries/names', methods=['GET'])
+@app.route('/api/libraries/names', methods=['GET'])
 def get_library_namesapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -541,7 +498,7 @@ def get_library_namesapi():
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
-@ app.route('/api/libraries/getall', methods=['GET'])
+@app.route('/api/libraries/getall', methods=['GET'])
 def get_librariesapi():
     key = request.args['key']
     if verifykey(key) == "0":
@@ -556,44 +513,65 @@ def get_librariesapi():
     return response, 200
 
 
-@ app.route('/api/library/deletesign', methods=['DELETE'])
+@app.route('/api/library/deletesign', methods=['DELETE'])
 def delete_signapi():
     key = request.json.get('key')
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
     libname = request.json.get('library_name')
     signname = request.json.get('sign_name')
-    try:
-        lib = SignLanguageLibrary.query.filter_by(name=libname).first()
-        Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
-        db.session.commit()
-        return Response(status=200)
-    except Exception:
-        return Response(status=400)
+    lib = SignLanguageLibrary.query.filter_by(name=libname).first()
+    Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
+    db.session.commit()
+    return Response(status=200)
 
 
-@ app.route('/api/library/deletelibrary', methods=['DELETE'])
+@app.route('/api/library/deletelibrary', methods=['DELETE'])
 def delete_libraryapi():
     key = request.json.get('key')
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
     libname = request.json.get('library_name')
-    try:
-        libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-        Sign.query.filter_by(library_id=libid).delete()
-        SignLanguageLibrary.query.filter_by(name=libname).delete()
-        shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
-        db.session.commit()
-        return Response(status=200)
-    except Exception:
-        return Response(status=400)
+    libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
+    Sign.query.filter_by(library_id=libid).delete()
+    SignLanguageLibrary.query.filter_by(name=libname).delete()
+    shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
+    db.session.commit()
+    return Response(status=200)
 
 
-@ app.route('/api/library/classifyimage', methods=['POST'])
+@app.route('/api/library/classifyimage', methods=['POST'])
 def classify_requestapi():
     key = request.form['key']
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
+    return classify()
+
+
+@app.route('/library/classifyimage', methods=['POST'])
+def classify_request():
+    """
+    https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
+    https://www.geeksforgeeks.org/python-opencv-imdecode-function/
+    """
+    return classify()
+
+
+def classify():
     data_image = request.files['image'].read()
     lib_name = request.form['library_name']
-    return classify(data_image, lib_name)
+    b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
+    image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
+    processed_image = preprocess_image(image)
+    if processed_image is not None:
+        flat_image = processed_image.flatten()
+        processed_image = cv2.imencode('.png', processed_image)[1]
+        image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
+        start = time.time()
+        result = knn_classify(lib_name, flat_image)
+        end = time.time()
+        print('Time taken = ' + str(end - start))
+        return {'processedImage': image_out, 'result': result}
+    else:
+        print('processed_image is none')
+        return Response(status=400)
