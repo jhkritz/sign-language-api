@@ -16,6 +16,13 @@ desired_shape = (200, 200)
 
 
 def classify():
+    """
+    Classifies the image provided in the request's files.
+
+    :return: the classification predicted,
+        the confidence the algorithm has in the predicted,
+        and the preprocessed input image.
+    """
     data_image = request.files['image'].read()
     lib_name = request.form['library_name']
     b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
@@ -30,12 +37,15 @@ def classify():
         end = time.time()
         print('Time taken = ' + str(end - start))
         return {'processedImage': image_out, 'result': result}
-    else:
-        print('processed_image is none')
-        return Response(status=400)
+    print('processed_image is none')
+    return Response(status=400)
 
 
 def get_data_and_labels(lib_name):
+    """
+    Returns the training data and labels contained
+    in the library with name lib_name.
+    """
     lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     # Read library images and get labels
     lib = SignLanguageLibrary.query.filter_by(name=lib_name).first()
@@ -45,7 +55,7 @@ def get_data_and_labels(lib_name):
     meaning_labels = {}
     label_meanings = []
     for sign in lib.signs:
-        if sign.meaning not in meaning_labels.keys():
+        if sign.meaning not in meaning_labels:
             meaning_labels[sign.meaning] = next_label
             label_meanings += [sign.meaning]
             next_label += 1
@@ -58,6 +68,9 @@ def get_data_and_labels(lib_name):
 
 
 def preprocess_image(frame):
+    """
+    Detects hands in the input frame, crops and then resizes the result.
+    """
     # TODO: reference tutorial video
     offset = 30
     input_img = frame
@@ -72,13 +85,17 @@ def preprocess_image(frame):
             ]
             cropped = cv2.resize(cropped, desired_shape)
             return cropped
-        except Exception as e:
-            print(e)
+        except Exception as exception:
+            print(exception)
     # Return None so that classification is aborted if hands aren't found.
     return None
 
 
 def knn_classify(lib_name, flat_image):
+    """
+    Classifies the flat_image using the KNN algorithm,
+    with the training data associated with the library with name lib_name.
+    """
     data, labels, label_meanings = get_data_and_labels(lib_name)
     k = min(int(data.shape[0] / len(label_meanings)), 20)
     knn = cv2.ml.KNearest_create()

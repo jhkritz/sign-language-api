@@ -5,8 +5,11 @@ from flask import Blueprint, request
 
 from application.image_processing import classify
 from application.login_routes import verifykey
-from application.routes import upload, create_library, get_signs, get_sign_image, get_library_names, \
+from application.routes import (
+    upload, create_library, get_signs,
+    get_sign_image, get_library_names,
     get_users_libraries, delete_sign, delete_library
+)
 
 api_routes = Blueprint('api_routes', __name__)
 
