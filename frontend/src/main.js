@@ -150,6 +150,7 @@ router.beforeEach(async (to, from, next) => {
 			await axios(config);
 		} catch (err) {
 			alert('Unauthorized.');
+			console.log(err);
 			router.push('/');
 		}
 	}

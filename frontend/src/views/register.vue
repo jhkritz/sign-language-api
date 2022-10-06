@@ -3,9 +3,9 @@
         <div>
             <!--Navigation bar-->
             <v-app-bar elevation="0" color=#3AAFA9>
-                <v-appbar-title class="white--text">
+                <v-app-bar-title class="white--text">
                     Sign Language API
-                </v-appbar-title>
+                </v-app-bar-title>
                 <v-spacer>
                 </v-spacer>
                 <v-btn icon color="white" id='homeButton' to='/'>
