@@ -165,7 +165,7 @@
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('Failed to upload image.');
+                    alert('Upload failed.');
                 }
             },
             async initCamera() {
