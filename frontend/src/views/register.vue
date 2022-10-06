@@ -2,19 +2,13 @@
     <v-app>
         <div>
             <!--Navigation bar-->
-            <v-app-bar 
-            elevation="0" 
-            color=#3AAFA9>
-                <v-appbar-title 
-                class="white--text">
-                Sign Language API
+            <v-app-bar elevation="0" color=#3AAFA9>
+                <v-appbar-title class="white--text">
+                    Sign Language API
                 </v-appbar-title>
                 <v-spacer>
                 </v-spacer>
-                <v-btn icon 
-                color="white" 
-                id='homeButton' 
-                to='/'>
+                <v-btn icon color="white" id='homeButton' to='/'>
                     <v-icon>
                         mdi-home
                     </v-icon>
@@ -22,49 +16,29 @@
             </v-app-bar>
         </div>
         <!--Registration form-->
-        <v-container 
-        fill-height>
-        <v-layout 
-        align-center 
-        justify-center>
-        <v-form 
-        ref="form" 
-        v-model="valid" 
-        lazy-validation>
-        <center>
-        <h1 class = "pb-8" >
-      Create your account
-        </h1>
-        
-</center>
-            <v-text-field 
-            outlined
-            v-model="email" 
-            :rules="emailRules" 
-            label="E-mail" 
-            required>
-            </v-text-field>
+        <v-container fill-height>
+            <v-layout align-center justify-center>
+                <v-form ref="form" v-model="valid" lazy-validation>
+                    <center>
+                        <h1 class="pb-8">
+                            Create your account
+                        </h1>
 
-            <v-text-field 
-            outlined
-            v-model="password" 
-            :rules="passwordRules" :type="show1 ? 'text' : 'password'" 
-            name="input-10-1" 
-            label="Password" 
-            required >
-            </v-text-field>
-               
-            <center>
-            <v-btn :disabled="!valid" 
-            color=#17252A 
-            class="mr-4 white--text" 
-            @click="postInfo()">
-                Register
-            </v-btn>
-            </center>
-    
-        </v-form>
-    </v-layout>
+                    </center>
+                    <v-text-field outlined v-model="email" :rules="emailRules" label="E-mail" required>
+                    </v-text-field>
+
+                    <v-text-field outlined v-model="password" :rules="passwordRules" :type="show1 ? 'text' : 'password'" name="input-10-1" label="Password" required>
+                    </v-text-field>
+
+                    <center>
+                        <v-btn :disabled="!valid" color=#17252A class="mr-4 white--text" @click="postInfo()">
+                            Register
+                        </v-btn>
+                    </center>
+
+                </v-form>
+            </v-layout>
         </v-container>
     </v-app>
 </template>
@@ -114,11 +88,12 @@
                         alert('Success');
                         this.password = " ";
                         this.email = " ";
-                        localStorage.setItem('access_token',res.data['access'])
-                        localStorage.setItem('refresh_token',res.data['refresh'])
+                        localStorage.setItem('access_token', res.data['access'])
+                        localStorage.setItem('refresh_token', res.data['refresh'])
                         console.log(res.data['api_key']);
                         sharedState.setAPIkey(res.data['api_key']);
-                        this.$router.push(`/API?API_key=${res.data['api_key']}`);
+                        //this.$router.push(`/API?API_key=${res.data['api_key']}`);
+                        this.$router.push('/dashboard');
                     } else {
                         alert(res.data)
                     }
@@ -134,7 +109,7 @@
 </script>
 <style scoped>
     .logo {
-      width: 7%;
-      margin-left: 1%;
+        width: 7%;
+        margin-left: 1%;
     }
 </style>
