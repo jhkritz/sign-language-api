@@ -19,6 +19,9 @@ import LibraryPermissionsPage from './views/LibraryPermissionsPage';
 import {
 	sharedState
 } from './SharedState';
+import {
+	baseUrl
+} from './BaseRequestUrl';
 
 Vue.config.productionTip = false;
 
@@ -128,9 +131,27 @@ const router = new VueRouter({
 	routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
 	if (from.path.includes('/library/test') || from.path.includes('/addsign')) {
 		sharedState.stopCamera();
+	}
+	if (!to.path.includes('login') && !to.path.includes('register') && to.path !==
+		'/') {
+		// Verify that the user is logged in.
+		try {
+			const url = new URL(baseUrl + '/verify/user');
+			const config = {
+				method: 'get',
+				url: url,
+				headers: {
+					Authorization: 'Bearer ' + localStorage.getItem('access_token')
+				}
+			};
+			await axios(config);
+		} catch (err) {
+			alert('Unauthorized.');
+			router.push('/');
+		}
 	}
 	next();
 });

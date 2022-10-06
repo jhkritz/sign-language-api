@@ -24,6 +24,12 @@ def home():
     return "Hello World!"
 
 
+@app.route('/verify/user', methods=['GET'])
+@jwt_required()
+def verify_user():
+    return Response(status=200)
+
+
 @app.route('/library/uploadsigns', methods=['POST'])
 @jwt_required()
 def upload_signs():
