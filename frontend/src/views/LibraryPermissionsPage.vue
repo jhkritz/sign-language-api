@@ -36,7 +36,7 @@
                                         Users with basic permissions
                                     </v-card-title>
                                     <v-list>
-                                        <template v-for="user in permissionlessUsers">
+                                        <template v-for="user in normalUsers">
                                             <v-divider :key="user + 'div'" />
                                             <v-list-item :key="user">
                                                 <v-list-item-content>
