@@ -52,6 +52,16 @@
                                 </v-btn>
                             </v-col>
                         </v-row>
+                        <div class="text-center">
+                            <v-dialog v-model='loading' width='300' hide-overlay persistent>
+                                <v-card class='align-center justify-center'>
+                                    <v-card-text class='text-center'>
+                                        <br />
+                                        <v-progress-circular :size="70" indeterminate />
+                                    </v-card-text>
+                                </v-card>
+                            </v-dialog>
+                        </div>
                     </v-sheet>
                 </v-container>
             </v-form>
@@ -101,6 +111,7 @@
             library_id: null
         },
         data: () => ({
+            loading: false,
             valid: false,
             signname: '',
             signrules: [
@@ -159,8 +170,10 @@
                     }
                 };
                 try {
+                    this.loading = true;
                     const res = await axios(config);
                     if (res.status == 200) {
+                        this.loading = false;
                         alert('Success');
                     }
                 } catch (err) {
