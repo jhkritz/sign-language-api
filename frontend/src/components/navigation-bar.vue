@@ -52,6 +52,9 @@
 </style>
 
 <script charset="utf-8">
+    import {
+        baseUrl
+    } from '../BaseRequestUrl';
     export default {
         data: () => ({
             links: [{
@@ -74,21 +77,18 @@
             },
             async deleteLibrary() {
                 var axios = require('axios');
-                var data = JSON.stringify({
-                    "library_name": localStorage.getItem('library_id')
-                });
+                const url = new URL(baseUrl + '/library/deletelibrary');
+                url.searchParams.append('library_name', localStorage.getItem('library_id'));
                 var config = {
                     method: 'delete',
-                    url: 'http://localhost:5000/library/deletelibrary',
+                    url: url,
                     headers: {
-                        'Content-Type': 'application/json',
                         Authorization: 'Bearer ' + localStorage.getItem('access_token')
                     },
-                    data: data
                 };
                 try {
                     const response = await axios(config);
-                    console.log(response.data);
+                    console.log(response);
                     // Navigate home after deleting library.
                     this.$router.push('/dashboard');
                 } catch (err) {
