@@ -129,7 +129,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-	if (from.path.includes('/library/test')) {
+	if (from.path.includes('/library/test') || from.path.includes('/addsign')) {
 		sharedState.stopCamera();
 	}
 	next();
