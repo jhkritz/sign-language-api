@@ -16,7 +16,7 @@ socketio = SocketIO()
 def init_app():
     """Initialize the core application."""
     app = Flask(__name__, instance_relative_config=False)
-    jwt = JWTManager(app)
+    JWTManager(app)
     app.config.from_object('config')
     # app.add_url_rule('/library/image', endpoint='get_sign_image', build_only=True)
     # Initialize CORS
@@ -26,8 +26,6 @@ def init_app():
     db.init_app(app)
     socketio.init_app(app, cors_allowed_origins="*")
     with app.app_context():
-        # Include our Routes
-        from application import routes, login_routes
         try:
             db.create_all()
         except Exception as e:

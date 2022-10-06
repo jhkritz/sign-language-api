@@ -1,156 +1,134 @@
-import time
 import os
-import io
 import shutil
-import base64
 from zipfile import ZipFile
-import cv2
-import numpy as np
-from flask import current_app as app, Response, request, send_from_directory, jsonify
+
+from flask import send_from_directory, jsonify, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from cvzone.HandTrackingModule import HandDetector
-from PIL import Image
-from .models import SignLanguageLibrary, Sign, User, UserRole
-from .login_routes import verifykey
+
 from . import db
+from .image_processing import *
+from .models import User, UserRole, Sign
 
-hand_detector = HandDetector(maxHands=1)
-desired_shape = (200, 200)
+library_routes = Blueprint('library_routes', __name__)
 
 
-@app.route("/")
+@library_routes.route("/")
 def home():
     return "Hello World!"
 
 
-@app.route('/verify/user', methods=['GET'])
-@jwt_required()
-def verify_user():
-    return Response(status=200)
-
-
-@app.route('/library/uploadsigns', methods=['POST'])
+@library_routes.route('/library/upload_sign_video', methods=['POST'])
+@library_routes.route('/library/uploadsigns', methods=['POST'])
+@library_routes.route('/library/uploadsign', methods=['POST'])
 @jwt_required()
 def upload_signs():
-    try:
-        lib_name = request.form['lib_name']
-        sign_name = request.form['sign_name']
-        zip_file = request.files['zip_file']
-        zip_name = 'temp_zip.zip'
-        zip_file.save(zip_name)
-        zpfl = ZipFile(zip_name)
-        filenames = zpfl.namelist()
-        total_num_images = 0
-        num_good_images = 0
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
-        for filename in filenames[1:]:
-            total_num_images += 1
-            # XXX: what happens if the file already exists? Is it overwritten?
-            zpfl.extract(filename, path=img_path)
-            img = cv2.imread(img_path + filename)
-            img = preprocess_image(img)
-            os.remove(img_path + filename)
-            if img is None:
-                continue
-            else:
-                num_good_images += 1
-                cv2.imwrite(img_path + filename, img)
-                libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-                sign = Sign(
-                    meaning=sign_name,
-                    image_filename=filename,
-                    library_id=libid
-                )
-                db.session.add(sign)
-                db.session.commit()
+    user_id = get_jwt_identity()
+    return upload(user_id)
+
+
+def upload(user_id):
+    lib_name = request.form['lib_name']
+    libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+    role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
+    if role is None:
+        return {"Error": "Permission Denied"}, 400
+    sign_name = request.form['sign_name']
+    img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
+    os.makedirs(img_path[:-1], exist_ok=True)
+    zip_file = request.files.get('zip_file')
+    image = request.files.get('image_file')
+    video = request.files.get('video')
+    if zip_file is not None:
+        return upload_zip_file(sign_name, img_path, zip_file, libid)
+    if image is not None:
+        return upload_single_image(sign_name, img_path, image, libid)
+    if video is not None:
+        return upload_video(sign_name, img_path, video, libid)
+
+
+def upload_zip_file(sign_name, img_path, zip_file, libid):
+    zip_name = 'temp_zip.zip'
+    zip_file.save(zip_name)
+    zpfl = ZipFile(zip_name)
+    filenames = zpfl.namelist()
+    total_num_images = 0
+    num_good_images = 0
+    for filename in filenames[1:]:
+        total_num_images += 1
+        # XXX: what happens if the file already exists? Is it overwritten?
+        zpfl.extract(filename, path=img_path)
+        if save_image(img_path, sign_name, filename, libid):
+            num_good_images += 1
             print('Successfully uploaded image ' + str(total_num_images))
-        message = 'Successfully uploaded {} of {} images.'.format(num_good_images, total_num_images)
-        print(message)
-        return {'status': 200, 'message': message}
-    except Exception as e:
-        print(e)
-        return Response(status=400)
+    db.session.commit()
+    message = 'Successfully uploaded {} of {} images.'.format(num_good_images, total_num_images)
+    print(message)
+    return {'status': 200, 'message': message}
 
 
-@app.route('/library/upload_sign_video', methods=['POST'])
-def upload_sign_video():
-    try:
-        lib_name = request.form['lib_name']
-        sign_name = request.form['sign_name']
-        video = request.files['video']
-        filename = 'temp_video.webm'
-        video.save(filename)
-        video_capture = cv2.VideoCapture('./' + filename)
-        frame_grabbed, img = video_capture.read()
-        count = 0
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
-        os.makedirs(img_path[:-1], exist_ok=True)
-        while frame_grabbed:
-            img = preprocess_image(img)
-            if img is not None:
-                img_name = sign_name + str(count) + '.png'
-                cv2.imwrite(img_path + img_name, img)
-                libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-                sign = Sign(meaning=sign_name, image_filename=img_name, library_id=libid)
-                db.session.add(sign)
-                count += 1
-                print(count)
-            frame_grabbed, img = video_capture.read()
-        print('Successfully uploaded ' + str(count) + ' images.')
-        db.session.commit()
-        return Response(status=200)
-    except Exception as e:
-        print(e)
-    return Response(status=404)
-
-
-@app.route('/library/uploadsign', methods=['POST'])
-@jwt_required()
-def uploadsign():
-    # Endpoint to upload a single sign with a name
-    try:
-        lib_name = request.form.get('lib_name')
-        sign_name = request.form.get('sign_name')
-        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-        user_id = get_jwt_identity()
-        role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
-        if role is None:
-            return {"Error": "Permission Denied"}, 400
-        image = request.files['image_file']
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
-        os.makedirs(img_path[:-1], exist_ok=True)
-        image.save(img_path + 'temp.jpg')
-        image = cv2.imread(img_path + 'temp.jpg')
-        image = preprocess_image(image)
-        os.remove(img_path + 'temp.jpg')
-        if image is None:
-            msg = 'A hand could not be found in the image.'
-            print(msg)
-            return {"Error": msg}, 400
-        Image.fromarray(image).save(img_path + sign_name + '.jpg')
-        sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg', library_id=libid)
+def save_image(img_path, sign_name, filename, libid):
+    img = preprocess_image(cv2.imread(img_path + filename))
+    os.remove(img_path + filename)
+    if img is not None:
+        cv2.imwrite(img_path + filename, img)
+        sign = Sign(
+            meaning=sign_name,
+            image_filename=filename,
+            library_id=libid
+        )
         db.session.add(sign)
+    return img is not None
+
+
+def upload_single_image(sign_name, img_path, image, libid):
+    filename = sign_name + '.png'
+    image.save(img_path + filename)
+    if save_image(img_path, sign_name, filename, libid):
         db.session.commit()
-    except Exception as e:
-        print(e)
-        return {"Error": str(e)}, 400
+        return {}, 200
+    else:
+        msg = 'A hand could not be found in the image.'
+        print(msg)
+        return {"Error": msg}, 400
+
+
+def upload_video(sign_name, img_path, video, libid):
+    filename = 'temp_video.webm'
+    video.save(filename)
+    video_capture = cv2.VideoCapture('./' + filename)
+    frame_grabbed, img = video_capture.read()
+    count = 0
+    while frame_grabbed:
+        img = preprocess_image(img)
+        if img is not None:
+            img_name = sign_name + str(count) + '.png'
+            cv2.imwrite(img_path + img_name, img)
+            sign = Sign(meaning=sign_name, image_filename=img_name, library_id=libid)
+            db.session.add(sign)
+            count += 1
+            print(count)
+        frame_grabbed, img = video_capture.read()
+    print('Successfully uploaded ' + str(count) + ' images.')
+    db.session.commit()
     return Response(status=200)
 
 
-@app.route('/library/createlibrary', methods=['POST'])
+@library_routes.route('/library/createlibrary', methods=['POST'])
 @jwt_required()
 def create_library():
+    user_id = get_jwt_identity()
+    return create_library(user_id)
+
+
+def create_library(user_id):
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
-    user_id = get_jwt_identity()
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
     if existinglib:
         return {'message': 'Library exists'}, 403
     library = SignLanguageLibrary(name=libname, description=lib_description)
-
     os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.add(library)
-
     db.session.commit()
     owner_role = UserRole(userid=user_id, libraryid=library.id, admin=True)
     db.session.add(owner_role)
@@ -159,10 +137,14 @@ def create_library():
     return response, 200
 
 
-@app.route('/library/signs', methods=['GET'])
+@library_routes.route('/library/signs', methods=['GET'])
 @jwt_required()
 def get_signs():
     user_id = get_jwt_identity()
+    return get_signs(user_id)
+
+
+def get_signs(user_id):
     library_name = request.args['library_name']
     img_url_base = '/library/image'
     lib = SignLanguageLibrary.query.filter_by(name=library_name).first_or_404()
@@ -173,10 +155,14 @@ def get_signs():
     return {'signs': signs}
 
 
-@app.route('/library/image', methods=['GET'])
+@library_routes.route('/library/image', methods=['GET'])
 @jwt_required()
 def get_sign_image():
     user_id = get_jwt_identity()
+    return get_sign_image(user_id)
+
+
+def get_sign_image(user_id):
     lib_name = request.args['library_name']
     if lib_name != '':
         lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
@@ -188,18 +174,26 @@ def get_sign_image():
     return send_from_directory(path, img_name)
 
 
-@app.route('/libraries/names', methods=['GET'])
+@library_routes.route('/libraries/names', methods=['GET'])
 @jwt_required()
 def get_library_names():
     user_id = get_jwt_identity()
+    return get_library_names(user_id)
+
+
+def get_library_names(user_id):
     libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
     return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
 
 
-@app.route('/libraries/getall', methods=['GET'])
+@library_routes.route('/libraries/getall', methods=['GET'])
 @jwt_required()
 def get_libraries():
     user_id = get_jwt_identity()
+    return get_users_libraries(user_id)
+
+
+def get_users_libraries(user_id):
     libs = SignLanguageLibrary.query.all()
     all_libs = []
     for lib in libs:
@@ -207,17 +201,20 @@ def get_libraries():
         user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id).first()
         if not user_role:
             continue
-
         thislib = {'name': lib.name, 'description': lib.description}
         all_libs.append(thislib)
     response = jsonify({'libraries': all_libs})
     return response, 200
 
 
-@app.route('/library/deletesign', methods=['DELETE'])
+@library_routes.route('/library/deletesign', methods=['DELETE'])
 @jwt_required()
 def delete_sign():
     user_id = get_jwt_identity()
+    return delete_sign(user_id)
+
+
+def delete_sign(user_id):
     libname = request.args['library_name']
     signname = request.args['sign_name']
     lib = SignLanguageLibrary.query.filter_by(name=libname).first()
@@ -229,12 +226,16 @@ def delete_sign():
     return Response(status=200)
 
 
-@app.route('/library/deletelibrary', methods=['DELETE'])
+@library_routes.route('/library/deletelibrary', methods=['DELETE'])
 @jwt_required()
 def delete_library():
+    user_id = get_jwt_identity()
+    return delete_library(user_id)
+
+
+def delete_library(user_id):
     print(request)
     libname = request.args.get('library_name')
-    user_id = get_jwt_identity()
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
     user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True)
     if user_role is None:
@@ -247,12 +248,16 @@ def delete_library():
     return Response(status=200)
 
 
-@app.route('/library/adduser', methods=['POST'])
+@library_routes.route('/library/adduser', methods=['POST'])
 @jwt_required()
 def adduser():
+    user_id = get_jwt_identity()
+    return adduser(user_id)
+
+
+def adduser(user_id):
     libname = request.json.get('library_name')
     useremail = request.json.get('user_email')
-    user_id = get_jwt_identity()
 
     # check if sending user is admin first.
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
@@ -270,11 +275,15 @@ def adduser():
     return jsonify(), 200
 
 
-@app.route('/library/get/user/groups', methods=['GET'])
+@library_routes.route('/library/get/user/groups', methods=['GET'])
 @jwt_required()
 def get_user_groups():
-    lib_name = request.args['library_name']
     user_id = get_jwt_identity()
+    return get_user_groups(user_id)
+
+
+def get_user_groups(user_id):
+    lib_name = request.args['library_name']
     # check if sending user is admin first.
     lib_id = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
     callers_role = UserRole.query.filter_by(userid=user_id, libraryid=lib_id, admin=True).first()
@@ -312,12 +321,16 @@ def get_user_groups():
            }, 200
 
 
-@app.route('/library/addadmin', methods=['POST'])
+@library_routes.route('/library/addadmin', methods=['POST'])
 @jwt_required()
 def addadmin():
+    user_id = get_jwt_identity()
+    return addadmin(user_id)
+
+
+def addadmin(user_id):
     libname = request.json.get('library_name')
     useremail = request.json.get('user_email')
-    user_id = get_jwt_identity()
 
     # check if sending user is admin first.
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
@@ -337,9 +350,10 @@ def addadmin():
     return jsonify(), 200
 
 
-@app.route('/library/revoke/permissions', methods=['DELETE'])
+@library_routes.route('/library/revoke/permissions', methods=['DELETE'])
 @jwt_required()
 def revoke_permissions():
+    # XXX: will this work with the api key?
     lib_name = request.args['library_name']
     user_email = request.args['user_email']
     user_id = User.query.filter_by(email=user_email).first().id
@@ -349,229 +363,10 @@ def revoke_permissions():
     return {}, 200
 
 
-# Functions used to classify images.
-####################################################################################################
-
-
-def get_data_and_labels(lib_name):
-    lib_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    # Read library images and get labels
-    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first()
-    labels = []
-    data = []
-    next_label = 0
-    meaning_labels = {}
-    label_meanings = []
-    for sign in lib.signs:
-        if sign.meaning not in meaning_labels.keys():
-            meaning_labels[sign.meaning] = next_label
-            label_meanings += [sign.meaning]
-            next_label += 1
-        img = cv2.imread(lib_path + sign.meaning + '/' + sign.image_filename)
-        data += [img.flatten()]
-        labels += [meaning_labels[sign.meaning]]
-    data = np.array(data, dtype=np.float32)
-    labels = np.array(labels, dtype=np.float32)
-    return data, labels, label_meanings
-
-
-def preprocess_image(frame):
-    # TODO: reference tutorial video
-    offset = 30
-    input_img = frame
-    hands, hands_img = hand_detector.findHands(input_img)
-    if hands:
-        x, y, w, h = hands[0]['bbox']
-        try:
-            # All the images used need to be the same size
-            cropped = hands_img[y - offset:y + offset + h, x - offset:x + w + offset]
-            cropped = cv2.resize(cropped, desired_shape)
-            return cropped
-        except Exception as e:
-            print(e)
-    # Return None so that classification is aborted if hands aren't found.
-    return None
-
-
-def knn_classify(lib_name, flat_image):
-    data, labels, label_meanings = get_data_and_labels(lib_name)
-    k = min(int(data.shape[0] / len(label_meanings)), 20)
-    knn = cv2.ml.KNearest_create()
-    knn.train(data, cv2.ml.ROW_SAMPLE, labels)
-    to_classify = np.array(flat_image[np.newaxis, :], dtype=np.float32)
-    retval, results, responses, dists = knn.findNearest(to_classify, k=k)
-    classification = results[0][0]
-    meaning = label_meanings[int(classification)]
-    quality_of_match = 0
-    for resp in responses[0]:
-        if resp == classification:
-            quality_of_match += 1
-    quality_of_match = 100 * quality_of_match / len(responses[0])
-    return {'classification': meaning, 'quality_of_match': str(quality_of_match)}
-
-
-#########################################################################
-# API routes using API keys instead of JWT
-#########################################################################
-
-
-@app.route('/api/library/uploadsign', methods=['POST'])
-def uploadsignapi():
-    key = request.form.get('key')
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-
-    # Endpoint to upload a single sign with a name
-    try:
-        lib_name = request.form.get('lib_name')
-        sign_name = request.form.get('sign_name')
-        image = request.files['image_file']
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '_temp.jpg'
-        image.save(img_path)
-        image = cv2.imread(img_path)
-        image = preprocess_image(image)
-        os.remove(img_path)
-        if image is None:
-            return {"Error": "A hand could not be found in the image"}, 400
-        img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '.jpg'
-        Image.fromarray(image).save(img_path)
-        libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-        sign = Sign(meaning=sign_name, image_filename=sign_name + '.jpg', library_id=libid)
-        db.session.add(sign)
-        db.session.commit()
-        print('success')
-    except Exception as e:
-        print(e)
-        return {"Error": str(e)}, 400
-    return Response(status=200)
-
-
-@app.route('/api/library/createlibrary', methods=['POST'])
-def createlibraryapi():
-    key = request.form.get('key')
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-    libname = request.form.get('library_name')
-    lib_description = request.form.get('description')
-    existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
-    if existinglib:
-        return {'message': 'Library exists'}
-    library = SignLanguageLibrary(name=libname, description=lib_description)
-    os.makedirs(app.config['IMAGE_PATH'] + '/' + libname)
-    db.session.add(library)
-    db.session.commit()
-    response = jsonify()
-    return response, 200
-
-
-@app.route('/api/library/signs', methods=['GET'])
-def get_signsapi():
-    key = request.args['key']
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-    library_name = request.args['library_name']
-    img_url_base = '/library/image'
-    lib = SignLanguageLibrary.query.filter_by(name=library_name).first_or_404()
-    signs = [sign.to_dict(img_url_base) for sign in lib.signs]
-    return {'signs': signs}
-
-
-@app.route('/api/library/image', methods=['GET'])
-def get_sign_imageapi():
-    key = request.args['key']
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-    lib_name = request.args['library_name']
-    img_name = request.args['image_name']
-    path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    return send_from_directory(path, img_name)
-
-
-@app.route('/api/libraries/names', methods=['GET'])
-def get_library_namesapi():
-    key = request.args['key']
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-
-    user_id = key[0]
-    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
-    return {'library_names': [name for name in map(lambda lib: lib.name, libs)]}
-
-
-@app.route('/api/libraries/getall', methods=['GET'])
-def get_librariesapi():
-    key = request.args['key']
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-    user_id = key[0]
-    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
-    all_libs = []
-    for lib in libs:
-        thislib = {'name': lib.name, 'description': lib.description}
-        all_libs.append(thislib)
-    response = jsonify({'libraries': all_libs})
-    return response, 200
-
-
-@app.route('/api/library/deletesign', methods=['DELETE'])
-def delete_signapi():
-    key = request.json.get('key')
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-    libname = request.json.get('library_name')
-    signname = request.json.get('sign_name')
-    lib = SignLanguageLibrary.query.filter_by(name=libname).first()
-    Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
-    db.session.commit()
-    return Response(status=200)
-
-
-@app.route('/api/library/deletelibrary', methods=['DELETE'])
-def delete_libraryapi():
-    key = request.json.get('key')
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-    libname = request.json.get('library_name')
-    libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-    Sign.query.filter_by(library_id=libid).delete()
-    SignLanguageLibrary.query.filter_by(name=libname).delete()
-    shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
-    db.session.commit()
-    return Response(status=200)
-
-
-@app.route('/api/library/classifyimage', methods=['POST'])
-def classify_requestapi():
-    key = request.form['key']
-    if verifykey(key) == "0":
-        return {'message': 'Authentication failed'}, 401
-    return classify()
-
-
-@app.route('/library/classifyimage', methods=['POST'])
+@library_routes.route('/library/classifyimage', methods=['POST'])
 def classify_request():
     """
     https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
     https://www.geeksforgeeks.org/python-opencv-imdecode-function/
     """
     return classify()
-
-
-def classify():
-    data_image = request.files['image'].read()
-    lib_name = request.form['library_name']
-    b_array = np.asarray(bytearray(io.BytesIO(data_image).read()), dtype='uint8')
-    image = cv2.imdecode(b_array, cv2.IMREAD_COLOR)
-    processed_image = preprocess_image(image)
-    if processed_image is not None:
-        flat_image = processed_image.flatten()
-        processed_image = cv2.imencode('.png', processed_image)[1]
-        image_out = 'data:image/png;base64,' + base64.b64encode(processed_image).decode('utf-8')
-        start = time.time()
-        result = knn_classify(lib_name, flat_image)
-        end = time.time()
-        print('Time taken = ' + str(end - start))
-        return {'processedImage': image_out, 'result': result}
-    else:
-        print('processed_image is none')
-        return Response(status=400)

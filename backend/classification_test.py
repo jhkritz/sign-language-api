@@ -9,7 +9,6 @@ LARGEST = 'ABC - 300 images'
 def test_classification_accuracy():
     lib_names = ["ABC - 30 images"]
     signs = ['a', 'b', 'c']
-    i = 0
     for lib_name in lib_names:
         num_correct = 0
         total = 0
@@ -41,22 +40,19 @@ def test_classification_accuracy():
                     print(output['result'])
                 except Exception as e:
                     print(e)
-        try:
-            if num_correct > 0:
-                avg_pc = positive_confidence / num_correct
-                print(avg_pc)
-            else:
-                print('Undefined')
-            if total > num_correct:
-                avg_nc = negative_confidence / (total - num_correct)
-                print(avg_nc)
-            else:
-                print('Undefined')
-            ratio_correct = num_correct / total
-            print(ratio_correct*100)
-            print('-----------------------------------------------------')
-        except Exception:
-            pass
+        if num_correct > 0:
+            avg_pc = positive_confidence / num_correct
+            print(avg_pc)
+        else:
+            print('Undefined')
+        if total > num_correct:
+            avg_nc = negative_confidence / (total - num_correct)
+            print(avg_nc)
+        else:
+            print('Undefined')
+        ratio_correct = num_correct / total
+        print(ratio_correct*100)
+        print('-----------------------------------------------------')
 
 
 test_classification_accuracy()

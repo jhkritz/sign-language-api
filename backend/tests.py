@@ -2,7 +2,6 @@ import subprocess
 import nose2
 import json
 
-
 access_token = ""
 
 
@@ -24,11 +23,21 @@ def get_access_token():
 def test_get_libraries():
     cmd = "curl --location --request GET 'http://127.0.0.1:5000/libraries/getall'\
             --header 'Authorization: Bearer {}'".format(access_token)
+    get_libs(cmd)
+
+
+def get_libs(cmd):
     completed = subprocess.run(cmd, capture_output=True, shell=True)
     log_process(completed)
     assert completed.returncode == 0
     output = completed.stdout.decode('utf-8')
     assert output.find('libraries') >= 0
+
+
+def test_api_get_libraries():
+    cmd = "curl --location --request GET \
+    'http://127.0.0.1:5000/api/libraries/getall?key=6.265e0952-a5ca-49aa-9d7f-daa44134a527'"
+    get_libs(cmd)
 
 
 if __name__ == '__main__':

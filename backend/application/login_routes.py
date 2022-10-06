@@ -1,4 +1,4 @@
-from flask import current_app as app, request, jsonify
+from flask import request, jsonify, Blueprint
 from . import db
 from .models import User, APIKeys
 import hashlib
@@ -10,8 +10,16 @@ from flask_jwt_extended import (create_access_token,
                                 get_jwt_identity
                                 )
 
+auth_routes = Blueprint('auth_routes', __name__)
 
-@app.route('/login', methods=['POST'])
+
+@auth_routes.route('/verify/user', methods=['GET'])
+@jwt_required()
+def verify_user():
+    return {}, 200
+
+
+@auth_routes.route('/login', methods=['POST'])
 def login():
     email = request.json.get('email')
     existinguser = User.query.filter_by(email=email).first()
@@ -28,7 +36,7 @@ def login():
     return {'access': access_token, 'refresh': refresh_token}, 200
 
 
-@app.route('/register', methods=['POST'])
+@auth_routes.route('/register', methods=['POST'])
 def register():
     email = request.json.get('email')
     existinguser = User.query.filter_by(email=email).first()
@@ -51,7 +59,7 @@ def register():
     return {'api_key': key, 'access': access_token, 'refresh': refresh_token}
 
 
-@app.route('/logout', methods=['POST'])
+@auth_routes.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
     response = jsonify({'message': 'Success'})
@@ -59,7 +67,7 @@ def logout():
     return response
 
 
-@app.route('/refresh', methods=['GET'])
+@auth_routes.route('/refresh', methods=['GET'])
 @jwt_required(refresh=True)
 def refreshtoken():
     user_id = get_jwt_identity()
@@ -69,7 +77,7 @@ def refreshtoken():
     return {'access': access_token, 'refresh': refresh_token}
 
 
-@app.route('/api/resetapikey', methods=['GET'])
+@auth_routes.route('/api/resetapikey', methods=['GET'])
 @jwt_required()
 def resetapikey():
     userid = get_jwt_identity()
@@ -79,7 +87,6 @@ def resetapikey():
 # create api key and store hash in DB
 # return unhashed key
 def generateapikey(user_id):
-
     # check for existing key and remove it
     if not (User.query.filter_by(id=user_id).first()):
         return "0"
@@ -92,6 +99,7 @@ def generateapikey(user_id):
     db.session.commit()
 
     return key
+
 
 # verify key and return user id. return 0 if failed to verify
 
@@ -106,7 +114,7 @@ def verifykey(api_key):
     return str(userid)
 
 
-@app.route('/api/testkey', methods=['POST'])
+@auth_routes.route('/api/testkey', methods=['POST'])
 def testkey():
     key = request.json.get('key')
     return verifykey(key)
