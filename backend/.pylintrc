@@ -1,2 +1,6 @@
 [MASTER]
 ignore=venv
+# Source: https://www.lesinskis.com/pylint-false-positives.html
+ignored-modules=flask_sqlalchemy
+generated-members=db.session.add|db.session.commit|db.session.merge|db.session.query|db.session.flush|cv2.*
+extension-pkg-allow-list=cv2
