@@ -21,7 +21,7 @@
                                                     <v-icon @click='grantUserAccess(user)'>
                                                         mdi-check
                                                     </v-icon>
-                                                    <v-icon @click='grantAdminAccess'>
+                                                    <v-icon @click='grantAdminAccess(user)'>
                                                         mdi-account-check
                                                     </v-icon>
                                                 </v-list-item-action>
@@ -43,7 +43,7 @@
                                                     {{user}}
                                                 </v-list-item-content>
                                                 <v-list-item-action>
-                                                    <v-icon>
+                                                    <v-icon @click='revokePermissions(user)'>
                                                         mdi-close-box
                                                     </v-icon>
                                                 </v-list-item-action>
@@ -65,7 +65,7 @@
                                                     {{user}}
                                                 </v-list-item-content>
                                                 <v-list-item-action>
-                                                    <v-icon>
+                                                    <v-icon @click='revokePermissions(user)'>
                                                         mdi-close-box
                                                     </v-icon>
                                                 </v-list-item-action>
@@ -177,11 +177,59 @@
                 try {
                     console.log(config);
                     await axios(config);
+                    this.normalUsers.push(userEmail);
+                    this.permissionlessUsers = this.permissionlessUsers.filter(
+                        item => item !== userEmail
+                    );
                 } catch (err) {
                     alert('Failed to grant user permission');
                 }
             },
-            async grantAdminAccess() {},
+            async grantAdminAccess(userEmail) {
+                const config = {
+                    method: 'post',
+                    url: baseUrl + '/library/addadmin',
+                    data: JSON.stringify({
+                        library_name: localStorage.getItem('library_id'),
+                        user_email: userEmail
+                    }),
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+                        'Content-Type': 'application/json'
+                    }
+                };
+                try {
+                    console.log(config);
+                    await axios(config);
+                    this.adminUsers.push(userEmail);
+                    this.permissionlessUsers = this.permissionlessUsers.filter(
+                        item => item !== userEmail
+                    );
+                } catch (err) {
+                    alert('Failed to grant user permission');
+                }
+            },
+            async revokePermissions(email) {
+                const url = new URL(baseUrl + '/library/revoke/permissions');
+                url.searchParams.append('library_name', localStorage.getItem('library_id'));
+                url.searchParams.append('user_email', email);
+                const config = {
+                    method: 'delete',
+                    url: url,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token'),
+                    }
+                };
+                try {
+                    console.log(config);
+                    await axios(config);
+                    this.permissionlessUsers.push(email);
+                    this.adminUsers = this.adminUsers.filter(item => item !== email);
+                    this.normalUsers = this.normalUsers.filter(item => item !== email);
+                } catch (err) {
+                    alert('Failed to revoke user permissions');
+                }
+            },
             async submitInput() {
                 const data = new FormData();
                 data.append('sign_name', this.signname);
