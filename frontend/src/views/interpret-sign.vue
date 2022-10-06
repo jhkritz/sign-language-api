@@ -7,9 +7,7 @@
                         <v-card-title class='justify-center align-center'>
                             Camera
                         </v-card-title>
-                        <v-card-content>
-                            <video id='interpretationVideo' autoplay class='mediaElement' />
-                        </v-card-content>
+                        <video id='interpretationVideo' autoplay class='mediaElement' />
                         <v-card-actions class='justify-center align-center'>
                             <v-btn dark color=#17252A @click.stop='processSnapshot'>
                                 Process a snapshot
@@ -22,9 +20,7 @@
                         <v-card-title class='justify-center align-center'>
                             Processed Image
                         </v-card-title>
-                        <v-card-content>
-                            <v-img :src="processedImageSrc" class='mediaElement' id='processedImage' contain :aspect-ratio='16/9' />
-                        </v-card-content>
+                        <v-img :src="processedImageSrc" class='mediaElement' id='processedImage' contain :aspect-ratio='16/9' />
                         <v-card-subtitle class='justify-center align-center'>
                             Sign meaning: {{result.classification}}<br />
                             Confidence: {{result.quality_of_match}}
