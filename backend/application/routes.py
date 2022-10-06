@@ -110,6 +110,7 @@ def upload_video(sign_name, img_path, video, libid):
         frame_grabbed, img = video_capture.read()
     print('Successfully uploaded ' + str(count) + ' images.')
     db.session.commit()
+    os.remove('temp_video.webm')
     return Response(status=200)
 
 
@@ -315,10 +316,10 @@ def get_user_groups(user_id):
         if not has_permissions:
             permissionless_users += [user_a.email]
     return {
-               'permissionlessUsers': permissionless_users,
-               'normalUsers': normal_users,
-               'adminUsers': admins
-           }, 200
+        'permissionlessUsers': permissionless_users,
+        'normalUsers': normal_users,
+        'adminUsers': admins
+    }, 200
 
 
 @library_routes.route('/library/addadmin', methods=['POST'])
