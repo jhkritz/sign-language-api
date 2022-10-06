@@ -1,5 +1,17 @@
 # Backend README.md
 
+## Linting
+
+### Install pylint
+
+Activate your virtual environment and then:
+
+	pip install pylint
+
+### Running the linter
+
+	pylint application
+
 ## Dataset
 
 You can download an ASL dataset [here](https://www.kaggle.com/datasets/grassknoted/asl-alphabet?resource=download)
