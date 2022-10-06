@@ -1,62 +1,93 @@
 <template id="test_library">
-    <div id='mainContainer'>
-        <v-main class='grey lighten-3' id='mainContainer'>
-            <v-container id='sheet'>
-                <v-sheet min-height='70vh' rounded='lg' id='sheet'>
-                    <v-row id='sheet'>
-                        <v-col cols='6'>
-                            <v-card id='card' class='justify-center align-center'>
-                                <v-card-title class='justify-center align-center'>
-                                    Camera
-                                </v-card-title>
-                                <video id='interpretationVideo' autoplay />
-                                <v-card-actions class='justify-center align-center'>
-                                    <v-btn dark color=#17252A @click.stop='processSnapshot'>
-                                        Process a snapshot
-                                    </v-btn>
-                                </v-card-actions>
-                            </v-card>
-                        </v-col>
-                        <v-col cols='6'>
-                            <v-card id='card' class='justify-center align-center'>
-                                <v-card-title class='justify-center align-center'>
-                                    Processed Image
-                                </v-card-title>
-                                <v-img id='processedImage' :src='processedImageSrc' width='100%' contain :aspect-ratio='16/9' />
-                                <v-card-subtitle class='justify-center align-center'>
-                                    Sign meaning: {{result.classification}}<br />
-                                    Confidence: {{result.quality_of_match}}
-                                </v-card-subtitle>
-                            </v-card>
-                        </v-col>
-                    </v-row>
-                </v-sheet>
-            </v-container>
-        </v-main>
-    </div>
+    <v-main class='grey lighten-3' id='mainContainer'>
+        <v-container>
+            <v-row id='row'>
+                <v-col lg='4' md='6'>
+                    <v-card id='card' class='justify-center align-center'>
+                        <v-card-title class='justify-center align-center'>
+                            Camera
+                        </v-card-title>
+                        <v-card-content>
+                            <video id='interpretationVideo' autoplay class='mediaElement' />
+                        </v-card-content>
+                        <v-card-actions class='justify-center align-center'>
+                            <v-btn dark color=#17252A @click.stop='processSnapshot'>
+                                Process a snapshot
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-col>
+                <v-col lg='4' md='6'>
+                    <v-card id='card' class='justify-center align-center'>
+                        <v-card-title class='justify-center align-center'>
+                            Processed Image
+                        </v-card-title>
+                        <v-card-content>
+                            <v-img :src="processedImageSrc" class='mediaElement' id='processedImage' contain :aspect-ratio='16/9' />
+                        </v-card-content>
+                        <v-card-subtitle class='justify-center align-center'>
+                            Sign meaning: {{result.classification}}<br />
+                            Confidence: {{result.quality_of_match}}
+                        </v-card-subtitle>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-main>
 </template>
 <style>
-    #card {
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
+    @media (max-width: 998px) {
+        .mediaElement {
+            border: 25px solid;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 35vh;
+            max-height: 35vh;
+            background-color: black;
+        }
+
+        #card {
+            box-sizing: border-box;
+            min-height: 50vh;
+            border-radius: 10px;
+        }
+
+        #row {
+            box-sizing: border-box;
+            width: 100%;
+            display: flex;
+            align: center;
+            justify: center;
+            margin: 0.5em;
+            padding: 0.5em;
+        }
     }
 
-    #interpretationVideo {
-        border: 3px solid;
-        width: 100%;
-    }
+    @media (min-width: 1100px) {
+        .mediaElement {
+            border: 25px solid;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 40vh;
+            max-height: 40vh;
+            background-color: black;
+        }
 
-    #sheet {
-        width: 100%;
-        padding: 2.5%;
-        box-sizing: border-box;
-        justify-content: space-between;
-    }
+        #card {
+            box-sizing: border-box;
+            min-height: 55vh;
+            border-radius: 10px;
+        }
 
-    #mainContainer {
-        height: 100%;
-        box-sizing: border-box;
+        #row {
+            box-sizing: border-box;
+            width: 100%;
+            display: flex;
+            align: center;
+            justify: center;
+            margin: 0.5em;
+            padding: 0.5em;
+        }
     }
 </style>
 
@@ -65,6 +96,9 @@
     import {
         sharedState
     } from '../SharedState';
+    import {
+        baseUrl
+    } from '../BaseRequestUrl';
     export default {
         props: ['library_id'],
         data: () => ({
@@ -74,9 +108,19 @@
                 classification: 'Unknown',
                 quality_of_match: '0%',
             },
-            processedImageSrc: 'http://localhost:5000/library/image?image_name=default.jpg&library_name='
+            processedImageSrc: null,
         }),
-        created() {
+        async created() {
+            const config = {
+                method: 'get',
+                url: baseUrl + '/library/image?image_name=default.jpg&library_name=',
+                headers: {
+                    Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                }
+            };
+            const res = await axios(config);
+            console.log(res);
+            this.processedImageSrc = res;
             this.initCamera();
         },
         methods: {
