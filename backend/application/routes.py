@@ -235,19 +235,22 @@ def delete_sign():
 @app.route('/library/deletelibrary', methods=['DELETE'])
 @jwt_required()
 def delete_library():
-    libname = request.json.get('library_name')
+    print(request)
+    libname = request.args.get('library_name')
     user_id = get_jwt_identity()
     try:
         libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
         user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True)
         if user_role is None:
             return {"Error": "Permission Denied"}, 400
+        UserRole.query.filter_by(libraryid=libid).delete()
         Sign.query.filter_by(library_id=libid).delete()
         SignLanguageLibrary.query.filter_by(name=libname).delete()
         shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
         db.session.commit()
         return Response(status=200)
-    except Exception:
+    except Exception as e:
+        print(e)
         return Response(status=400)
 
 
