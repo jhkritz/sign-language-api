@@ -111,6 +111,7 @@
             processedImageSrc: null,
         }),
         async created() {
+            this.initCamera();
             const config = {
                 method: 'get',
                 url: baseUrl + '/library/image?image_name=default.jpg&library_name=',
@@ -118,10 +119,13 @@
                     Authorization: 'Bearer ' + localStorage.getItem('access_token')
                 }
             };
-            const res = await axios(config);
-            console.log(res);
+            try {
+                const res = await axios(config);
+                console.log(res);
+            } catch (err) {
+                console.log(err);
+            }
             this.processedImageSrc = res;
-            this.initCamera();
         },
         methods: {
             async processSnapshot() {
