@@ -177,10 +177,11 @@ def get_signs():
 def get_sign_image():
     user_id = get_jwt_identity()
     lib_name = request.args['library_name']
-    lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
-    user_role = UserRole(userid=user_id, libraryid=lib.id)
-    if not user_role:
-        return {"Error": "Permission Denied"}, 400
+    if lib_name != '':
+        lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
+        user_role = UserRole(userid=user_id, libraryid=lib.id)
+        if not user_role:
+            return {"Error": "Permission Denied"}, 400
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     return send_from_directory(path, img_name)
@@ -310,8 +311,8 @@ def get_user_groups():
     }, 200
 
 
-@ app.route('/library/addadmin', methods=['POST'])
-@ jwt_required()
+@app.route('/library/addadmin', methods=['POST'])
+@jwt_required()
 def addadmin():
     libname = request.json.get('library_name')
     useremail = request.json.get('user_email')
@@ -334,6 +335,17 @@ def addadmin():
     db.session.commit()
     return jsonify(), 200
 
+
+@app.route('/library/revoke/permissions', methods=['DELETE'])
+@jwt_required()
+def revoke_permissions():
+    lib_name = request.args['library_name']
+    user_email = request.args['user_email']
+    user_id = User.query.filter_by(email=user_email).first().id
+    library_id = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
+    UserRole.query.filter_by(libraryid=library_id, userid=user_id).delete()
+    db.session.commit()
+    return {}, 200
 
 # Functions used to classify images.
 ####################################################################################################
