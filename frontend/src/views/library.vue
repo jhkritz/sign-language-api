@@ -33,7 +33,7 @@
                             <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
                         </template>
                         <template v-slot:no-data>
-                            <v-btn icon @click="initialize">
+                            <v-btn icon>
                                 <v-icon>
                                     mdi-cached
                                 </v-icon>
@@ -70,7 +70,7 @@
                             <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
                         </template>
                         <template v-slot:no-data>
-                            <v-btn icon @click="initialize">
+                            <v-btn icon>
                                 <v-icon>
                                     mdi-cached
                                 </v-icon>
