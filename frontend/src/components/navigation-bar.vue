@@ -3,9 +3,9 @@
         <v-btn icon color="white" id='homeButton' to='/dashboard'>
             <v-icon>mdi-home</v-icon>
         </v-btn>
-        <v-appbar-title id='toolbarTitle' class="white--text">
+        <v-app-bar-title id='toolbarTitle' class="white--text">
             {{libraryname}}
-        </v-appbar-title>
+        </v-app-bar-title>
         <v-tabs centered class="ml-n9">
             <v-tab v-for="link in links" :key="link.text" :to='link.route'>
                 {{link.text}}
