@@ -19,6 +19,7 @@ SQLALCHEMY_DATABASE_URI = 'postgresql://sign_language_api:flask123@localhost:543
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 IMAGE_PATH = './library_images'
+os.makedirs(IMAGE_PATH, exist_ok=True)
 
 
 # Heroku database configuration.
