@@ -81,7 +81,7 @@ def refreshtoken():
 @jwt_required()
 def resetapikey():
     userid = get_jwt_identity()
-    return {'api_key': generateapikey(userid)}
+    return {'api_key': generateapikey(userid)}, 200
 
 
 # create api key and store hash in DB
