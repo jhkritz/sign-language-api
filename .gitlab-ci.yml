@@ -25,6 +25,8 @@ run_tests:
 
 deploy_staging:
   stage: deploy
+  only:
+    - main
   tags:
     - shared-docker-runner
   script:
