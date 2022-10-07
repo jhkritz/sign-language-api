@@ -1,12 +1,12 @@
 image: jjanzic/docker-python3-opencv
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/python_cache"
+#variables:
+#  PIP_CACHE_DIR: "$CI_PROJECT_DIR/python_cache"
 
-cache:
-  key: cache_key
-  paths:
-    ['$CI_PROJECT_DIR/python_cache']
+#cache:
+#  key: cache_key
+#  paths:
+#    ['$CI_PROJECT_DIR/python_cache']
 
 stages:
   - test
@@ -30,11 +30,6 @@ deploy_staging:
   tags:
     - shared-docker-runner
   script:
-    #- apt-get update -yq
-    #- apt-get install -y ruby ruby-dev rubygems-integration
-    #- gem install dpl
-    #- dpl --provider=heroku --app=$HEROKU_APP_NAME --api-key=$HEROKU_API_KEY
-    #- echo "Deployed to Staging Server https://flask-api-staging.herokuapp.com"
     - git remote remove heroku_backend || echo Already removed.
     - git remote remove heroku_frontend || echo Already removed.
     - git remote add heroku_backend https://heroku:$HEROKU_API_KEY@git.heroku.com/guarded-hamlet-40611.git || echo heroku_backend should exist.
