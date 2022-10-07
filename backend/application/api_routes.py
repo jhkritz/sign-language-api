@@ -78,7 +78,7 @@ def delete_signapi():
 
 @api_routes.route('/api/library/deletelibrary', methods=['DELETE'])
 def delete_libraryapi():
-    key = request.json.get('key')
+    key = request.args.get('key')
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
     user_id = key[0]
