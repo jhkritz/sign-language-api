@@ -1,7 +1,14 @@
+"""
+Database table classes
+"""
+
 from . import db
 
 
 class User(db.Model):
+    """
+    Stores information related to users of our application.
+    """
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(256), nullable=False, unique=True)
@@ -9,6 +16,9 @@ class User(db.Model):
 
 
 class UserRole(db.Model):
+    """
+    Stores the permissions users have for different libraries.
+    """
     __tablename__ = 'user_role'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     userid = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -25,11 +35,17 @@ class UserRole(db.Model):
 
 
 class APIKeys(db.Model):
+    """
+    Associates the hashes of api keys with users.
+    """
     userid = db.Column(db.Integer, primary_key=True)
     api_key_hash = db.Column(db.String(256), nullable=False)
 
 
 class SignLanguageLibrary(db.Model):
+    """
+    Stores information associated with sign language libraries.
+    """
     __tablename__ = 'sign_language_library'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(256), nullable=False)
@@ -40,6 +56,9 @@ class SignLanguageLibrary(db.Model):
 
 
 class Sign(db.Model):
+    """
+    Associates sign meanings with image file names and the library it is a part of.
+    """
     __tablename__ = 'sign'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     meaning = db.Column(db.String(256), nullable=False)
@@ -47,8 +66,11 @@ class Sign(db.Model):
     library_id = db.Column(db.Integer, db.ForeignKey('sign_language_library.id'), nullable=False)
 
     def to_dict(self, url_base):
+        """
+        Returns a dictionary representation of this sign.
+        """
         lib_name = self.sign_language_library.name
-        url = '{}?image_name={}+library_name={}'.format(url_base, self.image_filename, lib_name)
+        url = f'{url_base}?image_name={self.image_filename}+library_name={lib_name}'
         return {
             'id': self.id,
             'meaning': self.meaning,

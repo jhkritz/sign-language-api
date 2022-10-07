@@ -28,7 +28,7 @@ def init_app():
     with app.app_context():
         try:
             db.create_all()
-        except Exception as e:
-            print(e)
+        except Exception as exception:
+            print(exception)
             print('continuing...')
         return app
