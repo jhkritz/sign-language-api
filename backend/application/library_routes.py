@@ -181,8 +181,7 @@ def create_library(user_id):
     owner_role = UserRole(userid=user_id, libraryid=library.id, admin=True)
     db.session.add(owner_role)
     db.session.commit()
-    response = jsonify()
-    return response, 200
+    return {}, 200
 
 
 @library_routes.route('/library/signs', methods=['GET'])
