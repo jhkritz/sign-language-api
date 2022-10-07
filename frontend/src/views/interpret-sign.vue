@@ -131,7 +131,7 @@
                 data.append('image', img);
                 const config = {
                     method: 'post',
-                    url: 'http://localhost:5000/library/classifyimage',
+                    url: baseUrl + '/library/classifyimage',
                     data: data,
                     headers: {
                         Authorization: 'Bearer ' + localStorage.getItem('access_token')
