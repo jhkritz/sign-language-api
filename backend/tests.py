@@ -5,13 +5,11 @@ Note: We used Postman to generate the HTTP requests.
 """
 
 import os
-import subprocess
-import nose2
 import json
 import requests
+import nose2
 
-access_token = ""
-lib_name = "ci_cd_test_lib"
+LIB_NAME = "ci_cd_test_lib"
 input_data_path = os.getcwd() + '/input_data'
 
 
@@ -27,7 +25,7 @@ def get_access_token():
     headers = {
         'Content-Type': 'application/json'
     }
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
     return response.json()['access']
 
 
@@ -37,14 +35,14 @@ def create_library():
     """
     url = "http://127.0.0.1:5000/library/createlibrary"
     payload = {
-        'library_name': f'{lib_name}',
+        'library_name': f'{LIB_NAME}',
         'description': 'Test library'
     }
     files = []
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    response = requests.request("POST", url, headers=headers, data=payload, files=files)
+    response = requests.request("POST", url, headers=headers, data=payload, files=files, timeout=30)
     assert response.status_code == 200
 
 
@@ -52,55 +50,66 @@ def delete_library():
     """
     Deletes the test library.
     """
-    url = f"http://127.0.0.1:5000/library/deletelibrary?library_name={lib_name}"
+    url = f"http://127.0.0.1:5000/library/deletelibrary?library_name={LIB_NAME}"
     payload = {}
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    response = requests.request("DELETE", url, headers=headers, data=payload)
+    requests.request("DELETE", url, headers=headers, data=payload, timeout=30)
 
 
 def upload_images():
+    """
+    Uploads the training data.
+    """
     url = "http://127.0.0.1:5000/library/uploadsigns"
     sign_names = ['a', 'b', 'c']
     for sign_name in sign_names:
         payload = {'sign_name': f'{sign_name}',
-                   'lib_name': f'{lib_name}'}
+                   'lib_name': f'{LIB_NAME}'}
+        with open(f'{input_data_path}/{sign_name}.zip', 'rb') as zpfl:
+            files = [
+                (
+                    'zip_file',
+                    (
+                        f'{sign_name}.zip',
+                        zpfl, 'application/zip'
+                    )
+                )
+            ]
+            headers = {
+                'Authorization': f'Bearer {access_token}'
+            }
+            response = requests.request("POST", url, headers=headers,
+                                        data=payload, files=files, timeout=30)
+            assert response.status_code == 200
+
+
+def classify_image():
+    """
+    Checks that the server correctly classifies one
+    of the training images.
+    """
+    url = "http://localhost:5000/library/classifyimage"
+    payload = {'library_name': LIB_NAME}
+    sign_name = 'a'
+    with open(f'{input_data_path}/{sign_name}.png', 'rb') as img:
         files = [
             (
-                'zip_file',
+                'image',
                 (
-                    f'{sign_name}.zip',
-                    open(f'{input_data_path}/{sign_name}.zip', 'rb'), 'application/zip'
+                    '{sign_name}.png',
+                    img, 'image/png'
                 )
             )
         ]
         headers = {
             'Authorization': f'Bearer {access_token}'
         }
-        response = requests.request("POST", url, headers=headers, data=payload, files=files)
+        response = requests.request("POST", url, headers=headers,
+                                    data=payload, files=files, timeout=30)
         assert response.status_code == 200
-
-
-def classify_image():
-    url = "http://localhost:5000/library/classifyimage"
-    payload = {'library_name': lib_name}
-    sign_name = 'a'
-    files = [
-        (
-            'image',
-            (
-                '{sign_name}.png',
-                open(f'{input_data_path}/{sign_name}.png', 'rb'), 'image/png'
-            )
-        )
-    ]
-    headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
-    response = requests.request("POST", url, headers=headers, data=payload, files=files)
-    assert response.status_code == 200
-    assert response.json()['result']['classification'] == sign_name
+        assert response.json()['result']['classification'] == sign_name
 
 
 def test_classification():
