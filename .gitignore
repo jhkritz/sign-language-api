@@ -57,5 +57,5 @@ latex
 docker
 *.zip
 frontend/dist
-backend/miscellaneous
+miscellaneous
 backend/library_images/*/*
