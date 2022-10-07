@@ -1,17 +1,25 @@
 import os
 import shutil
 from zipfile import ZipFile
-from flask import send_from_directory, jsonify, Blueprint
+
+import cv2
+from flask import (
+    current_app as app, send_from_directory,
+    jsonify, Blueprint, request
+)
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from . import db
-from .image_processing import *
-from .models import User, UserRole, Sign
+from .image_processing import preprocess_image, classify
+from .models import User, UserRole, Sign, SignLanguageLibrary
 
 library_routes = Blueprint('library_routes', __name__)
 
 
 @library_routes.route("/")
 def home():
+    """
+    Simple home route.
+    """
     return "Hello World!"
 
 
@@ -20,11 +28,22 @@ def home():
 @library_routes.route('/library/uploadsign', methods=['POST'])
 @jwt_required()
 def upload_signs():
+    """
+    Receives requests to upload signs in the form of a zip file,
+    an image, or a video. Gets the user's identity from their JWT
+    and calls a function that processes the file.
+    """
     user_id = get_jwt_identity()
     return upload(user_id)
 
 
 def upload(user_id):
+    """
+    Extracts variable names and sets up the
+    environment for saving the file(s). Calls
+    a function that actually processes and
+    saves the file(s) to be uploaded.
+    """
     lib_name = request.form['lib_name']
     libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
     role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
@@ -45,6 +64,10 @@ def upload(user_id):
 
 
 def upload_zip_file(sign_name, img_path, zip_file, libid):
+    """
+    Extracts images from the zip file, preprocesses them
+    and creates database entries for them.
+    """
     zip_name = 'temp_zip.zip'
     zip_file.save(zip_name)
     zpfl = ZipFile(zip_name)
@@ -65,6 +88,10 @@ def upload_zip_file(sign_name, img_path, zip_file, libid):
 
 
 def save_image(img_path, sign_name, filename, libid):
+    """
+    Creates a database entry for the input image
+    and saves the image on the filesystem.
+    """
     img = preprocess_image(cv2.imread(img_path + filename))
     os.remove(img_path + filename)
     if img is not None:
@@ -79,6 +106,9 @@ def save_image(img_path, sign_name, filename, libid):
 
 
 def upload_single_image(sign_name, img_path, image, libid):
+    """
+    Handles a single image file upload.
+    """
     filename = sign_name + '.png'
     image.save(img_path + filename)
     if save_image(img_path, sign_name, filename, libid):
@@ -91,6 +121,11 @@ def upload_single_image(sign_name, img_path, image, libid):
 
 
 def upload_video(sign_name, img_path, video, libid):
+    """
+    Reads frames from the video, preprocesses them,
+    creates a database entry for them and saves the
+    preprocessed images to the file system.
+    """
     filename = 'temp_video.webm'
     video.save(filename)
     video_capture = cv2.VideoCapture('./' + filename)
@@ -109,17 +144,25 @@ def upload_video(sign_name, img_path, video, libid):
     print('Successfully uploaded ' + str(count) + ' images.')
     db.session.commit()
     os.remove('temp_video.webm')
-    return Response(status=200)
+    return {}, 200
 
 
 @library_routes.route('/library/createlibrary', methods=['POST'])
 @jwt_required()
 def create_library():
+    """
+    Gets the user's identity from their JWT and calls
+    a function that creates a library for that user.
+    """
     user_id = get_jwt_identity()
     return create_library(user_id)
 
 
 def create_library(user_id):
+    """
+    Creates a new database entry for the library
+    with the user with ID user_id as the admin.
+    """
     libname = request.form.get('library_name')
     lib_description = request.form.get('description')
     existinglib = SignLanguageLibrary.query.filter_by(name=libname).first()
@@ -139,11 +182,20 @@ def create_library(user_id):
 @library_routes.route('/library/signs', methods=['GET'])
 @jwt_required()
 def get_signs():
+    """
+    Gets the user's identity from their JWT and
+    calls a function that gets the signs for them.
+    """
     user_id = get_jwt_identity()
     return get_signs(user_id)
 
 
 def get_signs(user_id):
+    """
+    Gets the signs from the library with name library_name
+    for the user, if they have permission to use this
+    library.
+    """
     library_name = request.args['library_name']
     img_url_base = '/library/image'
     lib = SignLanguageLibrary.query.filter_by(name=library_name).first_or_404()
@@ -157,11 +209,21 @@ def get_signs(user_id):
 @library_routes.route('/library/image', methods=['GET'])
 @jwt_required()
 def get_sign_image():
+    """
+    Gets the user's ID from their JWT and
+    calls a function that returns the image
+    they requested.
+    """
     user_id = get_jwt_identity()
     return get_sign_image(user_id)
 
 
 def get_sign_image(user_id):
+    """
+    Returns the image associated with the sign if
+    the user has permission to use the library
+    to which the image belongs.
+    """
     lib_name = request.args['library_name']
     if lib_name != '':
         lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
@@ -222,7 +284,7 @@ def delete_sign(user_id):
         return {"Error": "Permission Denied"}, 400
     Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
     db.session.commit()
-    return Response(status=200)
+    return {}, 200
 
 
 @library_routes.route('/library/deletelibrary', methods=['DELETE'])
@@ -244,7 +306,7 @@ def delete_library(user_id):
     SignLanguageLibrary.query.filter_by(name=libname).delete()
     shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
     db.session.commit()
-    return Response(status=200)
+    return {}, 200
 
 
 @library_routes.route('/library/adduser', methods=['POST'])

@@ -88,7 +88,7 @@ def resetapikey():
 # return unhashed key
 def generateapikey(user_id):
     # check for existing key and remove it
-    if not (User.query.filter_by(id=user_id).first()):
+    if not User.query.filter_by(id=user_id).first():
         return "0"
     APIKeys.query.filter_by(userid=user_id).delete()
 
