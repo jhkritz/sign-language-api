@@ -1,14 +1,14 @@
-from flask import request, jsonify, Blueprint
-from . import db
-from .models import User, APIKeys
 import hashlib
 import uuid
+from flask import request, jsonify, Blueprint
 from flask_jwt_extended import (create_access_token,
                                 create_refresh_token,
                                 jwt_required,
                                 unset_jwt_cookies,
                                 get_jwt_identity
                                 )
+from . import db
+from .models import User, APIKeys
 
 auth_routes = Blueprint('auth_routes', __name__)
 

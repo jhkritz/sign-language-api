@@ -4,7 +4,7 @@ Starts the application.
 
 from application import init_app
 from application.login_routes import auth_routes
-from application.routes import library_routes
+from application.library_routes import library_routes
 from application.api_routes import api_routes
 
 app = init_app()

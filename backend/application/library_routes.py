@@ -1,7 +1,10 @@
+"""
+Routes associated with sign language libraries.
+"""
+
 import os
 import shutil
 from zipfile import ZipFile
-
 import cv2
 from flask import (
     current_app as app, send_from_directory,
@@ -27,17 +30,17 @@ def home():
 @library_routes.route('/library/uploadsigns', methods=['POST'])
 @library_routes.route('/library/uploadsign', methods=['POST'])
 @jwt_required()
-def upload_signs():
+def upload_signs_jwt():
     """
     Receives requests to upload signs in the form of a zip file,
     an image, or a video. Gets the user's identity from their JWT
     and calls a function that processes the file.
     """
-    user_id = get_jwt_identity()
-    return upload(user_id)
+    caller_id = get_jwt_identity()
+    return upload(caller_id)
 
 
-def upload(user_id):
+def upload(caller_id):
     """
     Extracts variable names and sets up the
     environment for saving the file(s). Calls
@@ -46,7 +49,9 @@ def upload(user_id):
     """
     lib_name = request.form['lib_name']
     libid = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-    role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
+    role = UserRole.query.filter_by(
+        userid=caller_id, libraryid=libid, admin=True
+    ).first()
     if role is None:
         return {"Error": "Permission Denied"}, 400
     sign_name = request.form['sign_name']
@@ -59,8 +64,8 @@ def upload(user_id):
         return upload_zip_file(sign_name, img_path, zip_file, libid)
     if image is not None:
         return upload_single_image(sign_name, img_path, image, libid)
-    if video is not None:
-        return upload_video(sign_name, img_path, video, libid)
+    assert video is not None
+    return upload_video(sign_name, img_path, video, libid)
 
 
 def upload_zip_file(sign_name, img_path, zip_file, libid):
@@ -70,21 +75,23 @@ def upload_zip_file(sign_name, img_path, zip_file, libid):
     """
     zip_name = 'temp_zip.zip'
     zip_file.save(zip_name)
-    zpfl = ZipFile(zip_name)
-    filenames = zpfl.namelist()
-    total_num_images = 0
-    num_good_images = 0
-    for filename in filenames[1:]:
-        total_num_images += 1
-        # XXX: what happens if the file already exists? Is it overwritten?
-        zpfl.extract(filename, path=img_path)
-        if save_image(img_path, sign_name, filename, libid):
-            num_good_images += 1
-            print('Successfully uploaded image ' + str(total_num_images))
-    db.session.commit()
-    message = 'Successfully uploaded {} of {} images.'.format(num_good_images, total_num_images)
-    print(message)
-    return {'status': 200, 'message': message}
+    with ZipFile(zip_name) as zpfl:
+        filenames = zpfl.namelist()
+        total_num_images = 0
+        num_good_images = 0
+        for filename in filenames[1:]:
+            total_num_images += 1
+            # XXX: what happens if the file already exists? Is it overwritten?
+            zpfl.extract(filename, path=img_path)
+            if save_image(img_path, sign_name, filename, libid):
+                num_good_images += 1
+                print('Successfully uploaded image ' + str(total_num_images))
+        db.session.commit()
+        message = f'Successfully uploaded {num_good_images} of {total_num_images} images.'
+        print(message)
+        # XXX: test this
+        return {'message': message}, 200
+    return {'message': "Failed to upload zip file."}, 500
 
 
 def save_image(img_path, sign_name, filename, libid):
@@ -114,10 +121,9 @@ def upload_single_image(sign_name, img_path, image, libid):
     if save_image(img_path, sign_name, filename, libid):
         db.session.commit()
         return {}, 200
-    else:
-        msg = 'A hand could not be found in the image.'
-        print(msg)
-        return {"Error": msg}, 400
+    msg = 'A hand could not be found in the image.'
+    print(msg)
+    return {"Error": msg}, 400
 
 
 def upload_video(sign_name, img_path, video, libid):
@@ -149,7 +155,7 @@ def upload_video(sign_name, img_path, video, libid):
 
 @library_routes.route('/library/createlibrary', methods=['POST'])
 @jwt_required()
-def create_library():
+def create_library_jwt():
     """
     Gets the user's identity from their JWT and calls
     a function that creates a library for that user.
@@ -181,7 +187,7 @@ def create_library(user_id):
 
 @library_routes.route('/library/signs', methods=['GET'])
 @jwt_required()
-def get_signs():
+def get_signs_jwt():
     """
     Gets the user's identity from their JWT and
     calls a function that gets the signs for them.
@@ -208,7 +214,7 @@ def get_signs(user_id):
 
 @library_routes.route('/library/image', methods=['GET'])
 @jwt_required()
-def get_sign_image():
+def get_sign_image_jwt():
     """
     Gets the user's ID from their JWT and
     calls a function that returns the image
@@ -218,7 +224,7 @@ def get_sign_image():
     return get_sign_image(user_id)
 
 
-def get_sign_image(user_id):
+def get_sign_image(caller_id):
     """
     Returns the image associated with the sign if
     the user has permission to use the library
@@ -227,8 +233,8 @@ def get_sign_image(user_id):
     lib_name = request.args['library_name']
     if lib_name != '':
         lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
-        user_role = UserRole(userid=user_id, libraryid=lib.id)
-        if not user_role:
+        caller_role = UserRole(userid=caller_id, libraryid=lib.id)
+        if not caller_role:
             return {"Error": "Permission Denied"}, 400
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
@@ -237,30 +243,47 @@ def get_sign_image(user_id):
 
 @library_routes.route('/libraries/names', methods=['GET'])
 @jwt_required()
-def get_library_names():
-    user_id = get_jwt_identity()
-    return get_library_names(user_id)
+def get_library_names_jwt():
+    """
+    Gets the caller's ID from their JWT
+    and calls a functions to get the
+    names of the libraries they have
+    permission to access.
+    """
+    caller_id = get_jwt_identity()
+    return get_library_names(caller_id)
 
 
-def get_library_names(user_id):
-    libs = SignLanguageLibrary.query.filter_by(ownerid=user_id)
+def get_library_names(caller_id):
+    """
+    Gets the names of the library that the
+    caller has permission to access.
+    """
+    libs = SignLanguageLibrary.query.filter_by(ownerid=caller_id)
     return {'library_names': name for name in map(lambda lib: lib.name, libs)}
 
 
 @library_routes.route('/libraries/getall', methods=['GET'])
 @jwt_required()
-def get_libraries():
-    user_id = get_jwt_identity()
-    return get_users_libraries(user_id)
+def get_libraries_jwt():
+    """
+    Gets the caller's ID from their JWT and calls get_users_libraries()
+    """
+    caller_id = get_jwt_identity()
+    return get_users_libraries(caller_id)
 
 
-def get_users_libraries(user_id):
+def get_users_libraries(caller_id):
+    """
+    Gets the libraries that the caller
+    has permission to access.
+    """
     libs = SignLanguageLibrary.query.all()
     all_libs = []
     for lib in libs:
         # skip all libs that the user doesn't have access to.
-        user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id).first()
-        if not user_role:
+        caller_role = UserRole.query.filter_by(userid=caller_id, libraryid=lib.id).first()
+        if not caller_role:
             continue
         thislib = {'name': lib.name, 'description': lib.description}
         all_libs.append(thislib)
@@ -270,17 +293,24 @@ def get_users_libraries(user_id):
 
 @library_routes.route('/library/deletesign', methods=['DELETE'])
 @jwt_required()
-def delete_sign():
-    user_id = get_jwt_identity()
-    return delete_sign(user_id)
+def delete_sign_jwt():
+    """
+    Gets the caller's ID from their JWT and calls
+    delete_sign.
+    """
+    caller_id = get_jwt_identity()
+    return delete_sign(caller_id)
 
 
-def delete_sign(user_id):
+def delete_sign(caller_id):
+    """
+    Deletes a sign from a library if the caller has permission to do so.
+    """
     libname = request.args['library_name']
     signname = request.args['sign_name']
     lib = SignLanguageLibrary.query.filter_by(name=libname).first()
-    user_role = UserRole.query.filter_by(userid=user_id, libraryid=lib.id, admin=True)
-    if user_role is None:
+    caller_role = UserRole.query.filter_by(userid=caller_id, libraryid=lib.id, admin=True)
+    if caller_role is None:
         return {"Error": "Permission Denied"}, 400
     Sign.query.filter_by(meaning=signname, library_id=lib.id).delete()
     db.session.commit()
@@ -289,17 +319,25 @@ def delete_sign(user_id):
 
 @library_routes.route('/library/deletelibrary', methods=['DELETE'])
 @jwt_required()
-def delete_library():
+def delete_library_jwt():
+    """
+    Gets the caller's ID from their JWT and deletes a library
+    if they have admin permissions for that library.
+    """
     user_id = get_jwt_identity()
     return delete_library(user_id)
 
 
-def delete_library(user_id):
+def delete_library(caller_id):
+    """
+    Deletes a library if the caller has admin
+    permissions for this library.
+    """
     print(request)
     libname = request.args.get('library_name')
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True)
-    if user_role is None:
+    caller_role = UserRole.query.filter_by(userid=caller_id, libraryid=libid, admin=True)
+    if caller_role is None:
         return {"Error": "Permission Denied"}, 400
     UserRole.query.filter_by(libraryid=libid).delete()
     Sign.query.filter_by(library_id=libid).delete()
@@ -311,19 +349,26 @@ def delete_library(user_id):
 
 @library_routes.route('/library/adduser', methods=['POST'])
 @jwt_required()
-def adduser():
-    user_id = get_jwt_identity()
-    return adduser(user_id)
+def adduser_jwt():
+    """
+    Gets the caller's ID and calls adduser.
+    """
+    caller_id = get_jwt_identity()
+    return adduser(caller_id)
 
 
-def adduser(user_id):
+def adduser(caller_id):
+    """
+    Gives a user basic permissions for a library if
+    the caller has admin permissions for this library.
+    """
     libname = request.json.get('library_name')
     useremail = request.json.get('user_email')
 
     # check if sending user is admin first.
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
-    if user_role is None:
+    caller_role = UserRole.query.filter_by(userid=caller_id, libraryid=libid, admin=True).first()
+    if caller_role is None:
         return {"Error": "Permission Denied"}, 400
 
     newuser = User.query.filter_by(email=useremail).first()
@@ -338,16 +383,24 @@ def adduser(user_id):
 
 @library_routes.route('/library/get/user/groups', methods=['GET'])
 @jwt_required()
-def get_user_groups():
-    user_id = get_jwt_identity()
-    return get_user_groups(user_id)
+def get_user_groups_jwt():
+    """
+    Gets the caller's ID from their JWT and calls
+    a function that gets the groups of users
+    associated with the library.
+    """
+    caller_id = get_jwt_identity()
+    return get_user_groups(caller_id)
 
 
-def get_user_groups(user_id):
+def get_user_groups(caller_id):
+    """
+    Gets the groups of users associated with a library.
+    """
     lib_name = request.args['library_name']
     # check if sending user is admin first.
     lib_id = SignLanguageLibrary.query.filter_by(name=lib_name).first().id
-    callers_role = UserRole.query.filter_by(userid=user_id, libraryid=lib_id, admin=True).first()
+    callers_role = UserRole.query.filter_by(userid=caller_id, libraryid=lib_id, admin=True).first()
     if callers_role is None:
         return {"Error": "Permission Denied"}, 400
     admins = UserRole.query.filter_by(libraryid=lib_id, admin=True).all()
@@ -384,21 +437,28 @@ def get_user_groups(user_id):
 
 @library_routes.route('/library/addadmin', methods=['POST'])
 @jwt_required()
-def addadmin():
-    user_id = get_jwt_identity()
-    return addadmin(user_id)
+def addadmin_jwt():
+    """
+    Gets the ID of the user from their JWT and calls a
+    function that gives another user admin permissions.
+    """
+    caller_id = get_jwt_identity()
+    return addadmin(caller_id)
 
 
-def addadmin(user_id):
+def addadmin(caller_id):
+    """
+    Gives the user admin permissions for this library.
+    """
     libname = request.json.get('library_name')
     useremail = request.json.get('user_email')
 
     # check if sending user is admin first.
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
-    user_role = UserRole.query.filter_by(userid=user_id, libraryid=libid, admin=True).first()
-    if user_role is None:
+    caller_role = UserRole.query.filter_by(userid=caller_id, libraryid=libid, admin=True).first()
+    if caller_role is None:
         return {"Error": "Permission Denied"}, 400
-    if not user_role.admin:
+    if not caller_role.admin:
         return {"Error": "Permission Denied"}, 400
 
     newuser = User.query.filter_by(email=useremail).first()
@@ -413,7 +473,10 @@ def addadmin(user_id):
 
 @library_routes.route('/library/revoke/permissions', methods=['DELETE'])
 @jwt_required()
-def revoke_permissions():
+def revoke_permissions_jwt():
+    """
+    Removes the all permissions the user has for this library.
+    """
     # XXX: will this work with the api key?
     lib_name = request.args['library_name']
     user_email = request.args['user_email']
@@ -425,7 +488,7 @@ def revoke_permissions():
 
 
 @library_routes.route('/library/classifyimage', methods=['POST'])
-def classify_request():
+def classify_request_jwt():
     """
     https://stackoverflow.com/questions/58931854/how-to-stream-live-video-frames-from-client-to-flask-server-and-back-to-the-clie
     https://www.geeksforgeeks.org/python-opencv-imdecode-function/
