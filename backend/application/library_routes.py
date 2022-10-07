@@ -341,7 +341,7 @@ def delete_library(caller_id):
     UserRole.query.filter_by(libraryid=libid).delete()
     Sign.query.filter_by(library_id=libid).delete()
     SignLanguageLibrary.query.filter_by(name=libname).delete()
-    shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname)
+    shutil.rmtree(app.config['IMAGE_PATH'] + '/' + libname, ignore_errors=True)
     db.session.commit()
     return {}, 200
 
