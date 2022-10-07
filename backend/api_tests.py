@@ -9,8 +9,12 @@ import json
 import requests
 import nose2
 
-LIB_NAME = "ci_cd_test_lib_api"
-input_data_path = os.getcwd() + '/input_data'
+LIB_NAME = "ci_cd_test_lib"
+input_data_path = os.getcwd()
+if not input_data_path.find('/backend') >= 0:
+    input_data_path += '/backend/input_data'
+else:
+    input_data_path += '/input_data'
 
 
 def get_access_token():
