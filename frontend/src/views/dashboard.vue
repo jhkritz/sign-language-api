@@ -1,58 +1,3 @@
-<style>
-    .header {
-        background-repeat: repeat-x;
-        min-height: 25vw;
-        max-height: 30vw;
-        background-image: url('../assets/Tile.svg');
-        background-color: #3AA5A9;
-        background-size: contain;
-
-    }
-
-    .center {
-        text-align: center;
-        margin: auto;
-        padding: 8%;
-    }
-
-    .maintitle {
-
-        padding-bottom: 1%;
-        font-size: 4vw;
-        color: white;
-        font-family: Arial, Helvetica, sans-serif;
-        font-weight: lighter;
-        backdrop-filter: blur(20px) opacity(0.8);
-    }
-
-    .addLibraryButton {
-        padding: 2%;
-        padding-top: 2.5%;
-        display: inline-flex;
-        position: relative;
-        float: right;
-    }
-
-    .libraries {
-        padding: 2%;
-        display: inline-flex;
-        align-content: left;
-        flex-wrap: wrap;
-        flex-direction: row;
-        gap: 2vw;
-        max-width: 93%;
-    }
-
-    .libraries>v-card {
-        max-height: 10vw;
-        max-width: 20vw;
-        display: flex;
-        justify-content: left;
-        justify-items: left;
-        align-items: left;
-
-    }
-</style>
 <template>
     <div>
         <div class="header">
@@ -200,3 +145,58 @@
         }
     }
 </script>
+<style scoped>
+    .header {
+        background-repeat: repeat-x;
+        min-height: 25vw;
+        max-height: 30vw;
+        background-image: url('../assets/Tile.svg');
+        background-color: #3AA5A9;
+        background-size: contain;
+
+    }
+
+    .center {
+        text-align: center;
+        margin: auto;
+        padding: 8%;
+    }
+
+    .maintitle {
+
+        padding-bottom: 1%;
+        font-size: 4vw;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: lighter;
+        backdrop-filter: blur(20px) opacity(0.8);
+    }
+
+    .addLibraryButton {
+        padding: 2%;
+        padding-top: 2.5%;
+        display: inline-flex;
+        position: relative;
+        float: right;
+    }
+
+    .libraries {
+        padding: 2%;
+        display: inline-flex;
+        align-content: left;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 2vw;
+        max-width: 93%;
+    }
+
+    .libraries>v-card {
+        max-height: 10vw;
+        max-width: 20vw;
+        display: flex;
+        justify-content: left;
+        justify-items: left;
+        align-items: left;
+
+    }
+</style>

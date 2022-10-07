@@ -69,7 +69,7 @@
     </div>
 </template>
 
-<style>
+<style scoped>
     #row {
         align-content: center;
         justify-content: center;
@@ -83,11 +83,6 @@
         min-height: 80vh;
         box-sizing: border-box;
         text-align: center;
-    }
-
-    #mainContainer {
-        height: 100%;
-        box-sizing: border-box;
     }
 
     #webcamVideo {

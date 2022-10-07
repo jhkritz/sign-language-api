@@ -8,7 +8,6 @@ import ViewAPI from './views/ViewApi'
 import dashboard from './views/dashboard'
 import addsign from './views/addsign'
 import page_not_found from './views/page-not-found';
-import test_library from './views/test-library';
 import interpret_sign from './views/interpret-sign';
 import library from './views/library';
 import register from './views/register';
@@ -80,13 +79,6 @@ const routes = [{
 	{
 		path: '/library/test',
 		component: interpret_sign,
-		props: route => ({
-			library_id: route.query.library_id
-		})
-	},
-	{
-		path: '/library/test',
-		component: test_library,
 		props: route => ({
 			library_id: route.query.library_id
 		})

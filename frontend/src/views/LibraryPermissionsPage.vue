@@ -1,114 +1,84 @@
 <template>
-    <div id='mainContainer'>
-        <v-main class="grey lighten-3" id='mainContainer'>
-            <v-form v-model="valid">
-                <v-container id='sheet'>
-                    <v-sheet id='sheet' rounded="lg" class='justify-center align-center'>
-                        <v-row id='row'>
-                            <v-col cols=4>
-                                <v-card>
-                                    <v-card-title>
-                                        Users without any permissions
-                                    </v-card-title>
-                                    <v-list>
-                                        <template v-for="user in permissionlessUsers">
-                                            <v-divider :key="user + 'div'" />
-                                            <v-list-item :key="user">
-                                                <v-list-item-content>
-                                                    {{user}}
-                                                </v-list-item-content>
-                                                <v-list-item-action>
-                                                    <v-icon @click='grantUserAccess(user)'>
-                                                        mdi-check
-                                                    </v-icon>
-                                                    <v-icon @click='grantAdminAccess(user)'>
-                                                        mdi-account-check
-                                                    </v-icon>
-                                                </v-list-item-action>
-                                            </v-list-item>
-                                        </template>
-                                    </v-list>
-                                </v-card>
-                            </v-col>
-                            <v-col cols=4>
-                                <v-card>
-                                    <v-card-title>
-                                        Users with basic permissions
-                                    </v-card-title>
-                                    <v-list>
-                                        <template v-for="user in normalUsers">
-                                            <v-divider :key="user + 'div'" />
-                                            <v-list-item :key="user">
-                                                <v-list-item-content>
-                                                    {{user}}
-                                                </v-list-item-content>
-                                                <v-list-item-action>
-                                                    <v-icon @click='revokePermissions(user)'>
-                                                        mdi-close-box
-                                                    </v-icon>
-                                                </v-list-item-action>
-                                            </v-list-item>
-                                        </template>
-                                    </v-list>
-                                </v-card>
-                            </v-col>
-                            <v-col cols=4>
-                                <v-card>
-                                    <v-card-title>
-                                        Users with admin permissions
-                                    </v-card-title>
-                                    <v-list>
-                                        <template v-for="user in adminUsers">
-                                            <v-divider :key="user + 'div'" />
-                                            <v-list-item :key="user">
-                                                <v-list-item-content>
-                                                    {{user}}
-                                                </v-list-item-content>
-                                                <v-list-item-action>
-                                                    <v-icon @click='revokePermissions(user)'>
-                                                        mdi-close-box
-                                                    </v-icon>
-                                                </v-list-item-action>
-                                            </v-list-item>
-                                        </template>
-                                    </v-list>
-                                </v-card>
-                            </v-col>
-                        </v-row>
-                    </v-sheet>
-                </v-container>
-            </v-form>
-        </v-main>
-    </div>
+    <v-main class="grey lighten-3" id='mainContainer'>
+        <v-form v-model="valid">
+            <v-container>
+                <v-sheet id='sheet' rounded="lg" class='justify-center align-center'>
+                    <v-row>
+                        <v-col cols=4>
+                            <v-card>
+                                <v-card-title>
+                                    Users without any permissions
+                                </v-card-title>
+                                <v-list>
+                                    <template v-for="user in permissionlessUsers">
+                                        <v-divider :key="user + 'div'" />
+                                        <v-list-item :key="user">
+                                            <v-list-item-content>
+                                                {{user}}
+                                            </v-list-item-content>
+                                            <v-list-item-action>
+                                                <v-icon @click='grantUserAccess(user)'>
+                                                    mdi-check
+                                                </v-icon>
+                                                <v-icon @click='grantAdminAccess(user)'>
+                                                    mdi-account-check
+                                                </v-icon>
+                                            </v-list-item-action>
+                                        </v-list-item>
+                                    </template>
+                                </v-list>
+                            </v-card>
+                        </v-col>
+                        <v-col cols=4>
+                            <v-card>
+                                <v-card-title>
+                                    Users with basic permissions
+                                </v-card-title>
+                                <v-list>
+                                    <template v-for="user in normalUsers">
+                                        <v-divider :key="user + 'div'" />
+                                        <v-list-item :key="user">
+                                            <v-list-item-content>
+                                                {{user}}
+                                            </v-list-item-content>
+                                            <v-list-item-action>
+                                                <v-icon @click='revokePermissions(user)'>
+                                                    mdi-close-box
+                                                </v-icon>
+                                            </v-list-item-action>
+                                        </v-list-item>
+                                    </template>
+                                </v-list>
+                            </v-card>
+                        </v-col>
+                        <v-col cols=4>
+                            <v-card>
+                                <v-card-title>
+                                    Users with admin permissions
+                                </v-card-title>
+                                <v-list>
+                                    <template v-for="user in adminUsers">
+                                        <v-divider :key="user + 'div'" />
+                                        <v-list-item :key="user">
+                                            <v-list-item-content>
+                                                {{user}}
+                                            </v-list-item-content>
+                                            <v-list-item-action>
+                                                <v-icon @click='revokePermissions(user)'>
+                                                    mdi-close-box
+                                                </v-icon>
+                                            </v-list-item-action>
+                                        </v-list-item>
+                                    </template>
+                                </v-list>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                </v-sheet>
+            </v-container>
+        </v-form>
+    </v-main>
 </template>
-
-<style>
-    #row {
-        align-content: center;
-        justify-content: center;
-        box-sizing: border-box;
-        display: flex;
-    }
-
-    #sheet {
-        width: 100%;
-        padding: 2.5%;
-        min-height: 80vh;
-        box-sizing: border-box;
-        text-align: center;
-    }
-
-    #mainContainer {
-        height: 100%;
-        box-sizing: border-box;
-    }
-
-    #webcamVideo {
-        border: 3px solid;
-        width: 100%;
-        display: none;
-    }
-</style>
 
 <script>
     import {
@@ -275,3 +245,22 @@
         },
     }
 </script>
+<style scoped>
+    @media (max-width: 998px) {
+        #sheet {
+            width: 100%;
+            padding: 2.5%;
+            box-sizing: border-box;
+            min-height: 60vh;
+        }
+    }
+
+    @media (min-width: 1100px) {
+        #sheet {
+            width: 100%;
+            padding: 2.5%;
+            box-sizing: border-box;
+            min-height: 75vh;
+        }
+    }
+</style>

@@ -9,7 +9,7 @@
         </v-main>
     </div>
 </template>
-<style>
+<style scoped>
     #sheet {
         width: 100%;
         padding: 2.5%;

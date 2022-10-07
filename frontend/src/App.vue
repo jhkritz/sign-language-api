@@ -8,8 +8,30 @@
 </template>
 
 <style>
+    #sheet {
+        width: 100%;
+        padding: 2.5%;
+        box-sizing: border-box;
+        justify-content: space-between;
+    }
+
+    #mainContainer {
+        height: 100%;
+        box-sizing: border-box;
+    }
+
     html {
         overflow-y: hidden;
+    }
+
+    #row {
+        box-sizing: border-box;
+        width: 100%;
+        display: flex;
+        align-content: center;
+        justify-content: center;
+        margin: 0.5em;
+        padding: 0.5em;
     }
 </style>
 

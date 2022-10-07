@@ -1,9 +1,9 @@
 <template id="test_library">
     <v-main class='grey lighten-3' id='mainContainer'>
-        <v-container>
+        <v-container id='signInterpretationContainer'>
             <v-row id='row'>
                 <v-col lg='4' md='6'>
-                    <v-card id='card' class='justify-center align-center'>
+                    <v-card id='signMediaCard' class='justify-center align-center'>
                         <v-card-title class='justify-center align-center'>
                             Camera
                         </v-card-title>
@@ -16,7 +16,7 @@
                     </v-card>
                 </v-col>
                 <v-col lg='4' md='6'>
-                    <v-card id='card' class='justify-center align-center'>
+                    <v-card id='signMediaCard' class='justify-center align-center'>
                         <v-card-title class='justify-center align-center'>
                             Processed Image
                         </v-card-title>
@@ -31,7 +31,14 @@
         </v-container>
     </v-main>
 </template>
-<style>
+<style scoped>
+    #signInterpretationContainer {
+        width: 100%;
+        padding: 2.5%;
+        box-sizing: border-box;
+        min-height: 70vh;
+    }
+
     @media (max-width: 998px) {
         .mediaElement {
             border: 25px solid;
@@ -42,20 +49,10 @@
             background-color: black;
         }
 
-        #card {
+        #signMediaCard {
             box-sizing: border-box;
             min-height: 50vh;
             border-radius: 10px;
-        }
-
-        #row {
-            box-sizing: border-box;
-            width: 100%;
-            display: flex;
-            align: center;
-            justify: center;
-            margin: 0.5em;
-            padding: 0.5em;
         }
     }
 
@@ -69,20 +66,10 @@
             background-color: black;
         }
 
-        #card {
+        #signMediaCard {
             box-sizing: border-box;
             min-height: 55vh;
             border-radius: 10px;
-        }
-
-        #row {
-            box-sizing: border-box;
-            width: 100%;
-            display: flex;
-            align: center;
-            justify: center;
-            margin: 0.5em;
-            padding: 0.5em;
         }
     }
 </style>
