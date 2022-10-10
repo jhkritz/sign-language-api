@@ -8,8 +8,6 @@
                     <v-text-field v-model="libraries.name" hide-details label="Search for a library..." prepend-icon="mdi-magnify" single-line @input="filterLibraries">
                     </v-text-field>
                 </v-toolbar>
-
-
             </div>
         </div>
 
@@ -43,10 +41,10 @@
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
-                            <v-btn color="indigo" text @click="dialog = false">
+                            <v-btn color="#17252A" text @click="dialog = false">
                                 Close
                             </v-btn>
-                            <v-btn color="indigo" text @click="addNewLibrary">
+                            <v-btn color="#17252A" text @click="addNewLibrary">
                                 Save
                             </v-btn>
                         </v-card-actions>
