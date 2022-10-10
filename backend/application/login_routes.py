@@ -21,6 +21,9 @@ def verify_user():
 
 @auth_routes.route('/login', methods=['POST'])
 def login():
+    """
+    Logs a user in and returns them an access key as well as a refresh key.
+    """
     email = request.json.get('email')
     existinguser = User.query.filter_by(email=email).first()
     if not existinguser:
@@ -38,6 +41,10 @@ def login():
 
 @auth_routes.route('/register', methods=['POST'])
 def register():
+    """
+    Creates a user account given the specified details if 
+    one does not already exist
+    """
     email = request.json.get('email')
     existinguser = User.query.filter_by(email=email).first()
     if existinguser:
@@ -62,6 +69,9 @@ def register():
 @auth_routes.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
+    """
+    Logs a user out by invalidating their keys.
+    """
     response = jsonify({'message': 'Success'})
     unset_jwt_cookies(response)
     return response
@@ -70,6 +80,10 @@ def logout():
 @auth_routes.route('/refresh', methods=['GET'])
 @jwt_required(refresh=True)
 def refreshtoken():
+    """
+    Used to refresh user's access tokens by
+    supplying the correct refresh token.
+    """
     user_id = get_jwt_identity()
     user = User.query.filter_by(id=user_id).first()
     access_token = create_access_token(identity=user.id)
@@ -80,6 +94,10 @@ def refreshtoken():
 @auth_routes.route('/api/resetapikey', methods=['GET'])
 @jwt_required()
 def resetapikey():
+    """
+    Used to recreate a user's API key if it was 
+    lost or forgotten.
+    """
     userid = get_jwt_identity()
     return {'api_key': generateapikey(userid)}, 200
 
@@ -87,6 +105,9 @@ def resetapikey():
 # create api key and store hash in DB
 # return unhashed key
 def generateapikey(user_id):
+    """
+    Function used to create API keys for a specfic user ids
+    """
     # check for existing key and remove it
     if not User.query.filter_by(id=user_id).first():
         return "0"
@@ -105,6 +126,9 @@ def generateapikey(user_id):
 
 
 def verifykey(api_key):
+    """
+    Verifies a users API key and returns the id of the owner of said key.
+    """
     calculated_hash = hashlib.sha512(str(api_key).encode("utf-8")).hexdigest()
     keys = APIKeys.query.all()
     userid = 0
@@ -116,5 +140,8 @@ def verifykey(api_key):
 
 @auth_routes.route('/api/testkey', methods=['POST'])
 def testkey():
+    """
+    A route which tests if a key is valid and returns the users' id.
+    """
     key = request.json.get('key')
     return verifykey(key)
