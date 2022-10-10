@@ -9,10 +9,10 @@
             </div>
         </v-card-text>
         <v-card-actions>
-            <v-btn text color="deep-purple accent-4" @click.stop='navigateToLibraryPage'>
+            <v-btn text color="#17252A" @click.stop='navigateToLibraryPage'>
                 Explore
             </v-btn>
-            <v-btn text color="deep-purple accent-4" @click.stop='navigateToAPI'>
+            <v-btn text color="#17252A" @click.stop='navigateToAPI'>
                 Use API
             </v-btn>
         </v-card-actions>
