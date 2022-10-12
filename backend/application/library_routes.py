@@ -55,7 +55,7 @@ def upload(caller_id):
     if role is None:
         return {"Error": "Permission Denied"}, 400
     sign_name = request.form['sign_name']
-    img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/' + sign_name + '/'
+    img_path = app.config['IMAGE_PATH'] + '/' + lib_name + '/'
     os.makedirs(img_path[:-1], exist_ok=True)
     zip_file = request.files.get('zip_file')
     image = request.files.get('image_file')
@@ -80,6 +80,7 @@ def upload_zip_file(sign_name, img_path, zip_file, libid):
         total_num_images = 0
         num_good_images = 0
         for filename in filenames[1:]:
+            print(filename)
             total_num_images += 1
             # XXX: what happens if the file already exists? Is it overwritten?
             zpfl.extract(filename, path=img_path)
@@ -237,6 +238,7 @@ def get_sign_image(caller_id):
             return {"Error": "Permission Denied"}, 400
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+    print(path + img_name)
     return send_from_directory(path, img_name)
 
 
