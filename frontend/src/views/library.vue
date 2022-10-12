@@ -50,7 +50,10 @@
                                     <v-divider class="mx-4" inset vertical>
                                     </v-divider>
                                     <v-spacer></v-spacer>
-                                    <v-btn dark color=#17252A class="mb-2" @click="goto_addsign">
+                                    <v-btn dark color=#17252A class="ma-2">
+                                    <v-icon dark small @click="deleteItem(item)"> mdi-delete </v-icon>
+                                    </v-btn>
+                                    <v-btn dark color=#17252A class="ma-2" @click="goto_addsign">
                                         Add Sign
                                     </v-btn>
                                     <v-dialog v-model="dialogDelete" max-width="500px">
