@@ -41,7 +41,7 @@
                                 </v-btn>
                             </template>
                         </v-data-table>
-                        <v-data-table v-if="showSignTable" :headers="headers" :items="signs" class="elevation-1">
+                        <v-data-table v-model="selected" v-if="showSignTable" :headers="headers" :items="signs" :single-select="singleSelect" show-select class="elevation-1">
                             <template v-slot:top>
                                 <v-toolbar flat>
                                     <v-toolbar-title>
@@ -95,7 +95,9 @@
         props: {
             library_id: null
         },
-        data: () => ({
+        data: () => ({ 
+            singleSelect: false,
+            selected: [],
             signToEdit: null,
             showSignTable: true,
             showEditSignTable: false,
