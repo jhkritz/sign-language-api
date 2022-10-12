@@ -25,7 +25,7 @@
                         </h3>
                         <br />
                         <v-btn color=#17252A class="mr-4 white--text">
-                            <a href="../api_docs.html" style="text-decoration: none; color: inherit;">View Api Documentation</a>
+                            <a target="_blank" style="text-decoration: none; color: inherit;" href="../api_docs.html">API Documentation</a>
                         </v-btn>
 
                         <br />
