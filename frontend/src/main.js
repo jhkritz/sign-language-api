@@ -15,6 +15,7 @@ import login from './views/login';
 import home from './views/home';
 import API from './views/API';
 import LibraryPermissionsPage from './views/LibraryPermissionsPage';
+
 import {
 	sharedState
 } from './SharedState';
@@ -24,11 +25,14 @@ import {
 
 Vue.config.productionTip = false;
 
-const routes = [{
+const routes = [
+	
+	{
 		path: '/',
 		name: 'home',
 		component: home
 	},
+
 	{
 		path: '/register',
 		name: 'register',
