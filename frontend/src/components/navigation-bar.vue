@@ -72,7 +72,7 @@
         }),
         methods: {
             navigateToAPI() {
-                this.$router.push(`/library/api?library_id=${localStorage.getItem('library_id')}`);
+                this.$router.push(`/ViewApi`);
             },
             navigateToPermissions() {
                 this.$router.push(`/library/permissions?library_id=${localStorage.getItem('library_id')}`);

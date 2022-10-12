@@ -1,11 +1,30 @@
 <template>
-    <v-main class="grey lighten-3" id='mainContainer'>
+    <v-app>
+        <div>
+            <!--Navigation bar-->
+            <v-app-bar elevation="0" color=#3AAFA9>
+                <v-app-bar-title class="white--text">
+                    Sign Language API
+                </v-app-bar-title>
+                <v-spacer>
+                </v-spacer>
+                <v-btn icon color="white" id='homeButton' @click="goToDashboard">
+                    <v-icon>
+                        mdi-home
+                    </v-icon>
+                </v-btn>
+            </v-app-bar>
+        </div>
         <v-container>
+            <v-layout align-center justify-center>
             <v-sheet id='sheet' rounded="lg">
-                <v-row id='row'>
-                    <v-col lg='8' md='12'>
+                <br>
+                <br>
+                <br>
+                <br>
+                        <center>
                         <h1>
-                            Your current API Key is :
+                            Your current API Key is
                         </h1>
                         <br />
                         <p class="font-weight-regular">
@@ -21,21 +40,20 @@
                         <br />
                         <br />
                         <h3>
-                            Add explanation here
+                            Click here to view or in depth documentation on how to use our API
                         </h3>
                         <br />
                         <v-btn color=#17252A class="mr-4 white--text">
                             <a target="_blank" style="text-decoration: none; color: inherit;" href="../api_docs.html">API Documentation</a>
                         </v-btn>
-
                         <br />
                         <br />
                         <br />
-                    </v-col>
-                </v-row>
+                        </center>
             </v-sheet>
+            </v-layout>
         </v-container>
-    </v-main>
+</v-app>
 </template>
 
 <script>

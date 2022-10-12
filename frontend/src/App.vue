@@ -58,7 +58,7 @@ export default {
     methods: {
         shouldDisplayNavbar() {
             const path = this.$router.currentRoute.path;
-            return path !== '/' && path !== '/register' && path !== '/login' && path !== '/dashboard' && path !== '/API';
+            return path !== '/' && path !== '/register' && path !== '/login' && path !== '/dashboard' && path !== '/API'&& path !== '/ViewApi';
         },
 
         async refreshTokens() {

@@ -53,12 +53,9 @@ const routes = [{
 		component: dashboard
 	},
 	{
-		path: '/library/api',
+		path: '/ViewApi',
 		name: 'api',
 		component: ViewAPI,
-		props: route => ({
-			library_id: route.query.library_id
-		})
 	},
 	{
 		path: '/library/permissions',

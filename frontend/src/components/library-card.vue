@@ -38,7 +38,7 @@
             },
             navigateToAPI() {
                 localStorage.setItem('library_id', this.libraryname);
-                this.$router.push(`/library/api?library_id=${this.libraryname}`);
+                this.$router.push(`/ViewApi`);
             }
         }
     };
