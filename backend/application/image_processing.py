@@ -59,7 +59,7 @@ def get_data_and_labels(lib_name):
             meaning_labels[sign.meaning] = next_label
             label_meanings += [sign.meaning]
             next_label += 1
-        img = cv2.imread(lib_path + sign.meaning + '/' + sign.image_filename)
+        img = cv2.imread(lib_path + sign.image_filename)
         data += [img.flatten()]
         labels += [meaning_labels[sign.meaning]]
     data = np.array(data, dtype=np.float32)

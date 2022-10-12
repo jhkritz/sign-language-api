@@ -129,6 +129,16 @@ def test_classification():
     classify_image()
 
 
+def test_get_image():
+    url = f"http://127.0.0.1:5000/library/image?library_name={LIB_NAME}&image_name=a/a14.png"
+    payload = {}
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    response = requests.request("GET", url, headers=headers, data=payload)
+    print(response.text)
+
+
 if __name__ == '__main__':
     access_token = get_access_token()
     nose2.main()
