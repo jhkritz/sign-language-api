@@ -51,7 +51,7 @@
                                     </v-divider>
                                     <v-spacer></v-spacer>
                                     <v-btn dark color=#17252A class="ma-2" @click="deleteAllItems">
-                                        <v-icon dark small > mdi-delete </v-icon>
+                                        <v-icon dark small> mdi-delete </v-icon>
                                     </v-btn>
                                     <v-btn dark color=#17252A class="ma-2" @click="goto_addsign">
                                         Add Sign
@@ -200,12 +200,54 @@
                 this.selected = [];
                 this.itemlist = [];
                 if (items.length > 0) {
-                    this.itemlist = items.map(item=>item)
+                    this.itemlist = items.map(item => item)
                     this.selected = items.map(item => item.name)
                 }
             },
 
-            deleteAllItems() {
+            async deleteItemConfirm() {
+                const url = new URL(baseUrl + '/library/deletesign');
+                url.searchParams.append('library_name', localStorage.getItem('library_id'));
+                url.searchParams.append('sign_name', this.itemToDelete);
+                const config = {
+                    method: 'delete',
+                    url: url,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    },
+                };
+                try {
+                    await axios(config);
+                } catch (err) {
+                    this.closeDelete();
+                    alert('Failed to delete sign.');
+                    return;
+                }
+                //this.signs.splice(this.editedIndex, 1);
+                this.closeDelete();
+            },
+
+            async deleteAllItems() {
+                const shouldKeep = (item) => {
+                    let keep = true;
+                    for (let i = 0; i < this.selected.length; i++) {
+                        console.log(item);
+                        console.log(this.selected[i]);
+                        if (this.selected[i] === item.name) {
+                            keep = false;
+                            break;
+                        }
+                    }
+                    if (!keep) {
+                        this.itemToDelete = item.name;
+                        this.deleteItemConfirm();
+                    }
+                    return keep;
+                };
+                console.log(this.signs);
+                this.signs = this.signs.filter(shouldKeep);
+                console.log(this.signs);
+                /*
                 var i = 0;
                 if (this.itemlist.length > 0) {
                     while(i < this.itemlist.length){
@@ -214,31 +256,7 @@
                         this.deleteItemConfirm();
                         i ++;
                     }
-                } 
-            },
-
-            async deleteAllItemsConfirm() {
-                try {
-                    const url = new URL('http://localhost:5000/library/deletesigns');
-                    const data = {
-                        library_name: this.library_id,
-                        signs: this.selected
-
-                    };
-                    const config = {
-                        method: 'get',
-                        url: url,
-                        data: data,
-                        headers: {
-                            Authorization: 'Bearer ' + localStorage.getItem('access_token')
-                        }
-                    }
-                    const res = await axios(config);
-                    console.log(res)
-                } catch (err) {
-                    console.error(err);
-                }
-
+                } */
             },
 
             goto_addsign() {
@@ -267,28 +285,6 @@
                 this.editedItem = Object.assign({}, item);
                 this.itemToDelete = item.name;
                 this.dialogDelete = true;
-            },
-
-            async deleteItemConfirm() {
-                const url = new URL(baseUrl + '/library/deletesign');
-                url.searchParams.append('library_name', localStorage.getItem('library_id'));
-                url.searchParams.append('sign_name', this.itemToDelete);
-                const config = {
-                    method: 'delete',
-                    url: url,
-                    headers: {
-                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
-                    },
-                };
-                try {
-                    await axios(config);
-                } catch (err) {
-                    this.closeDelete();
-                    alert('Failed to delete sign.');
-                    return;
-                }
-                this.signs.splice(this.editedIndex, 1);
-                this.closeDelete();
             },
 
             closeDelete() {
