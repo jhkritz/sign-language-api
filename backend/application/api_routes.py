@@ -6,7 +6,7 @@ from flask import Blueprint, request
 from application.image_processing import classify
 from application.login_routes import verifykey
 from application.library_routes import (
-    upload, create_library, get_signs,
+    addadmin, adduser, get_sign_image_base64, get_user_groups, upload, create_library, get_signs,
     get_sign_image, get_library_names,
     get_users_libraries, delete_sign, delete_library
 )
@@ -64,7 +64,7 @@ def get_sign_imageapi():
     key = request.args['key']
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
-    return get_sign_image(key[0])
+    return get_sign_image_base64(key[0])
 
 
 @api_routes.route('/api/libraries/names', methods=['GET'])
@@ -130,3 +130,41 @@ def classify_requestapi():
     if verifykey(key) == "0":
         return {'message': 'Authentication failed'}, 401
     return classify()
+
+@api_routes.route('/api/library/adduser', methods=['POST'])
+def adduser_api():
+    """
+    Verifies the user's API key and then adds a user to the
+    specified library.
+    """
+    key = request.json.get('key')
+    if verifykey(key) == "0":
+        return {'message': 'Authentication failed'}, 401
+    user_id = key[0]
+    return adduser(user_id)
+
+@api_routes.route('/api/library/addadmin', methods=['POST'])
+def addadmin_api():
+    """
+    Verifies the user's API key and then adds a user to the
+    specified library as an admin.
+    """
+    key = request.json.get('key')
+    if verifykey(key) == "0":
+        return {'message': 'Authentication failed'}, 401
+    user_id = key[0]
+    return addadmin(user_id)
+
+
+@api_routes.route('/api/library/get/user/groups', methods=['GET'])
+def get_user_groups_api():
+    """
+    Verifies the user's API key and then returns the groups of 
+    users associated with a specific library
+    """
+    key = request.args.get('key')
+    if verifykey(key) == "0":
+        return {'message': 'Authentication failed'}, 401
+    user_id = key[0]
+    return get_user_groups(user_id)
+
