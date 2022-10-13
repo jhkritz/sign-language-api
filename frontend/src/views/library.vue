@@ -210,7 +210,7 @@
             },
             async getSigns() {
                 try {
-                    const url = new URL('http://localhost:5000/library/signs');
+                    const url = new URL(baseUrl + '/library/signs');
                     console.log(this.library_id);
                     url.searchParams.append('library_name', this.library_id);
                     const config = {
