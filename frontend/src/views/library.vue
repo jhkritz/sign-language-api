@@ -50,8 +50,8 @@
                                     <v-divider class="mx-4" inset vertical>
                                     </v-divider>
                                     <v-spacer></v-spacer>
-                                    <v-btn dark color=#17252A class="ma-2">
-                                        <v-icon dark small @click="deleteItem(item)"> mdi-delete </v-icon>
+                                    <v-btn dark color=#17252A class="ma-2" @click="deleteAllItems">
+                                        <v-icon dark small > mdi-delete </v-icon>
                                     </v-btn>
                                     <v-btn dark color=#17252A class="ma-2" @click="goto_addsign">
                                         Add Sign
@@ -100,7 +100,6 @@
         },
         data: () => ({
             singleSelect: false,
-            selected: [],
             signToEdit: null,
             showSignTable: true,
             showEditSignTable: false,
@@ -134,6 +133,11 @@
                 status: "",
             },
             signsToDelete: [],
+
+            //Multiple delete
+            selected: [],
+            itemlist: [],
+
         }),
 
         computed: {
@@ -194,12 +198,26 @@
 
             selectAll(items) {
                 this.selected = [];
+                this.itemlist = [];
                 if (items.length > 0) {
+                    this.itemlist = items.map(item=>item)
                     this.selected = items.map(item => item.name)
                 }
-                console.dir(this.selected)
             },
-            async deleteAll() {
+
+            deleteAllItems() {
+                var i = 0;
+                if (this.itemlist.length > 0) {
+                    while(i < this.itemlist.length){
+                        this.editedIndex = this.signs.indexOf(this.itemlist[i]);
+                        this.itemToDelete = this.itemlist[i].name;
+                        this.deleteItemConfirm();
+                        i ++;
+                    }
+                } 
+            },
+
+            async deleteAllItemsConfirm() {
                 try {
                     const url = new URL('http://localhost:5000/library/deletesigns');
                     const data = {
