@@ -51,7 +51,7 @@
                                     </v-divider>
                                     <v-spacer></v-spacer>
                                     <v-btn dark color=#17252A class="ma-2">
-                                    <v-icon dark small @click="deleteItem(item)"> mdi-delete </v-icon>
+                                        <v-icon dark small @click="deleteItem(item)"> mdi-delete </v-icon>
                                     </v-btn>
                                     <v-btn dark color=#17252A class="ma-2" @click="goto_addsign">
                                         Add Sign
@@ -98,7 +98,7 @@
         props: {
             library_id: null
         },
-        data: () => ({ 
+        data: () => ({
             singleSelect: false,
             selected: [],
             signToEdit: null,
@@ -113,8 +113,8 @@
                     value: "name",
                 },
                 {
-                    text: "Status",
-                    value: "status"
+                    text: "Number of images",
+                    value: "number_of_images"
                 },
                 {
                     text: "Actions",
@@ -173,34 +173,43 @@
                     ).filter(
                         (item, index, self) => self.indexOf(item) === index
                     );
+                    const countImages = (meaning) => {
+                        var i = 0;
+                        res.data.signs.map(sign => {
+                            if (sign.meaning === meaning) {
+                                i++;
+                            }
+                        });
+                        return i;
+                    };
                     this.signs = this.signs.map(meaning => ({
                         name: meaning,
-                        status: 'trained'
+                        number_of_images: countImages(meaning)
                     }));
                 } catch (err) {
                     console.error(err);
                 }
             },
 
-            selectAll(items){
+            selectAll(items) {
                 this.selected = [];
-                if(items.length > 0){
+                if (items.length > 0) {
                     this.selected = items.map(item => item.name)
                 }
                 console.dir(this.selected)
             },
-            async deleteAll(){
+            async deleteAll() {
                 try {
                     const url = new URL('http://localhost:5000/library/deletesigns');
                     const data = {
-                        library_name:this.library_id,
-                        signs:this.selected
+                        library_name: this.library_id,
+                        signs: this.selected
 
                     };
                     const config = {
                         method: 'get',
                         url: url,
-                        data:data,
+                        data: data,
                         headers: {
                             Authorization: 'Bearer ' + localStorage.getItem('access_token')
                         }
@@ -209,8 +218,8 @@
                     console.log(res)
                 } catch (err) {
                     console.error(err);
-                }  
-                
+                }
+
             },
 
             goto_addsign() {
