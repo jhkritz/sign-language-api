@@ -125,7 +125,6 @@
         },
         data: () => ({
             singleSelect: false,
-            selected: [],
             signToView: null,
             imageToView: null,
             signToEdit: null,
