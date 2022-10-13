@@ -342,6 +342,19 @@ def delete_sign(caller_id):
     db.session.commit()
     return {}, 200
 
+@library_routes.route('/library/deletesigns', methods=['DELETE'])
+#@jwt_required()
+def delete_signs_jwt():
+    libname = request.json.get('library_name')
+    signs = request.json.get('signs')
+    libid = SignLanguageLibrary.query.filter_by(name = libname).first_or_404().id
+
+    for sign in signs:
+        signtodel = Sign.query.filter_by(meaning=sign, library_id=libid).delete()
+
+    return jsonify(), 200
+
+
 
 @library_routes.route('/library/deletelibrary', methods=['DELETE'])
 @jwt_required()

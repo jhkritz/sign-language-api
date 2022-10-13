@@ -189,7 +189,27 @@
                 }
                 console.dir(this.selected)
             },
-            deleteAll(){
+            async deleteAll(){
+                try {
+                    const url = new URL('http://localhost:5000/library/deletesigns');
+                    const data = {
+                        library_name:this.library_id,
+                        signs:this.selected
+
+                    };
+                    const config = {
+                        method: 'get',
+                        url: url,
+                        data:data,
+                        headers: {
+                            Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                        }
+                    }
+                    const res = await axios(config);
+                    console.log(res)
+                } catch (err) {
+                    console.error(err);
+                }  
                 
             },
 
