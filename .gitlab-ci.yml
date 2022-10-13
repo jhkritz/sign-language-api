@@ -18,7 +18,7 @@ run_tests:
     - shared-docker-runner
   script:
     - cd frontend
-    - apt npm install
+    - apt install npm
     - npm run test:unit
 
 deploy_staging:
