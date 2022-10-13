@@ -114,7 +114,8 @@
                 },
                 {
                     text: "Number of images",
-                    value: "number_of_images"
+                    value: "number_of_images",
+                    sortable: false,
                 },
                 {
                     text: "Actions",
