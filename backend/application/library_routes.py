@@ -14,6 +14,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from . import db
 from .image_processing import preprocess_image, classify
 from .models import User, UserRole, Sign, SignLanguageLibrary
+import base64
 
 library_routes = Blueprint('library_routes', __name__)
 
@@ -211,6 +212,30 @@ def get_signs(user_id):
     signs = [sign.to_dict(img_url_base) for sign in lib.signs]
     return {'signs': signs}
 
+
+@library_routes.route('/library/imageb64', methods=['GET'])
+@jwt_required()
+def get_sign_image_base64_jwt():
+    user_id = get_jwt_identity()
+    return get_sign_image_base64(user_id)
+
+
+def get_sign_image_base64(caller_id):
+    lib_name = request.args['library_name']
+    if lib_name != '':
+        lib = SignLanguageLibrary.query.filter_by(name=lib_name).first_or_404()
+        caller_role = UserRole(userid=caller_id, libraryid=lib.id)
+        if not caller_role:
+            return {"Error": "Permission Denied"}, 400
+    img_name = request.args['image_name']
+    img_name = Sign.query.filter_by(meaning=img_name).first_or_404().image_filename
+    path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
+    try:
+        with open(path+img_name, "rb") as img_file:
+            my_string = base64.b64encode(img_file.read())
+    except:
+        return jsonify(), 404
+    return my_string
 
 @library_routes.route('/library/image', methods=['GET'])
 @jwt_required()

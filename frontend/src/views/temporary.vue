@@ -1,10 +1,5 @@
 <template>
-  <v-img
-  lazy-src="https://picsum.photos/id/11/10/6"
-  max-height="150"
-  max-width="250"
-  src= "https://picsum.photos/id/11/500/300"
-></v-img>
+<img v-bind:src="'data:image/jpeg;base64,'+image_b64" />
 </template>
 
 <script>
@@ -18,36 +13,37 @@
             library_id: null
         },
         data: () => ({ 
-         
+         library_name: 'newlibrary',
+         image_name: 'a',
+         image_b64: '',
         }),
 
         methods: {
-          async getImages() {
+          async getImage() {
                 try {
-                    const url = new URL('http://localhost:5000/library/signs');
-                    console.log(this.library_id);
-                    url.searchParams.append('library_name', this.library_id);
+                    const url = new URL('http://localhost:5000/library/imageb64');
+                    url.searchParams.append('library_name', this.library_name);
+                    url.searchParams.append('image_name', this.image_name);
                     const config = {
                         method: 'get',
                         url: url,
                         headers: {
                             Authorization: 'Bearer ' + localStorage.getItem('access_token')
-                        }
+                        },
                     }
                     const res = await axios(config);
-                    this.signs = res.data.signs.map(
-                        sign => sign.meaning
-                    ).filter(
-                        (item, index, self) => self.indexOf(item) === index
-                    );
-                    this.signs = this.signs.map(meaning => ({
-                        name: meaning,
-                        status: 'trained'
-                    }));
+                    this.image_b64 = res.data;
+                    //console.log(res.data)
+                     
                 } catch (err) {
                     console.error(err);
                 }
             },
+            
+        },
+        beforeMount() {
+            this.getImage()
         }
+
         }
 </script>
