@@ -21,7 +21,7 @@
                             Processed Image
                         </v-card-title>
                         <v-img :src="processedImageSrc" class='mediaElement' id='processedImage' contain :aspect-ratio='16/9' />
-                        <v-card-subtitle class='justify-center align-center'>
+                        <v-card-subtitle>
                             Sign meaning: {{result.classification}}<br />
                             Confidence: {{result.quality_of_match}}
                         </v-card-subtitle>
