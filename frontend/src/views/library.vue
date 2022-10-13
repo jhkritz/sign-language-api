@@ -64,8 +64,8 @@
                                     <v-divider class="mx-4" inset vertical>
                                     </v-divider>
                                     <v-spacer></v-spacer>
-                                    <v-btn dark color=#17252A class="ma-2">
-                                        <v-icon dark small @click="deleteItem(item)"> mdi-delete </v-icon>
+                                    <v-btn dark color=#17252A class="ma-2" @click="deleteAllItems">
+                                        <v-icon dark small> mdi-delete </v-icon>
                                     </v-btn>
                                     <v-btn dark color=#17252A class="ma-2" @click="goto_addsign">
                                         Add Sign
@@ -161,6 +161,11 @@
                 status: "",
             },
             signsToDelete: [],
+
+            //Multiple delete
+            selected: [],
+            itemlist: [],
+
         }),
 
         computed: {
@@ -241,33 +246,54 @@
             },
             selectAll(items) {
                 this.selected = [];
+                this.itemlist = [];
                 if (items.length > 0) {
+                    this.itemlist = items.map(item => item)
                     this.selected = items.map(item => item.name)
                 }
-                console.dir(this.selected)
             },
-            async deleteAll() {
-                try {
-                    const url = new URL('http://localhost:5000/library/deletesigns');
-                    const data = {
-                        library_name: this.library_id,
-                        signs: this.selected
 
-                    };
-                    const config = {
-                        method: 'get',
-                        url: url,
-                        data: data,
-                        headers: {
-                            Authorization: 'Bearer ' + localStorage.getItem('access_token')
+            async deleteItemConfirm() {
+                const url = new URL(baseUrl + '/library/deletesign');
+                url.searchParams.append('library_name', localStorage.getItem('library_id'));
+                url.searchParams.append('sign_name', this.itemToDelete);
+                const config = {
+                    method: 'delete',
+                    url: url,
+                    headers: {
+                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
+                    },
+                };
+                try {
+                    await axios(config);
+                } catch (err) {
+                    this.closeDelete();
+                    alert('Failed to delete sign.');
+                    return;
+                }
+                this.closeDelete();
+            },
+
+            async deleteAllItems() {
+                const shouldKeep = (item) => {
+                    let keep = true;
+                    for (let i = 0; i < this.selected.length; i++) {
+                        console.log(item);
+                        console.log(this.selected[i]);
+                        if (this.selected[i] === item.name) {
+                            keep = false;
+                            break;
                         }
                     }
-                    const res = await axios(config);
-                    console.log(res)
-                } catch (err) {
-                    console.error(err);
-                }
-
+                    if (!keep) {
+                        this.itemToDelete = item.name;
+                        this.deleteItemConfirm();
+                    }
+                    return keep;
+                };
+                console.log(this.signs);
+                this.signs = this.signs.filter(shouldKeep);
+                console.log(this.signs);
             },
 
             goto_addsign() {
@@ -296,28 +322,6 @@
                 this.editedItem = Object.assign({}, item);
                 this.itemToDelete = item.name;
                 this.dialogDelete = true;
-            },
-
-            async deleteItemConfirm() {
-                const url = new URL(baseUrl + '/library/deletesign');
-                url.searchParams.append('library_name', localStorage.getItem('library_id'));
-                url.searchParams.append('sign_name', this.itemToDelete);
-                const config = {
-                    method: 'delete',
-                    url: url,
-                    headers: {
-                        Authorization: 'Bearer ' + localStorage.getItem('access_token')
-                    },
-                };
-                try {
-                    await axios(config);
-                } catch (err) {
-                    this.closeDelete();
-                    alert('Failed to delete sign.');
-                    return;
-                }
-                this.signs.splice(this.editedIndex, 1);
-                this.closeDelete();
             },
 
             closeDelete() {
