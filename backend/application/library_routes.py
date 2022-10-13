@@ -81,17 +81,13 @@ def upload_zip_file(sign_name, img_path, zip_file, libid):
         total_num_images = 0
         num_good_images = 0
         for filename in filenames[1:]:
-            print(filename)
             total_num_images += 1
-            # XXX: what happens if the file already exists? Is it overwritten?
             zpfl.extract(filename, path=img_path)
             if save_image(img_path, sign_name, filename, libid):
                 num_good_images += 1
                 print('Successfully uploaded image ' + str(total_num_images))
         db.session.commit()
         message = f'Successfully uploaded {num_good_images} of {total_num_images} images.'
-        print(message)
-        # XXX: test this
         return {'message': message}, 200
     return {'message': "Failed to upload zip file."}, 500
 
@@ -147,7 +143,6 @@ def upload_video(sign_name, img_path, video, libid):
             sign = Sign(meaning=sign_name, image_filename=img_name, library_id=libid)
             db.session.add(sign)
             count += 1
-            print(count)
         frame_grabbed, img = video_capture.read()
     print('Successfully uploaded ' + str(count) + ' images.')
     db.session.commit()
@@ -237,6 +232,7 @@ def get_sign_image_base64(caller_id):
         return jsonify(), 404
     return my_string
 
+
 @library_routes.route('/library/image', methods=['GET'])
 @jwt_required()
 def get_sign_image_jwt():
@@ -263,7 +259,6 @@ def get_sign_image(caller_id):
             return {"Error": "Permission Denied"}, 400
     img_name = request.args['image_name']
     path = os.getcwd() + '/' + app.config['IMAGE_PATH'] + '/' + lib_name + '/'
-    print(path + img_name)
     return send_from_directory(path, img_name)
 
 
@@ -342,18 +337,18 @@ def delete_sign(caller_id):
     db.session.commit()
     return {}, 200
 
+
 @library_routes.route('/library/deletesigns', methods=['DELETE'])
-#@jwt_required()
+# @jwt_required()
 def delete_signs_jwt():
     libname = request.json.get('library_name')
     signs = request.json.get('signs')
-    libid = SignLanguageLibrary.query.filter_by(name = libname).first_or_404().id
+    libid = SignLanguageLibrary.query.filter_by(name=libname).first_or_404().id
 
     for sign in signs:
         signtodel = Sign.query.filter_by(meaning=sign, library_id=libid).delete()
 
     return jsonify(), 200
-
 
 
 @library_routes.route('/library/deletelibrary', methods=['DELETE'])
@@ -372,7 +367,6 @@ def delete_library(caller_id):
     Deletes a library if the caller has admin
     permissions for this library.
     """
-    print(request)
     libname = request.args.get('library_name')
     libid = SignLanguageLibrary.query.filter_by(name=libname).first().id
     caller_role = UserRole.query.filter_by(userid=caller_id, libraryid=libid, admin=True)
@@ -516,7 +510,6 @@ def revoke_permissions_jwt():
     """
     Removes the all permissions the user has for this library.
     """
-    # XXX: will this work with the api key?
     lib_name = request.args['library_name']
     user_email = request.args['user_email']
     user_id = User.query.filter_by(email=user_email).first().id

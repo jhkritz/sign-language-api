@@ -1,5 +1,8 @@
 """
 Functions used to classify images.
+
+Note: we based some of this code on the tutorial linked below.
+https://www.youtube.com/watch?v=wa2ARoUUdU8
 """
 
 import base64
@@ -71,7 +74,6 @@ def preprocess_image(frame):
     """
     Detects hands in the input frame, crops and then resizes the result.
     """
-    # TODO: reference tutorial video
     offset = 30
     input_img = frame
     hands, hands_img = hand_detector.findHands(input_img)
