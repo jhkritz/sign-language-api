@@ -18,8 +18,10 @@ run_tests:
     - shared-docker-runner
   script:
     - cd frontend
-    - apt-get install nodejs npm
-    - npm run test:unit
+    - sudo apt install curl
+    - curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
+    - apt-get install -y nodejs
+    - apt-get install -y npm
 
 deploy_staging:
   stage: deploy
