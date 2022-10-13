@@ -1,9 +1,9 @@
 <template>
     <v-card class="mx-auto" elevation=6 height="10em" width="23em">
+        <v-card-title>
+                <span v-text="libraryname" class="text-h4 text--primary" />
+        </v-card-title>
         <v-card-text>
-            <p class="text-h4 text--primary">
-                {{libraryname}}
-            </p>
             <div class="text--primary">
                 {{librarydesc}}
             </div>
@@ -35,6 +35,7 @@
             navigateToLibraryPage() {
                 localStorage.setItem('library_id', this.libraryname);
                 this.$router.push(`/library/explore?library_id=${this.libraryname}`);
+                this.$emit('library-btn:clicked');
             },
             navigateToAPI() {
                 localStorage.setItem('library_id', this.libraryname);
