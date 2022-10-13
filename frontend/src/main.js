@@ -16,7 +16,6 @@ import home from './views/home';
 import API from './views/API';
 import LibraryPermissionsPage from './views/LibraryPermissionsPage';
 import temporary from './views/temporary';
-import 'material-design-icons-iconfont/dist/material-design-icons.css';
 
 import {
     sharedState

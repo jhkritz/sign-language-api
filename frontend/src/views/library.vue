@@ -103,7 +103,7 @@
                             </v-card-title>
                             <v-img class='mediaElement' id='processedImage' v-bind:src=" 'data:image/jpeg;base64,'+imageToView" contain :aspect-ratio='16/9' />
                             <v-card-subtitle id='subtitle'>
-                                {{signToView !== null ? `One of ${signToView.number_of_images}associated with '${signToView.name}'` : "Select a sign from the table"}}
+                                {{signToView !== null ? `One of ${signToView.number_of_images} images associated with '${signToView.name}'` : "Select a sign from the table"}}
                             </v-card-subtitle>
                         </v-card>
                     </v-col>
