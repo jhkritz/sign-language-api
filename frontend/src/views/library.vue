@@ -183,7 +183,7 @@
             },
 
             selectAll(items){
-                //this.selected = [];
+                this.selected = [];
                 if(items.length > 0){
                     this.selected = items.map(item => item.name)
                 }
