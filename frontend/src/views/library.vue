@@ -41,7 +41,7 @@
                                 </v-btn>
                             </template>
                         </v-data-table>
-                        <v-data-table v-model="selected" v-if="showSignTable" :headers="headers" :items="signs" :single-select="singleSelect" item-key="name" show-select class="elevation-1">
+                        <v-data-table v-model="selected" v-if="showSignTable" :headers="headers" :items="signs" :single-select="singleSelect" item-key="name" show-select @input="selectAll" class="elevation-1">
                             <template v-slot:top>
                                 <v-toolbar flat>
                                     <v-toolbar-title>
@@ -182,6 +182,14 @@
                 }
             },
 
+            selectAll(items){
+                this.selected = [];
+                if(items.length > 0){
+                    this.selected = items.map(item => this.signs.indexOf(item))
+                }
+                console.dir(this.selected)
+            },
+            
             goto_addsign() {
                 this.$router.push(`/library/addsign?library_id=${this.library_id}`);
             },
