@@ -15,6 +15,7 @@ import login from './views/login';
 import home from './views/home';
 import API from './views/API';
 import LibraryPermissionsPage from './views/LibraryPermissionsPage';
+import temporary from './views/temporary';
 
 import {
 	sharedState
@@ -26,6 +27,13 @@ import {
 Vue.config.productionTip = false;
 
 const routes = [
+
+
+	{
+		path: '/temporary',
+		name: 'temporary',
+		component: temporary
+	},
 	
 	{
 		path: '/',
