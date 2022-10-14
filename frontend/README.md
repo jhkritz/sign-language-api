@@ -9,3 +9,8 @@ npm install
 ```
 npm run serve
 ```
+
+### Running front end tests
+```
+npm run test:unit
+```
